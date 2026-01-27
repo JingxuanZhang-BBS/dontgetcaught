@@ -4,6 +4,24 @@
 
 ---
 
+## 2026-01-27 16:57
+
+**添加开发模式 - 支持无需 Supabase 快速测试**
+
+- 新增 `NEXT_PUBLIC_DEV_MODE` 环境变量（默认启用）
+- 登录/注册页面支持开发模式：任何输入都能通过
+- 中间件支持 mock 用户会话（通过 cookie）
+- 创建 `SignOutButton` 组件，支持开发模式退出登录
+- Dashboard 使用客户端登出按钮
+- 添加 `.env.local` 配置文件
+- Mock 用户：`dev@example.com (Dev Mode)`
+
+**改进**：现在可以不配置 Supabase 直接测试产品功能和 UI/UX
+
+**Commit**: bc550ec
+
+---
+
 ## 2026-01-27 16:35
 
 **初始提交 - Step 1 完成**
