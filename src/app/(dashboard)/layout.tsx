@@ -1,27 +1,36 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import SignOutButton from '@/components/SignOutButton'
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
+  const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  let user: any = null
 
-  if (!user) {
-    redirect('/login')
-  }
-
-  const handleSignOut = async () => {
-    'use server'
+  if (isDevMode) {
+    // 开发模式：使用假用户
+    user = {
+      id: 'dev-user-123',
+      email: 'dev@example.com (Dev Mode)',
+    }
+  } else {
+    // 生产模式：真实 Supabase 认证
     const supabase = await createClient()
-    await supabase.auth.signOut()
-    redirect('/login')
+
+    const {
+      data: { user: supabaseUser },
+    } = await supabase.auth.getUser()
+
+    if (!supabaseUser) {
+      redirect('/login')
+    }
+
+    user = supabaseUser
   }
 
   return (
@@ -69,14 +78,7 @@ export default async function DashboardLayout({
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-600">{user.email}</span>
-              <form action={handleSignOut}>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-gray-700 hover:text-red-600 transition"
-                >
-                  Sign Out
-                </button>
-              </form>
+              <SignOutButton />
             </div>
           </div>
         </div>

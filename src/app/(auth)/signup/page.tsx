@@ -30,20 +30,34 @@ export default function SignupPage() {
     setLoading(true)
 
     try {
-      const supabase = createClient()
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
-      })
+      const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
-      if (error) throw error
+      if (isDevMode) {
+        // 开发模式：任何输入都通过
+        await new Promise(resolve => setTimeout(resolve, 500)) // 模拟网络延迟
 
-      // Successfully signed up
-      router.push('/dashboard')
-      router.refresh()
+        // 设置开发模式 cookie
+        document.cookie = 'dev_logged_in=true; path=/; max-age=86400' // 24小时
+
+        router.push('/dashboard')
+        router.refresh()
+      } else {
+        // 生产模式：真实 Supabase 认证
+        const supabase = createClient()
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+          },
+        })
+
+        if (error) throw error
+
+        // Successfully signed up
+        router.push('/dashboard')
+        router.refresh()
+      }
     } catch (err: any) {
       setError(err.message || 'An error occurred during signup')
     } finally {
