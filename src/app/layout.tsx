@@ -5,7 +5,7 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'English Style Writer - Write Like Yourself',
+  title: 'DontGetCaught.AI - Write Like Yourself',
   description: 'AI-powered English writing assistant that learns and mimics your personal writing style',
 }
 

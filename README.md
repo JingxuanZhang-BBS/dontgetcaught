@@ -1,4 +1,4 @@
-# English Style Writer
+# DontGetCaught.AI
 
 AI-powered English writing assistant that learns and mimics your personal writing style.
 

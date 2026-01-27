@@ -7,7 +7,7 @@ export default function LandingPage() {
       <header className="container mx-auto px-6 py-6">
         <nav className="flex justify-between items-center">
           <div className="text-2xl font-bold text-blue-600">
-            English Style Writer
+            DontGetCaught.AI
           </div>
           <div className="space-x-4">
             <Link
@@ -119,7 +119,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="container mx-auto px-6 py-8 text-center text-gray-600">
-        <p>&copy; 2026 English Style Writer. All rights reserved.</p>
+        <p>&copy; 2026 DontGetCaught.AI. All rights reserved.</p>
       </footer>
     </div>
   )

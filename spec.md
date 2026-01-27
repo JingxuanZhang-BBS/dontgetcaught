@@ -1,4 +1,4 @@
-# spec.md — "English Style Writer" (方案二：风格画像 + 向量库) — v0.2 (English-only)
+# spec.md — "DontGetCaught.AI" (方案二：风格画像 + 向量库) — v0.2 (English-only)
 
 > 版本：v0.2（MVP，English-only）
 > 范围：仅支持英文写作风格学习与生成；非英文内容会提示并拒绝进入风格库/生成流程。

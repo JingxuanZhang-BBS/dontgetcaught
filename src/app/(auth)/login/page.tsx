@@ -57,7 +57,7 @@ export default function LoginPage() {
             Welcome Back
           </h1>
           <p className="text-gray-600">
-            Sign in to continue to English Style Writer
+            Sign in to continue to DontGetCaught.AI
           </p>
         </div>
 

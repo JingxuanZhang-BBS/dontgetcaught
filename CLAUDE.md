@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**English Style Writer** - An English-only AI writing assistant that learns from user's writing samples and generates new content matching their personal style. Users upload 3-5 English documents, the system builds a vector style library, then generates authentic-sounding content with natural imperfections preserved.
+**DontGetCaught.AI** - An English-only AI writing assistant that learns from user's writing samples and generates new content matching their personal style. Users upload 3-5 English documents, the system builds a vector style library, then generates authentic-sounding content with natural imperfections preserved.
 
 **Critical constraint**: English-only MVP. Non-English content must be detected and rejected at all entry points (upload, task creation, revision).
 
