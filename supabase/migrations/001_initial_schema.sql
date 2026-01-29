@@ -24,9 +24,9 @@ CREATE TABLE IF NOT EXISTS public.style_samples (
 );
 
 -- Indexes for performance
-CREATE INDEX idx_style_samples_user ON public.style_samples(user_id);
-CREATE INDEX idx_style_samples_status ON public.style_samples(status);
-CREATE INDEX idx_style_samples_created ON public.style_samples(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_style_samples_user ON public.style_samples(user_id);
+CREATE INDEX IF NOT EXISTS idx_style_samples_status ON public.style_samples(status);
+CREATE INDEX IF NOT EXISTS idx_style_samples_created ON public.style_samples(created_at DESC);
 
 -- ============================================
 -- TABLE: style_chunks
@@ -44,8 +44,8 @@ CREATE TABLE IF NOT EXISTS public.style_chunks (
 );
 
 -- Indexes for performance
-CREATE INDEX idx_style_chunks_sample ON public.style_chunks(sample_id);
-CREATE INDEX idx_style_chunks_user ON public.style_chunks(user_id);
+CREATE INDEX IF NOT EXISTS idx_style_chunks_sample ON public.style_chunks(sample_id);
+CREATE INDEX IF NOT EXISTS idx_style_chunks_user ON public.style_chunks(user_id);
 -- Vector index will be created after pgvector is enabled
 
 -- ============================================
@@ -86,8 +86,8 @@ CREATE TABLE IF NOT EXISTS public.writing_tasks (
 );
 
 -- Indexes for performance
-CREATE INDEX idx_writing_tasks_user ON public.writing_tasks(user_id);
-CREATE INDEX idx_writing_tasks_created ON public.writing_tasks(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_writing_tasks_user ON public.writing_tasks(user_id);
+CREATE INDEX IF NOT EXISTS idx_writing_tasks_created ON public.writing_tasks(created_at DESC);
 
 -- ============================================
 -- TABLE: task_versions
@@ -104,8 +104,8 @@ CREATE TABLE IF NOT EXISTS public.task_versions (
 );
 
 -- Indexes for performance
-CREATE INDEX idx_task_versions_task ON public.task_versions(task_id);
-CREATE UNIQUE INDEX idx_task_versions_unique ON public.task_versions(task_id, version_number);
+CREATE INDEX IF NOT EXISTS idx_task_versions_task ON public.task_versions(task_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_task_versions_unique ON public.task_versions(task_id, version_number);
 
 -- ============================================
 -- TRIGGER: Update updated_at timestamp
@@ -118,11 +118,13 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS update_style_samples_updated_at ON public.style_samples;
 CREATE TRIGGER update_style_samples_updated_at
   BEFORE UPDATE ON public.style_samples
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_writing_tasks_updated_at ON public.writing_tasks;
 CREATE TRIGGER update_writing_tasks_updated_at
   BEFORE UPDATE ON public.writing_tasks
   FOR EACH ROW

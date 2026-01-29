@@ -74,11 +74,16 @@ export default function StyleLibraryPage() {
         setSamples(mockSamples)
       } else {
         // Production mode: fetch from Supabase
-        // TODO: Implement Supabase fetch
-        setSamples([])
+        const response = await fetch('/api/samples')
+        if (!response.ok) {
+          throw new Error('Failed to fetch samples')
+        }
+        const data = await response.json()
+        setSamples(data.samples || [])
       }
     } catch (error) {
       console.error('Error loading samples:', error)
+      alert('Failed to load samples. Please refresh the page.')
     } finally {
       setLoading(false)
     }
@@ -92,11 +97,34 @@ export default function StyleLibraryPage() {
 
     setUploading(true)
     try {
-      // TODO: Implement file upload to Supabase
-      console.log('Uploading files:', files, 'Type:', type)
+      const formData = new FormData()
+      files.forEach(file => {
+        formData.append('files', file)
+      })
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Upload failed')
+      }
+
+      // Show results
+      if (data.uploaded && data.uploaded.length > 0) {
+        alert(`✅ Successfully uploaded ${data.uploaded.length} file(s)!${data.errors ? '\n\n⚠️ Some files had errors:\n' + data.errors.join('\n') : ''}`)
+      } else if (data.errors) {
+        alert(`❌ Upload failed:\n${data.errors.join('\n')}`)
+      }
+
+      // Reload samples to show new uploads
+      await loadSamples()
     } catch (error) {
       console.error('Upload error:', error)
-      alert('Upload failed. Please try again.')
+      alert(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setUploading(false)
     }
@@ -110,11 +138,30 @@ export default function StyleLibraryPage() {
 
     setUploading(true)
     try {
-      // TODO: Implement text paste to Supabase
-      console.log('Pasting text:', text.substring(0, 100) + '...')
+      const response = await fetch('/api/paste', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text,
+          filename: `Pasted Text ${new Date().toLocaleString()}`,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to save text')
+      }
+
+      alert(`✅ Text saved successfully! (${data.sample.word_count} words)`)
+
+      // Reload samples to show new paste
+      await loadSamples()
     } catch (error) {
       console.error('Paste error:', error)
-      alert('Upload failed. Please try again.')
+      alert(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setUploading(false)
     }
@@ -132,19 +179,33 @@ export default function StyleLibraryPage() {
 
     setDeleting(id)
     try {
-      // TODO: Implement delete from Supabase
-      console.log('Deleting sample:', id)
+      const response = await fetch(`/api/samples/${id}`, {
+        method: 'DELETE',
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Delete failed')
+      }
+
+      alert('✅ Sample deleted successfully!')
+
+      // Reload samples to refresh the list
+      await loadSamples()
     } catch (error) {
       console.error('Delete error:', error)
-      alert('Delete failed. Please try again.')
+      alert(`Delete failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setDeleting(null)
     }
   }
 
   // Calculate statistics
+  // NOTE: Temporarily counting all samples for MVP testing.
+  // In production, only count samples with status='indexed' and detected_language='en'
   const totalWords = samples
-    .filter(s => s.status === 'indexed' && s.detected_language === 'en')
+    .filter(s => s.word_count_en > 0)
     .reduce((sum, s) => sum + s.word_count_en, 0)
   const recommendedWords = 2000
   const readinessPercentage = Math.min(100, Math.round((totalWords / recommendedWords) * 100))
