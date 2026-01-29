@@ -4,6 +4,54 @@
 
 ---
 
+## 2026-01-28 20:45
+
+**✅ Step 2 完成 - 后端 API 全流程打通 + Supabase 配置完成**
+
+**Supabase 配置**：
+- 成功执行所有数据库迁移
+- 创建 Storage bucket 并配置 RLS 策略
+- 完成用户注册和认证测试
+- 修复迁移文件幂等性问题（添加 IF NOT EXISTS）
+
+**后端 API 实现**：
+- ✅ `POST /api/upload` - 文件上传到 Supabase Storage
+  - 支持 .docx 和 .pdf（最大 10MB，10 个文件）
+  - 自动验证文件类型和大小
+  - 存储文件 + 创建数据库记录
+  - 失败时自动清理
+- ✅ `POST /api/paste` - 粘贴文本保存
+  - 支持最多 10,000 词
+  - 自动计算单词数
+  - 直接存储到数据库
+- ✅ `GET /api/samples` - 获取用户样本列表
+  - 按时间倒序排序
+  - RLS 自动过滤用户数据
+- ✅ `DELETE /api/samples/[id]` - 删除样本
+  - 同时删除 Storage 文件和数据库记录
+  - 验证所有权
+
+**前端集成**：
+- 更新 Style Library 页面调用真实 API
+- 实现上传/粘贴/删除完整流程
+- 修复进度条统计逻辑（临时统计所有样本，等 Step 3-5 完成后改为只统计已索引样本）
+- 关闭开发模式（`NEXT_PUBLIC_DEV_MODE=false`）
+
+**测试验证**：
+- ✅ 文件上传 → Storage + 数据库 → 页面显示
+- ✅ 粘贴文本 → 数据库 → 单词数统计 → 进度条更新
+- ✅ 删除样本 → Storage + 数据库清理 → 页面刷新
+- ✅ 用户注册和登录流程正常
+
+**已知限制（等待后续 Step 实现）**：
+- 文件上传后 word_count_en = 0（Step 3 实现文本解析后会更新）
+- detected_language = 'unknown'（Step 4 实现语言检测）
+- status = 'uploaded'（Step 5 向量化后更新为 'indexed'）
+
+**Commit**: a725205
+
+---
+
 ## 2026-01-27 17:35
 
 **Step 2 完成 - 数据库 Schema & 上传 UI（开发模式）**
