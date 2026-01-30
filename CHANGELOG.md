@@ -4,6 +4,35 @@
 
 ---
 
+## 2026-01-30 Step 5 完成
+
+**✅ Step 5 完成 - 文本分块与OpenAI Embeddings**
+
+**新增功能**：
+- 文本分块：将文档按语义边界分割成300-500词的块
+- OpenAI Embeddings：使用 text-embedding-ada-002 生成1536维向量
+- 自动索引：英文内容上传后自动进行分块和向量化
+- 状态流转：`parsing` → `indexed`（成功）或 `error`（失败）
+
+**新增文件**：
+- `src/lib/vector/chunker.ts` - 文本分块模块
+- `src/lib/vector/embeddings.ts` - OpenAI Embeddings模块
+- `src/lib/vector/indexer.ts` - 索引帮助函数
+- `src/lib/vector/index.ts` - 模块导出
+- `src/app/api/process-sample/route.ts` - 手动索引API端点
+
+**修改文件**：
+- `src/app/api/upload/route.ts` - 添加自动索引调用
+- `src/app/api/paste/route.ts` - 添加自动索引调用
+- `src/app/api/samples/[id]/route.ts` - 修复Next.js 15 async params
+- `package.json` - 添加openai依赖
+
+**测试验证**：
+- ✅ 英文DOCX上传 → 自动分块 → 生成embeddings → 状态变为绿色"Ready"
+- ✅ Supabase `style_chunks` 表有对应的embedding记录
+
+---
+
 ## 2026-01-30 Step 4 完成
 
 **✅ Step 4 完成 - 语言检测门控**
