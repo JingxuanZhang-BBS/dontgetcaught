@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { parseFile } from '@/lib/parsing'
 import { detectLanguage } from '@/lib/language/detector'
+import { indexSample } from '@/lib/vector'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 const ALLOWED_TYPES = [
@@ -113,7 +114,7 @@ export async function POST(request: Request) {
             let errorMessage: string | null = null
 
             if (langResult.language === 'en') {
-              status = 'uploaded' // Ready for next step (vectorization)
+              status = 'parsing' // Will be updated to 'indexed' after embedding
             } else if (langResult.language === 'non_en') {
               status = 'lang_failed'
               errorMessage = langResult.message
@@ -139,6 +140,29 @@ export async function POST(request: Request) {
               .eq('id', dbData.id)
 
             wordCount = langResult.language === 'en' ? (parseResult.wordCount || 0) : 0
+
+            // If English content, index it (generate embeddings)
+            if (langResult.language === 'en' && parseResult.cleanedText) {
+              const indexResult = await indexSample(
+                supabase,
+                dbData.id,
+                user.id,
+                parseResult.cleanedText
+              )
+
+              if (!indexResult.success) {
+                console.error(`Indexing failed for ${file.name}:`, indexResult.error)
+                // Update status to error if indexing fails
+                await supabase
+                  .from('style_samples')
+                  .update({
+                    status: 'error',
+                    error_message: indexResult.error || 'Failed to index content',
+                  })
+                  .eq('id', dbData.id)
+              }
+              // If successful, indexSample already sets status to 'indexed'
+            }
           } else if (!parseResult.success) {
             // Parsing failed - mark as error
             await supabase

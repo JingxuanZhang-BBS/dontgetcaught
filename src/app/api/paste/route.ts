@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { detectLanguage } from '@/lib/language/detector'
+import { indexSample } from '@/lib/vector'
 
 const MAX_WORDS = 10000
 
@@ -55,7 +56,7 @@ export async function POST(request: Request) {
     let errorMessage: string | null = null
 
     if (langResult.language === 'en') {
-      status = 'uploaded' // Ready for next step
+      status = 'parsing' // Will be updated to 'indexed' after embedding
     } else if (langResult.language === 'non_en') {
       status = 'lang_failed'
       errorMessage = langResult.message
@@ -93,8 +94,40 @@ export async function POST(request: Request) {
       )
     }
 
-    // Return different response based on language
+    // If English content, index it (generate embeddings)
     if (langResult.language === 'en') {
+      const indexResult = await indexSample(
+        supabase,
+        dbData.id,
+        user.id,
+        text
+      )
+
+      if (!indexResult.success) {
+        console.error('Indexing failed for pasted text:', indexResult.error)
+        // Update status to error if indexing fails
+        await supabase
+          .from('style_samples')
+          .update({
+            status: 'error',
+            error_message: indexResult.error || 'Failed to index content',
+          })
+          .eq('id', dbData.id)
+
+        return NextResponse.json({
+          success: true,
+          sample: {
+            id: dbData.id,
+            filename: dbData.filename,
+            word_count: wordCount,
+            language: 'en',
+          },
+          message: 'Text saved but indexing failed',
+          indexingError: indexResult.error,
+        })
+      }
+
+      // Indexing successful
       return NextResponse.json({
         success: true,
         sample: {
@@ -103,7 +136,8 @@ export async function POST(request: Request) {
           word_count: wordCount,
           language: 'en',
         },
-        message: 'Text saved successfully',
+        message: 'Text saved and indexed successfully',
+        indexed: true,
       })
     } else {
       return NextResponse.json({

@@ -237,7 +237,7 @@ export default function StyleLibraryPage() {
                 Development Mode Active
               </h3>
               <p className="text-amber-800 mb-3">
-                You're viewing mock data. To enable full functionality:
+                You&apos;re viewing mock data. To enable full functionality:
               </p>
               <ol className="list-decimal list-inside text-amber-800 space-y-1 text-sm">
                 <li>Set up your Supabase project at <a href="https://supabase.com" target="_blank" className="underline font-semibold">supabase.com</a></li>

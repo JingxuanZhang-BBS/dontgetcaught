@@ -1,6 +1,7 @@
 // pdf-parse is a CommonJS module, needs dynamic require
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+/* eslint-disable */
 const pdfParse = require('pdf-parse')
+/* eslint-enable */
 
 /**
  * Parse a .pdf file and extract all text content

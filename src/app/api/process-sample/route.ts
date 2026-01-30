@@ -1,12 +1,18 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-import { parseFile } from '@/lib/parsing'
+import { chunkText } from '@/lib/vector/chunker'
+import { generateEmbeddings } from '@/lib/vector/embeddings'
 
+/**
+ * Process a style sample: chunk text and generate embeddings
+ * POST /api/process-sample
+ * Body: { sampleId: string }
+ */
 export async function POST(request: Request) {
   try {
     const supabase = await createClient()
 
-    // Verify user authentication
+    // Check authentication
     const {
       data: { user },
     } = await supabase.auth.getUser()
@@ -15,116 +21,159 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get request parameters
     const body = await request.json()
-    const { sample_id } = body
+    const { sampleId } = body
 
-    if (!sample_id) {
+    if (!sampleId) {
       return NextResponse.json(
-        { error: 'sample_id is required' },
+        { error: 'Sample ID is required' },
         { status: 400 }
       )
     }
 
-    // Step 1: Get sample record from database
+    // Fetch the sample
     const { data: sample, error: fetchError } = await supabase
       .from('style_samples')
       .select('*')
-      .eq('id', sample_id)
-      .eq('user_id', user.id) // Verify ownership
+      .eq('id', sampleId)
+      .eq('user_id', user.id)
       .single()
 
     if (fetchError || !sample) {
       return NextResponse.json(
-        { error: 'Sample not found or access denied' },
+        { error: 'Sample not found' },
         { status: 404 }
       )
     }
 
-    // If no storage_path, it's pasted text - skip parsing
-    if (!sample.storage_path) {
-      return NextResponse.json({
-        success: true,
-        message: 'Sample is pasted text, no parsing needed',
-      })
-    }
-
-    // Step 2: Download file from Supabase Storage
-    const { data: fileData, error: downloadError } = await supabase.storage
-      .from('style-samples')
-      .download(sample.storage_path)
-
-    if (downloadError || !fileData) {
-      console.error('Storage download error:', downloadError)
-      await supabase
-        .from('style_samples')
-        .update({
-          status: 'error',
-          error_message: `Failed to download file: ${downloadError?.message}`,
-        })
-        .eq('id', sample_id)
-
+    // Check if sample is ready for processing
+    if (sample.status !== 'uploaded' || sample.detected_language !== 'en') {
       return NextResponse.json(
-        { error: 'Failed to download file from storage' },
-        { status: 500 }
+        { error: 'Sample is not ready for processing (must be uploaded English content)' },
+        { status: 400 }
       )
     }
 
-    // Step 3: Convert to Buffer
-    const arrayBuffer = await fileData.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
+    // Check if already indexed
+    const { count: existingChunks } = await supabase
+      .from('style_chunks')
+      .select('*', { count: 'exact', head: true })
+      .eq('sample_id', sampleId)
 
-    // Step 4: Parse the file
-    const parseResult = await parseFile(
-      buffer,
-      sample.source_type as 'docx' | 'pdf'
-    )
-
-    if (!parseResult.success) {
-      // Parsing failed - update status to error
-      await supabase
-        .from('style_samples')
-        .update({
-          status: 'error',
-          error_message: parseResult.error || 'Parsing failed',
-        })
-        .eq('id', sample_id)
-
+    if (existingChunks && existingChunks > 0) {
       return NextResponse.json(
-        { error: parseResult.error || 'Parsing failed' },
-        { status: 500 }
+        { error: 'Sample has already been indexed' },
+        { status: 400 }
       )
     }
 
-    // Step 5: Update database with parsed content
-    // Keep status as 'uploaded' (will change to 'indexed' after Step 5 vector embedding)
-    const { error: updateError } = await supabase
+    // Update status to parsing
+    await supabase
       .from('style_samples')
-      .update({
-        raw_text: parseResult.rawText,
-        cleaned_text: parseResult.cleanedText,
-        word_count_en: parseResult.wordCount || 0,
-        error_message: null,
-      })
-      .eq('id', sample_id)
+      .update({ status: 'parsing' })
+      .eq('id', sampleId)
 
-    if (updateError) {
-      console.error('Database update error:', updateError)
+    // Get the cleaned text
+    const text = sample.cleaned_text || sample.raw_text
+
+    if (!text) {
+      await supabase
+        .from('style_samples')
+        .update({
+          status: 'error',
+          error_message: 'No text content found in sample',
+        })
+        .eq('id', sampleId)
+
       return NextResponse.json(
-        { error: 'Failed to update database' },
+        { error: 'No text content found in sample' },
+        { status: 400 }
+      )
+    }
+
+    // Chunk the text
+    const chunks = chunkText(text)
+
+    if (chunks.length === 0) {
+      await supabase
+        .from('style_samples')
+        .update({
+          status: 'error',
+          error_message: 'Could not create chunks from text',
+        })
+        .eq('id', sampleId)
+
+      return NextResponse.json(
+        { error: 'Could not create chunks from text' },
+        { status: 400 }
+      )
+    }
+
+    // Generate embeddings for all chunks
+    const chunkTexts = chunks.map((c) => c.text)
+
+    let embeddings
+    try {
+      embeddings = await generateEmbeddings(chunkTexts)
+    } catch (embeddingError) {
+      console.error('Embedding generation error:', embeddingError)
+      await supabase
+        .from('style_samples')
+        .update({
+          status: 'error',
+          error_message: 'Failed to generate embeddings',
+        })
+        .eq('id', sampleId)
+
+      return NextResponse.json(
+        { error: 'Failed to generate embeddings' },
         { status: 500 }
       )
     }
 
-    // Step 6: Return success result
+    // Insert chunks into database
+    const chunkInserts = embeddings.map((emb) => ({
+      sample_id: sampleId,
+      user_id: user.id,
+      chunk_text: emb.text,
+      chunk_index: emb.index,
+      embedding: JSON.stringify(emb.embedding), // pgvector accepts array as JSON
+    }))
+
+    const { error: insertError } = await supabase
+      .from('style_chunks')
+      .insert(chunkInserts)
+
+    if (insertError) {
+      console.error('Chunk insert error:', insertError)
+      await supabase
+        .from('style_samples')
+        .update({
+          status: 'error',
+          error_message: 'Failed to store embeddings',
+        })
+        .eq('id', sampleId)
+
+      return NextResponse.json(
+        { error: `Failed to store embeddings: ${insertError.message}` },
+        { status: 500 }
+      )
+    }
+
+    // Update sample status to indexed
+    await supabase
+      .from('style_samples')
+      .update({ status: 'indexed' })
+      .eq('id', sampleId)
+
     return NextResponse.json({
       success: true,
-      sample_id,
-      word_count: parseResult.wordCount,
-      message: 'File parsed successfully',
+      message: 'Sample indexed successfully',
+      chunks: chunks.length,
+      totalWords: chunks.reduce((sum, c) => sum + c.wordCount, 0),
     })
   } catch (error) {
-    console.error('Process sample API error:', error)
+    console.error('Process sample error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
