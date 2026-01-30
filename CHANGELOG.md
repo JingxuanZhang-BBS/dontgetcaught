@@ -4,6 +4,57 @@
 
 ---
 
+## 2026-01-30 Step 3 完成
+
+**✅ Step 3 完成 - 文本解析与清理（DOCX）**
+
+**新增功能**：
+- DOCX 文件上传后自动解析提取文本
+- 文本清理（去除页码、多余空白等）
+- 英文单词统计
+- 数据库保存 `raw_text`、`cleaned_text`、`word_count_en`
+
+**新增文件**：
+- `src/lib/parsing/docx-parser.ts` - DOCX 解析器（使用 mammoth）
+- `src/lib/parsing/pdf-parser.ts` - PDF 解析器（待修复）
+- `src/lib/parsing/text-cleaner.ts` - 文本清理工具
+- `src/lib/parsing/index.ts` - 统一解析接口
+- `src/app/api/process-sample/route.ts` - 处理样本 API
+
+**修改文件**：
+- `src/app/api/upload/route.ts` - 上传后自动触发解析
+
+**已知问题**：
+- ⚠️ PDF 解析暂不可用（pdf-parse 2.x API 变更，待后续修复）
+
+**测试验证**：
+- ✅ DOCX 上传 → 解析 → 单词数显示
+- ✅ 粘贴文本功能正常（未受影响）
+- ✅ 进度条正确累计单词数
+
+---
+
+## 2026-01-30 回退
+
+**⏪ 回退：撤销 Step 3 所有改动**
+
+Step 3 实现过程中遇到多个级联错误，决定回退到 Step 2 完成的稳定状态：
+- 撤销的改动：
+  - `src/lib/parsing/` 目录及所有解析模块
+  - `src/app/api/process-sample/route.ts` API 端点
+  - `src/app/api/upload/route.ts` 的解析触发逻辑
+  - `src/app/api/paste/route.ts` 的文本清理逻辑
+  - `src/types/database.ts` 的 'parsed' 状态
+  - `src/components/StyleSampleCard.tsx` 的解析状态显示
+  - `src/app/(dashboard)/style-library/page.tsx` 的自动刷新
+  - mammoth 和 pdf-parse 依赖
+
+- 回退到 commit: `9f0e20a`
+
+**状态**: 回到 Step 2 完成状态，所有功能正常工作
+
+---
+
 ## 2026-01-28 20:45
 
 **✅ Step 2 完成 - 后端 API 全流程打通 + Supabase 配置完成**

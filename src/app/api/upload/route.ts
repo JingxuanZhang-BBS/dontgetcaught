@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { parseFile } from '@/lib/parsing'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 const ALLOWED_TYPES = [
@@ -95,10 +96,52 @@ export async function POST(request: Request) {
           continue
         }
 
+        // Parse the file to extract text and word count
+        let wordCount = 0
+        try {
+          const arrayBuffer = await file.arrayBuffer()
+          const buffer = Buffer.from(arrayBuffer)
+          const parseResult = await parseFile(buffer, sourceType)
+
+          if (parseResult.success) {
+            // Update database with parsed content
+            await supabase
+              .from('style_samples')
+              .update({
+                raw_text: parseResult.rawText,
+                cleaned_text: parseResult.cleanedText,
+                word_count_en: parseResult.wordCount || 0,
+              })
+              .eq('id', dbData.id)
+
+            wordCount = parseResult.wordCount || 0
+          } else {
+            // Parsing failed - mark as error
+            await supabase
+              .from('style_samples')
+              .update({
+                status: 'error',
+                error_message: parseResult.error || 'Parsing failed',
+              })
+              .eq('id', dbData.id)
+          }
+        } catch (parseErr) {
+          console.error(`Error parsing file ${file.name}:`, parseErr)
+          // Continue even if parsing fails - file is still uploaded
+          await supabase
+            .from('style_samples')
+            .update({
+              status: 'error',
+              error_message: 'Failed to parse file content',
+            })
+            .eq('id', dbData.id)
+        }
+
         uploadResults.push({
           filename: file.name,
           id: dbData.id,
           status: 'success',
+          word_count: wordCount,
         })
       } catch (err) {
         console.error(`Error processing file ${file.name}:`, err)
