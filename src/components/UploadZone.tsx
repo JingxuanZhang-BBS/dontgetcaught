@@ -166,6 +166,13 @@ export default function UploadZone({
         <p className="text-gray-600 mb-4">
           Drag & drop files here, or click to browse
         </p>
+
+        {/* English-only notice */}
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg mb-4">
+          <span className="text-blue-600 font-medium">English Only</span>
+          <span className="text-blue-500 text-sm">Our style analysis is optimized for English text</span>
+        </div>
+
         <p className="text-sm text-gray-500 mb-4">
           Supports: <span className="font-semibold">.docx, .pdf</span> • Max {maxFiles} files • Max {maxFileSize}MB each
         </p>
@@ -208,8 +215,12 @@ export default function UploadZone({
             <div className="p-6 border-b">
               <h2 className="text-2xl font-bold text-gray-900">Paste Your Text</h2>
               <p className="text-gray-600 mt-1">
-                Copy and paste your English writing sample here (max 10,000 words)
+                Copy and paste your writing sample here (max 10,000 words)
               </p>
+              <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg">
+                <span className="text-blue-600 font-medium text-sm">English Only</span>
+                <span className="text-blue-500 text-xs">Non-English content will be rejected</span>
+              </div>
             </div>
 
             <div className="p-6 flex-1 overflow-auto">

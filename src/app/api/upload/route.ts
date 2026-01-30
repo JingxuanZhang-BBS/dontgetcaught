@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { parseFile } from '@/lib/parsing'
+import { detectLanguage } from '@/lib/language/detector'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 const ALLOWED_TYPES = [
@@ -103,19 +104,42 @@ export async function POST(request: Request) {
           const buffer = Buffer.from(arrayBuffer)
           const parseResult = await parseFile(buffer, sourceType)
 
-          if (parseResult.success) {
-            // Update database with parsed content
+          if (parseResult.success && parseResult.cleanedText) {
+            // Detect language
+            const langResult = detectLanguage(parseResult.cleanedText)
+
+            // Determine status based on language
+            let status: string = 'uploaded'
+            let errorMessage: string | null = null
+
+            if (langResult.language === 'en') {
+              status = 'uploaded' // Ready for next step (vectorization)
+            } else if (langResult.language === 'non_en') {
+              status = 'lang_failed'
+              errorMessage = langResult.message
+            } else if (langResult.language === 'mixed') {
+              status = 'lang_failed'
+              errorMessage = langResult.message
+            } else {
+              // unknown - still allow but mark as unknown
+              status = 'uploaded'
+            }
+
+            // Update database with parsed content and language info
             await supabase
               .from('style_samples')
               .update({
                 raw_text: parseResult.rawText,
                 cleaned_text: parseResult.cleanedText,
-                word_count_en: parseResult.wordCount || 0,
+                word_count_en: langResult.language === 'en' ? (parseResult.wordCount || 0) : 0,
+                detected_language: langResult.language,
+                status,
+                error_message: errorMessage,
               })
               .eq('id', dbData.id)
 
-            wordCount = parseResult.wordCount || 0
-          } else {
+            wordCount = langResult.language === 'en' ? (parseResult.wordCount || 0) : 0
+          } else if (!parseResult.success) {
             // Parsing failed - mark as error
             await supabase
               .from('style_samples')

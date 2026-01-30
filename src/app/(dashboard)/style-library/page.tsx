@@ -155,7 +155,12 @@ export default function StyleLibraryPage() {
         throw new Error(data.error || 'Failed to save text')
       }
 
-      alert(`✅ Text saved successfully! (${data.sample.word_count} words)`)
+      // Show different message based on language detection
+      if (data.languageWarning) {
+        alert(`⚠️ Language Issue Detected\n\n${data.message}\n\nThe sample has been saved but won't be included in your style profile.`)
+      } else {
+        alert(`✅ Text saved successfully! (${data.sample.word_count} words)`)
+      }
 
       // Reload samples to show new paste
       await loadSamples()

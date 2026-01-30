@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { detectLanguage } from '@/lib/language/detector'
 
 const MAX_WORDS = 10000
 
@@ -46,6 +47,26 @@ export async function POST(request: Request) {
       )
     }
 
+    // Detect language
+    const langResult = detectLanguage(text)
+
+    // Determine status based on language
+    let status: string = 'uploaded'
+    let errorMessage: string | null = null
+
+    if (langResult.language === 'en') {
+      status = 'uploaded' // Ready for next step
+    } else if (langResult.language === 'non_en') {
+      status = 'lang_failed'
+      errorMessage = langResult.message
+    } else if (langResult.language === 'mixed') {
+      status = 'lang_failed'
+      errorMessage = langResult.message
+    } else {
+      // unknown - still allow but mark as unknown
+      status = 'uploaded'
+    }
+
     // Create database record for pasted text
     const { data: dbData, error: dbError } = await supabase
       .from('style_samples')
@@ -55,9 +76,11 @@ export async function POST(request: Request) {
         source_type: 'paste',
         storage_path: null, // No storage path for pasted text
         raw_text: text,
-        status: 'uploaded',
-        detected_language: 'unknown',
-        word_count_en: wordCount, // Temporarily set as English word count (will be updated after language detection)
+        cleaned_text: text, // For paste, raw = cleaned
+        status,
+        detected_language: langResult.language,
+        word_count_en: langResult.language === 'en' ? wordCount : 0,
+        error_message: errorMessage,
       })
       .select()
       .single()
@@ -70,15 +93,31 @@ export async function POST(request: Request) {
       )
     }
 
-    return NextResponse.json({
-      success: true,
-      sample: {
-        id: dbData.id,
-        filename: dbData.filename,
-        word_count: wordCount,
-      },
-      message: 'Text pasted successfully',
-    })
+    // Return different response based on language
+    if (langResult.language === 'en') {
+      return NextResponse.json({
+        success: true,
+        sample: {
+          id: dbData.id,
+          filename: dbData.filename,
+          word_count: wordCount,
+          language: 'en',
+        },
+        message: 'Text saved successfully',
+      })
+    } else {
+      return NextResponse.json({
+        success: true,
+        sample: {
+          id: dbData.id,
+          filename: dbData.filename,
+          word_count: 0,
+          language: langResult.language,
+        },
+        message: langResult.message,
+        languageWarning: true,
+      })
+    }
   } catch (error) {
     console.error('Paste API error:', error)
     return NextResponse.json(

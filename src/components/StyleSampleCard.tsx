@@ -95,13 +95,39 @@ export default function StyleSampleCard({ sample, onDelete, deleting }: StyleSam
         </div>
       </div>
 
-      {sample.error_message && (
+      {/* Language detection error - non-English */}
+      {sample.status === 'lang_failed' && sample.detected_language === 'non_en' && (
+        <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-sm text-red-700">
+            <strong>Non-English Content Detected</strong>
+          </p>
+          <p className="text-sm text-red-600 mt-1">
+            This document appears to be in a non-English language. Please upload English writing samples only, as our style analysis system is optimized exclusively for English text.
+          </p>
+        </div>
+      )}
+
+      {/* Language detection error - mixed content */}
+      {sample.status === 'lang_failed' && sample.detected_language === 'mixed' && (
+        <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+          <p className="text-sm text-amber-700">
+            <strong>Mixed Language Content Detected</strong>
+          </p>
+          <p className="text-sm text-amber-600 mt-1">
+            This document contains a mix of English and non-English content. For optimal style analysis results, we recommend removing non-English sections (such as translations, foreign quotes, or bilingual content) before uploading.
+          </p>
+        </div>
+      )}
+
+      {/* Generic error message */}
+      {sample.status === 'error' && sample.error_message && (
         <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
           <p className="text-sm text-red-700">{sample.error_message}</p>
         </div>
       )}
 
-      {sample.status === 'lang_failed' && !sample.error_message && (
+      {/* Fallback for lang_failed without detected_language */}
+      {sample.status === 'lang_failed' && !sample.detected_language && (
         <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
           <p className="text-sm text-yellow-800">
             <strong>English-only requirement:</strong> This sample contains non-English content.

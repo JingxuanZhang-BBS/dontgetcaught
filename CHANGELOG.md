@@ -4,6 +4,34 @@
 
 ---
 
+## 2026-01-30 Step 4 完成
+
+**✅ Step 4 完成 - 语言检测门控**
+
+**新增功能**：
+- 使用 franc 库进行语言检测
+- 英文内容（>90%）→ 正常处理
+- 非英文内容（<50%）→ 标记为 `lang_failed`，显示红色警告
+- 混合语言（50-90%）→ 标记为 `lang_failed`，显示黄色建议
+- 上传区域添加 "English Only" 提示标签
+
+**新增文件**：
+- `src/lib/language/detector.ts` - 语言检测模块
+
+**修改文件**：
+- `src/app/api/upload/route.ts` - 集成语言检测
+- `src/app/api/paste/route.ts` - 集成语言检测
+- `src/components/UploadZone.tsx` - 添加英文提示
+- `src/components/StyleSampleCard.tsx` - 显示语言错误详情
+- `src/app/(dashboard)/style-library/page.tsx` - 语言警告提示
+
+**测试验证**：
+- ✅ 英文文本/文档 → 正常处理，显示单词数
+- ✅ 中文文本 → 显示 "Non-English Content Detected"
+- ✅ 中英混合 → 显示 "Mixed Language Content Detected"
+
+---
+
 ## 2026-01-30 Step 3 完成
 
 **✅ Step 3 完成 - 文本解析与清理（DOCX）**
