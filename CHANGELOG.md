@@ -4,6 +4,47 @@
 
 ---
 
+## 2026-01-31 Step 6 完成
+
+**✅ Step 6 完成 - Style Profile Analysis (风格画像分析)**
+
+**核心特性**：
+实现了6大指标类别的纯JavaScript统计分析（无需GPT API调用）：
+
+1. **词汇画像 (Lexical)** - n-grams, TTR, MTLD, 缩写率, 拼写风格
+2. **句法画像 (Syntax)** - 句长分布, 从句密度, 段落结构
+3. **模板库 (Patterns)** - 签名开头/结尾, 修辞框架
+4. **错误画像 (Errors)** - 拼写错误, 冠词错误, 逗号拼接, 时态一致性
+5. **语气人格 (Voice)** - 模糊/强调词, 正式度, 态度, 自我提及
+6. **篇章结构 (Discourse)** - 过渡词, 衔接性, 话题发展
+
+**新增文件**：
+- `src/lib/style/metrics/lexical.ts` - 词汇分析模块
+- `src/lib/style/metrics/syntax.ts` - 句法分析模块
+- `src/lib/style/metrics/patterns.ts` - 模式提取模块
+- `src/lib/style/metrics/errors.ts` - 错误检测模块（关键：避免AI检测）
+- `src/lib/style/metrics/voice.ts` - 语气分析模块
+- `src/lib/style/metrics/discourse.ts` - 篇章分析模块
+- `src/lib/style/metrics/index.ts` - 指标模块导出
+- `src/lib/style/analyzer.ts` - 聚合模块 + LLM提示词生成
+- `src/lib/style/index.ts` - 风格模块导出
+- `src/app/api/style-profile/route.ts` - GET/POST API端点
+- `src/components/StyleProfileDisplay.tsx` - 3标签UI组件
+
+**修改文件**：
+- `src/app/(dashboard)/style-library/page.tsx` - 集成StyleProfileDisplay
+
+**UI功能**：
+- Summary标签：关键特征、风格标记、签名短语、自然瑕疵、生成指南
+- Details标签：所有细粒度指标数据
+- LLM Prompt标签：生成的系统提示词（用于Step 7生成）
+
+**关键亮点**：
+- 错误画像检测"自然瑕疵"（comma splices, tense shifts等）帮助生成更人性化的文本
+- 自动生成LLM系统提示词，包含所有风格特征
+
+---
+
 ## 2026-01-30 Step 5 完成
 
 **✅ Step 5 完成 - 文本分块与OpenAI Embeddings**
