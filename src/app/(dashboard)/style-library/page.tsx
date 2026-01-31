@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react'
 import UploadZone from '@/components/UploadZone'
 import StyleSampleCard from '@/components/StyleSampleCard'
+import StyleProfileDisplay from '@/components/StyleProfileDisplay'
 import type { StyleSample, SourceType } from '@/types/database'
+import type { StyleProfile } from '@/lib/style'
 
 // Mock data for development mode
 const mockSamples: StyleSample[] = [
@@ -61,9 +63,46 @@ export default function StyleLibraryPage() {
   const [uploading, setUploading] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
 
+  // Style profile state
+  const [styleProfile, setStyleProfile] = useState<StyleProfile | null>(null)
+  const [stylePrompt, setStylePrompt] = useState<string | null>(null)
+  const [profileStats, setProfileStats] = useState<{
+    sample_count: number
+    total_words: number
+    is_ready: boolean
+    recommended_words: number
+    words_needed: number
+  } | null>(null)
+  const [profileLoading, setProfileLoading] = useState(false)
+
   useEffect(() => {
     loadSamples()
   }, [])
+
+  // Load style profile when samples change
+  useEffect(() => {
+    if (!loading && samples.length > 0 && !isDevMode) {
+      loadStyleProfile()
+    }
+  }, [loading, samples.length, isDevMode])
+
+  const loadStyleProfile = async () => {
+    setProfileLoading(true)
+    try {
+      const response = await fetch('/api/style-profile')
+      if (!response.ok) {
+        throw new Error('Failed to fetch style profile')
+      }
+      const data = await response.json()
+      setStyleProfile(data.profile)
+      setStylePrompt(data.stylePrompt)
+      setProfileStats(data.stats)
+    } catch (error) {
+      console.error('Error loading style profile:', error)
+    } finally {
+      setProfileLoading(false)
+    }
+  }
 
   const loadSamples = async () => {
     setLoading(true)
@@ -253,42 +292,55 @@ export default function StyleLibraryPage() {
         </div>
       )}
 
-      {/* Style Profile Readiness */}
-      <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-8 rounded-xl mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Style Profile Status</h2>
-            <p className="text-gray-600 mt-1">
-              {isReady
-                ? '✅ Your profile is ready! You can start generating content.'
-                : `Upload more samples to reach the recommended ${recommendedWords.toLocaleString()} words.`}
+      {/* Style Profile Display */}
+      <div className="mb-8">
+        {isDevMode ? (
+          // Simple progress display for dev mode
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-8 rounded-xl">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Style Profile Status</h2>
+                <p className="text-gray-600 mt-1">
+                  {isReady
+                    ? 'Your profile is ready! You can start generating content.'
+                    : `Upload more samples to reach the recommended ${recommendedWords.toLocaleString()} words.`}
+                </p>
+              </div>
+              {isReady && (
+                <div className="text-5xl">🎉</div>
+              )}
+            </div>
+
+            <div className="mb-3">
+              <div className="flex justify-between text-sm mb-2">
+                <span className="text-gray-600 font-semibold">
+                  {totalWords.toLocaleString()} / {recommendedWords.toLocaleString()} words
+                </span>
+                <span className="text-gray-600 font-semibold">{readinessPercentage}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-4">
+                <div
+                  className={`h-4 rounded-full transition-all duration-500 ${
+                    isReady ? 'bg-green-500' : 'bg-blue-600'
+                  }`}
+                  style={{ width: `${readinessPercentage}%` }}
+                ></div>
+              </div>
+            </div>
+
+            <p className="text-sm text-gray-500">
+              <strong>Tip:</strong> More samples = better style matching. Upload 3-5 documents for optimal results.
             </p>
           </div>
-          {isReady && (
-            <div className="text-5xl">🎉</div>
-          )}
-        </div>
-
-        <div className="mb-3">
-          <div className="flex justify-between text-sm mb-2">
-            <span className="text-gray-600 font-semibold">
-              {totalWords.toLocaleString()} / {recommendedWords.toLocaleString()} words
-            </span>
-            <span className="text-gray-600 font-semibold">{readinessPercentage}%</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-4">
-            <div
-              className={`h-4 rounded-full transition-all duration-500 ${
-                isReady ? 'bg-green-500' : 'bg-blue-600'
-              }`}
-              style={{ width: `${readinessPercentage}%` }}
-            ></div>
-          </div>
-        </div>
-
-        <p className="text-sm text-gray-500">
-          💡 <strong>Tip:</strong> More samples = better style matching. Upload 3-5 documents for optimal results.
-        </p>
+        ) : (
+          // Full style profile display for production
+          <StyleProfileDisplay
+            profile={styleProfile}
+            stylePrompt={stylePrompt}
+            stats={profileStats}
+            isLoading={profileLoading}
+          />
+        )}
       </div>
 
       {/* Upload Zone */}
