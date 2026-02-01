@@ -10,6 +10,7 @@ export interface TaskInput {
   title: string
   requirements: string
   taskType: 'personal_narrative' | 'argumentative' | 'general'
+  referenceContent?: string
 }
 
 export interface GenerationPrompt {
@@ -31,6 +32,17 @@ export function buildGenerationPrompt(
   // Format style sample chunks
   const samplesSection = formatChunksForPrompt(styleChunks, 3000)
 
+  // Build reference materials section if provided
+  const referenceSection = task.referenceContent
+    ? `
+
+## Reference Materials
+The user has provided the following reference documents. You may cite, quote, or draw upon this content as appropriate for the writing task:
+
+${task.referenceContent}
+`
+    : ''
+
   // Build system message
   const systemMessage = `You are a writing assistant that mimics the user's personal writing style. Your goal is to generate text that sounds authentically like the user wrote it.
 
@@ -40,14 +52,14 @@ ${stylePromptSection}
 The following are excerpts from the user's actual writing. Study their word choices, sentence structures, and overall voice:
 
 ${samplesSection}
-
+${referenceSection}
 ## Critical Rules
 1. MATCH THE STYLE: Your output must feel like the user's writing, not generic AI text
 2. PRESERVE IMPERFECTIONS: Include the natural imperfections described above (if any)
 3. MAINTAIN READABILITY: Never sacrifice clarity for authenticity
 4. NO OVER-POLISHING: Avoid overly formal or perfect grammar if the user's style is casual
 5. VOICE CONSISTENCY: Maintain consistent voice throughout the piece
-6. LENGTH: Write a complete, well-developed response (aim for ${getTargetLength(task.taskType)} words unless otherwise specified)`
+6. LENGTH: Write a complete, well-developed response (aim for ${getTargetLength(task.taskType)} words unless otherwise specified)${task.referenceContent ? '\n7. REFERENCE USE: If reference materials are provided, integrate them naturally - cite or quote where appropriate' : ''}`
 
   // Build user message based on task type
   const userMessage = buildUserMessage(task)

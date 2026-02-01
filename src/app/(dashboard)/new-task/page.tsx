@@ -63,17 +63,26 @@ export default function NewTaskPage() {
     title: string
     requirements: string
     taskType: TaskType
+    referenceFiles: File[]
   }) => {
     setGenerating(true)
     setError(null)
 
     try {
+      // Use FormData to support file uploads
+      const formData = new FormData()
+      formData.append('title', data.title)
+      formData.append('requirements', data.requirements)
+      formData.append('taskType', data.taskType)
+
+      // Add reference files
+      for (const file of data.referenceFiles) {
+        formData.append('referenceFiles', file)
+      }
+
       const response = await fetch('/api/generate', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
+        body: formData,
       })
 
       const result: GenerateResponse = await response.json()

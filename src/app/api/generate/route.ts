@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { detectLanguage } from '@/lib/language/detector'
 import { generateEmbedding, searchSimilarChunks } from '@/lib/vector'
 import { buildStyleProfile } from '@/lib/style'
+import { parseFile } from '@/lib/parsing'
 import {
   buildGenerationPrompt,
   generateText,
@@ -11,6 +12,9 @@ import {
 } from '@/lib/generation'
 
 const TOP_K_CHUNKS = 5
+const MAX_REFERENCE_FILES = 3
+const MAX_FILE_SIZE = 2 * 1024 * 1024 // 2MB
+const MAX_REFERENCE_CONTENT = 8000 // characters
 
 /**
  * POST /api/generate
@@ -29,9 +33,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Parse JSON body
-    const body = await request.json()
-    const { title, requirements, taskType } = body
+    // Parse FormData
+    const formData = await request.formData()
+    const title = formData.get('title') as string
+    const requirements = formData.get('requirements') as string
+    const taskType = formData.get('taskType') as string
+    const referenceFiles = formData.getAll('referenceFiles') as File[]
 
     // Validate required fields
     if (!title || !requirements) {
@@ -46,6 +53,14 @@ export async function POST(request: Request) {
     if (taskType && !validTaskTypes.includes(taskType)) {
       return NextResponse.json(
         { error: 'Invalid task type' },
+        { status: 400 }
+      )
+    }
+
+    // Validate reference files
+    if (referenceFiles.length > MAX_REFERENCE_FILES) {
+      return NextResponse.json(
+        { error: `Maximum ${MAX_REFERENCE_FILES} reference files allowed` },
         { status: 400 }
       )
     }
@@ -72,6 +87,50 @@ export async function POST(request: Request) {
         },
         { status: 400 }
       )
+    }
+
+    // Process reference files
+    let referenceContent = ''
+    if (referenceFiles.length > 0) {
+      const referenceTexts: string[] = []
+
+      for (const file of referenceFiles) {
+        // Validate file size
+        if (file.size > MAX_FILE_SIZE) {
+          return NextResponse.json(
+            { error: `File "${file.name}" is too large. Maximum 2MB allowed.` },
+            { status: 400 }
+          )
+        }
+
+        // Validate file type
+        if (!file.name.toLowerCase().endsWith('.docx')) {
+          return NextResponse.json(
+            { error: `File "${file.name}" is not a .docx file.` },
+            { status: 400 }
+          )
+        }
+
+        try {
+          const arrayBuffer = await file.arrayBuffer()
+          const buffer = Buffer.from(arrayBuffer)
+          const parseResult = await parseFile(buffer, 'docx')
+
+          if (parseResult.success && parseResult.cleanedText) {
+            referenceTexts.push(`[${file.name}]\n${parseResult.cleanedText}`)
+          } else {
+            console.error(`Failed to parse reference file ${file.name}:`, parseResult.error)
+          }
+        } catch (err) {
+          console.error(`Error processing reference file ${file.name}:`, err)
+        }
+      }
+
+      // Combine reference texts with length limit
+      referenceContent = referenceTexts.join('\n\n---\n\n')
+      if (referenceContent.length > MAX_REFERENCE_CONTENT) {
+        referenceContent = referenceContent.slice(0, MAX_REFERENCE_CONTENT) + '\n\n[Content truncated...]'
+      }
     }
 
     // Fetch user's indexed samples for style profile
@@ -148,7 +207,8 @@ export async function POST(request: Request) {
     const taskInput: TaskInput = {
       title,
       requirements,
-      taskType: (taskType || 'general') as 'personal_narrative' | 'argumentative' | 'general'
+      taskType: (taskType || 'general') as 'personal_narrative' | 'argumentative' | 'general',
+      referenceContent: referenceContent || undefined
     }
 
     const prompt = buildGenerationPrompt(styleProfile, styleChunks, taskInput)

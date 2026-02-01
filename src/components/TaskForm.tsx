@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import type { TaskType } from '@/types/database'
 
 interface TaskFormProps {
@@ -8,6 +8,7 @@ interface TaskFormProps {
     title: string
     requirements: string
     taskType: TaskType
+    referenceFiles: File[]
   }) => void
   isLoading: boolean
   isReady: boolean
@@ -33,6 +34,9 @@ const TASK_TYPES: { value: TaskType; label: string; description: string }[] = [
   }
 ]
 
+const MAX_FILES = 3
+const MAX_FILE_SIZE = 2 * 1024 * 1024 // 2MB
+
 export default function TaskForm({
   onSubmit,
   isLoading,
@@ -43,6 +47,8 @@ export default function TaskForm({
   const [title, setTitle] = useState('')
   const [requirements, setRequirements] = useState('')
   const [taskType, setTaskType] = useState<TaskType>('general')
+  const [referenceFiles, setReferenceFiles] = useState<File[]>([])
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -55,8 +61,60 @@ export default function TaskForm({
     onSubmit({
       title: title.trim(),
       requirements: requirements.trim(),
-      taskType
+      taskType,
+      referenceFiles
     })
+  }
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    const validFiles: File[] = []
+    const errors: string[] = []
+
+    for (const file of files) {
+      // Check file type (.docx only)
+      if (!file.name.toLowerCase().endsWith('.docx')) {
+        errors.push(`${file.name}: Only .docx files are supported`)
+        continue
+      }
+
+      // Check file size
+      if (file.size > MAX_FILE_SIZE) {
+        errors.push(`${file.name}: File too large (max 2MB)`)
+        continue
+      }
+
+      // Check total count
+      if (referenceFiles.length + validFiles.length >= MAX_FILES) {
+        errors.push(`Maximum ${MAX_FILES} reference files allowed`)
+        break
+      }
+
+      validFiles.push(file)
+    }
+
+    if (errors.length > 0) {
+      alert(errors.join('\n'))
+    }
+
+    if (validFiles.length > 0) {
+      setReferenceFiles(prev => [...prev, ...validFiles])
+    }
+
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
+  const removeFile = (index: number) => {
+    setReferenceFiles(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return `${bytes} B`
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
   }
 
   const canSubmit = isReady && title.trim() && requirements.trim() && !isLoading
@@ -143,6 +201,79 @@ export default function TaskForm({
         <p className="mt-1 text-xs text-gray-500">
           Be specific about your topic and any requirements. The more detail you provide, the better the result.
         </p>
+      </div>
+
+      {/* Reference Files Upload */}
+      <div>
+        <label className="block text-sm font-semibold text-gray-700 mb-2">
+          Reference Files (Optional)
+        </label>
+        <p className="text-xs text-gray-500 mb-3">
+          Upload Word documents to reference in your writing. Content from these files can be cited or used as source material.
+        </p>
+
+        {/* File List */}
+        {referenceFiles.length > 0 && (
+          <div className="mb-3 space-y-2">
+            {referenceFiles.map((file, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="text-blue-600">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{file.name}</p>
+                    <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeFile(index)}
+                  disabled={isLoading}
+                  className="text-gray-400 hover:text-red-500 transition"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Upload Button */}
+        {referenceFiles.length < MAX_FILES && (
+          <div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".docx"
+              multiple
+              onChange={handleFileSelect}
+              className="hidden"
+              disabled={isLoading}
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isLoading}
+              className="w-full p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition text-center"
+            >
+              <div className="text-gray-500">
+                <svg className="w-8 h-8 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                <p className="text-sm font-medium">Add Reference File</p>
+                <p className="text-xs mt-1">.docx only, max 2MB each, up to {MAX_FILES} files</p>
+              </div>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Submit Button */}
