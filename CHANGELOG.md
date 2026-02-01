@@ -4,6 +4,51 @@
 
 ---
 
+## 2026-02-01 Step 7 增强 - Reference Files 功能
+
+**新增 Reference Files 上传功能**：
+- 支持上传 .docx 文件作为参考资料（最多3个，每个2MB）
+- 参考内容会被解析并整合到生成提示词中
+- 内容超过8000字符会自动截断
+
+**修改文件**：
+- `src/components/TaskForm.tsx` - 添加文件上传UI
+- `src/app/(dashboard)/new-task/page.tsx` - 使用FormData发送请求
+- `src/app/api/generate/route.ts` - 处理文件上传和解析
+- `src/lib/generation/prompt-builder.ts` - 整合参考内容到提示词
+
+---
+
+## Step 10 完成后待返工事项清单
+
+以下是各 Step 完成后标记的待返工事项，将在 Step 10 完成后统一处理：
+
+### Step 7 待返工
+1. **Reference Files PDF支持** - 目前只支持 .docx，需要添加 .pdf 支持
+2. **AI检测规避优化** - 目标：GPT0等平台检测率 < 20%
+   - 方案A：提供AI经典表达规避文档，避免模块化/规律化表达
+   - 方案B：丰富个人风格库，增强输出的个人特色
+
+### Step 6 待返工
+- （如有，后续补充）
+
+### Step 5 待返工
+- （如有，后续补充）
+
+### Step 4 待返工
+- （如有，后续补充）
+
+### Step 3 待返工
+- （如有，后续补充）
+
+### Step 2 待返工
+- （如有，后续补充）
+
+### Step 1 待返工
+- （如有，后续补充）
+
+---
+
 ## 2026-02-01 Step 7 完成
 
 **✅ Step 7 完成 - Task Creation and Text Generation (任务创建与文本生成)**
