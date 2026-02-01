@@ -7,3 +7,8 @@ export {
   type EmbeddingResult,
 } from './embeddings'
 export { indexSample } from './indexer'
+export {
+  searchSimilarChunks,
+  formatChunksForPrompt,
+  type StyleChunk,
+} from './search'
