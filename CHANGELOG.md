@@ -4,6 +4,29 @@
 
 ---
 
+## 2026-02-06 Steps 8-10 完成 + 多语言检测修复
+
+**✅ Step 8 完成 - Revision & Version Management**
+- 修订 API、版本 API、修订 UI、版本切换
+
+**✅ Step 9 完成 - Export .docx**
+- docx 生成模块、导出 API、导出按钮
+
+**✅ Step 10 完成 - History, Settings, Data Management**
+- History 页面（任务/版本浏览、删除、导出）
+- Settings 页面（账户信息、登出、清除数据）
+- Dashboard 页面（实时统计、就绪进度条）
+
+**✅ 任务组 A 修复 - 多语言检测**
+- 6 层检测：非拉丁字符 → 西班牙标点 → 拉丁变音符 → 非英语词库 → franc → 英文比例
+- 覆盖 16+ 非拉丁文字系统 + 5 种拉丁语系语言（西/法/葡/德/意）
+- 修复 revise/generate 路由语言校验漏洞
+- 修复短英文文本 franc 误判问题
+
+**Commit**: 8643a18
+
+---
+
 ## 2026-02-01 Step 7 增强 - Reference Files 功能
 
 **新增 Reference Files 上传功能**：
