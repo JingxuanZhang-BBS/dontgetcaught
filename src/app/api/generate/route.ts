@@ -89,6 +89,16 @@ export async function POST(request: Request) {
       )
     }
 
+    if (langResult.language === 'unknown') {
+      return NextResponse.json(
+        {
+          error: 'Unable to verify the language of your input. Please provide clear English text.',
+          code: 'UNKNOWN_LANGUAGE_INPUT'
+        },
+        { status: 400 }
+      )
+    }
+
     // Process reference files
     let referenceContent = ''
     if (referenceFiles.length > 0) {
@@ -117,6 +127,17 @@ export async function POST(request: Request) {
           const parseResult = await parseFile(buffer, 'docx')
 
           if (parseResult.success && parseResult.cleanedText) {
+            // Validate reference file content is English
+            const refLang = detectLanguage(parseResult.cleanedText)
+            if (refLang.language === 'non_en' || refLang.language === 'mixed') {
+              return NextResponse.json(
+                {
+                  error: `Reference file "${file.name}" contains non-English content. Please use English-only references.`,
+                  code: 'NON_ENGLISH_REFERENCE'
+                },
+                { status: 400 }
+              )
+            }
             referenceTexts.push(`[${file.name}]\n${parseResult.cleanedText}`)
           } else {
             console.error(`Failed to parse reference file ${file.name}:`, parseResult.error)

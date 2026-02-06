@@ -1,6 +1,6 @@
 /**
  * Generation Module
- * Text generation with style matching
+ * Text generation with style matching + revision support
  */
 
 export {
@@ -19,3 +19,9 @@ export {
   type GenerationResult,
   type GenerationError,
 } from './generator'
+
+export {
+  buildRevisionPrompt,
+  type RevisionInput,
+  type RevisionPrompt,
+} from './revision-builder'

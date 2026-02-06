@@ -27,6 +27,30 @@ interface GenerateResponse {
   error?: string
 }
 
+interface ReviseResponse {
+  success: boolean
+  task_id?: string
+  version_id?: string
+  version_number?: number
+  generated_text?: string
+  revision_instruction?: string
+  usage?: {
+    prompt_tokens: number
+    completion_tokens: number
+    total_tokens: number
+    estimated_cost: number
+  }
+  error?: string
+}
+
+interface VersionInfo {
+  id: string
+  version_number: number
+  generated_text: string
+  revision_instruction: string | null
+  created_at: string
+}
+
 export default function NewTaskPage() {
   const [profileStats, setProfileStats] = useState<StyleProfileStats | null>(null)
   const [loading, setLoading] = useState(true)
@@ -36,7 +60,9 @@ export default function NewTaskPage() {
     title: string
     usage?: GenerateResponse['usage']
     taskId?: string
+    versionNumber: number
   } | null>(null)
+  const [versions, setVersions] = useState<VersionInfo[]>([])
   const [error, setError] = useState<string | null>(null)
 
   // Load style profile stats on mount
@@ -96,8 +122,22 @@ export default function NewTaskPage() {
         text: result.generated_text || '',
         title: data.title,
         usage: result.usage,
-        taskId: result.task_id
+        taskId: result.task_id,
+        versionNumber: 1,
       })
+
+      // Set initial version
+      if (result.task_id && result.version_id) {
+        setVersions([
+          {
+            id: result.version_id,
+            version_number: 1,
+            generated_text: result.generated_text || '',
+            revision_instruction: null,
+            created_at: new Date().toISOString(),
+          },
+        ])
+      }
     } catch (err) {
       console.error('Generation error:', err)
       setError('An unexpected error occurred. Please try again.')
@@ -106,8 +146,67 @@ export default function NewTaskPage() {
     }
   }
 
+  const handleRevise = async (instruction: string) => {
+    if (!result?.taskId) throw new Error('No task to revise')
+
+    const response = await fetch('/api/revise', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        taskId: result.taskId,
+        revisionInstruction: instruction,
+      }),
+    })
+
+    const data: ReviseResponse = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Revision failed')
+    }
+
+    // Update result with revised text
+    setResult((prev) =>
+      prev
+        ? {
+            ...prev,
+            text: data.generated_text || prev.text,
+            usage: data.usage || prev.usage,
+            versionNumber: data.version_number || prev.versionNumber + 1,
+          }
+        : null
+    )
+
+    // Add new version to list
+    if (data.version_id) {
+      setVersions((prev) => [
+        ...prev,
+        {
+          id: data.version_id!,
+          version_number: data.version_number || prev.length + 1,
+          generated_text: data.generated_text || '',
+          revision_instruction: instruction,
+          created_at: new Date().toISOString(),
+        },
+      ])
+    }
+  }
+
+  const handleVersionSelect = (version: VersionInfo) => {
+    setResult((prev) =>
+      prev
+        ? {
+            ...prev,
+            text: version.generated_text,
+            versionNumber: version.version_number,
+            usage: undefined, // Usage not stored per version
+          }
+        : null
+    )
+  }
+
   const handleNewTask = () => {
     setResult(null)
+    setVersions([])
     setError(null)
   }
 
@@ -136,7 +235,11 @@ export default function NewTaskPage() {
           title={result.title}
           usage={result.usage}
           taskId={result.taskId}
+          versionNumber={result.versionNumber}
+          versions={versions}
           onNewTask={handleNewTask}
+          onRevise={handleRevise}
+          onVersionSelect={handleVersionSelect}
         />
       </div>
     )
@@ -194,7 +297,7 @@ export default function NewTaskPage() {
           </li>
           <li className="flex items-start gap-2">
             <span className="text-blue-500">•</span>
-            You can revise the generated text with follow-up instructions (coming in Step 8)
+            After generating, use the revision box to refine the output
           </li>
         </ul>
       </div>
