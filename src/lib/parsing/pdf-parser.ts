@@ -1,6 +1,6 @@
-// pdf-parse is a CommonJS module, needs dynamic require
+// pdf-parse 2.x exports PDFParse class (CommonJS)
 /* eslint-disable */
-const pdfParse = require('pdf-parse')
+const { PDFParse } = require('pdf-parse')
 /* eslint-enable */
 
 /**
@@ -10,13 +10,14 @@ const pdfParse = require('pdf-parse')
  */
 export async function parsePdf(buffer: Buffer): Promise<string> {
   try {
-    const data = await pdfParse(buffer)
+    const parser = new PDFParse({ data: buffer })
+    const result = await parser.getText()
 
-    if (!data.text || data.text.trim().length === 0) {
+    if (!result.text || result.text.trim().length === 0) {
       throw new Error('No text content found in PDF (might be a scanned image)')
     }
 
-    return data.text
+    return result.text
   } catch (error) {
     console.error('PDF parsing error:', error)
     throw new Error(

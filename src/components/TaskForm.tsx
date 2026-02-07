@@ -72,9 +72,10 @@ export default function TaskForm({
     const errors: string[] = []
 
     for (const file of files) {
-      // Check file type (.docx only)
-      if (!file.name.toLowerCase().endsWith('.docx')) {
-        errors.push(`${file.name}: Only .docx files are supported`)
+      // Check file type (.docx or .pdf)
+      const ext = file.name.toLowerCase()
+      if (!ext.endsWith('.docx') && !ext.endsWith('.pdf')) {
+        errors.push(`${file.name}: Only .docx and .pdf files are supported`)
         continue
       }
 
@@ -252,7 +253,7 @@ export default function TaskForm({
             <input
               ref={fileInputRef}
               type="file"
-              accept=".docx"
+              accept=".docx,.pdf"
               multiple
               onChange={handleFileSelect}
               className="hidden"

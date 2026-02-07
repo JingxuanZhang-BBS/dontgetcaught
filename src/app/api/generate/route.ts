@@ -114,9 +114,10 @@ export async function POST(request: Request) {
         }
 
         // Validate file type
-        if (!file.name.toLowerCase().endsWith('.docx')) {
+        const fileName = file.name.toLowerCase()
+        if (!fileName.endsWith('.docx') && !fileName.endsWith('.pdf')) {
           return NextResponse.json(
-            { error: `File "${file.name}" is not a .docx file.` },
+            { error: `File "${file.name}" must be a .docx or .pdf file.` },
             { status: 400 }
           )
         }
@@ -124,7 +125,8 @@ export async function POST(request: Request) {
         try {
           const arrayBuffer = await file.arrayBuffer()
           const buffer = Buffer.from(arrayBuffer)
-          const parseResult = await parseFile(buffer, 'docx')
+          const fileType: 'docx' | 'pdf' = fileName.endsWith('.pdf') ? 'pdf' : 'docx'
+          const parseResult = await parseFile(buffer, fileType)
 
           if (parseResult.success && parseResult.cleanedText) {
             // Validate reference file content is English
