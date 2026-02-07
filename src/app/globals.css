@@ -31,3 +31,35 @@ body {
     text-wrap: balance;
   }
 }
+
+/* ── Landing page: magnifying glass cursor ── */
+.cursor-magnify,
+.cursor-magnify * {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32' fill='none'%3E%3Ccircle cx='12' cy='12' r='9' stroke='%232D1B4E' stroke-width='2.5' fill='%23ffffff20'/%3E%3Cline x1='19' y1='19' x2='28' y2='28' stroke='%232D1B4E' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E") 12 12, crosshair;
+}
+
+/* ── Bounce animation for scroll arrow ── */
+@keyframes bounce-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(10px); }
+}
+.animate-bounce-slow {
+  animation: bounce-slow 2s ease-in-out infinite;
+}
+
+/* ── Subtle float for hero elements ── */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* ── Grainient WebGL background ── */
+.grainient-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
