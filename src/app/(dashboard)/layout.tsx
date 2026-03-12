@@ -2,9 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import SignOutButton from '@/components/SignOutButton'
-
-// Placeholder until credits system is built
-const PLACEHOLDER_CREDITS = 50
+import CreditsDisplay from '@/components/CreditsDisplay'
+import GridBackgroundClient from '@/components/GridBackgroundClient'
 
 export default async function DashboardLayout({
   children,
@@ -25,30 +24,41 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(160deg, #e8eaf0 0%, #e0e4ec 30%, #dbd8e8 65%, #d4d9e4 100%)' }}>
+    <div className="min-h-screen text-white" style={{ background: '#0d0d0d' }}>
+
+      {/* Very subtle grid background — full screen, low contrast */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <GridBackgroundClient
+          linesColor="#222222"
+          scanColor="#ffffff"
+          scanOpacity={0.08}
+          gridScale={0.13}
+          lineThickness={0.7}
+          bloomIntensity={0.1}
+          chromaticAberration={0.0002}
+          noiseIntensity={0.003}
+          scanDuration={6.0}
+          scanDelay={10.0}
+        />
+      </div>
+
       {/* Nav */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/50 backdrop-blur-md border-b border-white/60">
-        <nav className="mx-auto max-w-5xl px-6 py-4 flex justify-between items-center">
-          <Link href="/dashboard" className="text-xs font-medium tracking-widest uppercase text-slate-500/80 hover:text-slate-700 transition">
+
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/[0.06]" style={{ background: 'rgba(13,13,13,0.9)', backdropFilter: 'blur(12px)' }}>
+        <nav className="mx-auto max-w-5xl px-6 py-3 flex justify-between items-center">
+          <Link href="/" className="text-xs font-medium tracking-[0.25em] uppercase text-white/30 hover:text-white/60 transition">
             DontGetCaught.AI
           </Link>
           <div className="flex items-center gap-4">
-            {/* Credits badge */}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100/80 border border-slate-200/60">
-              <svg className="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2" />
-              </svg>
-              <span className="text-xs font-semibold text-slate-600">{PLACEHOLDER_CREDITS} credits</span>
-            </div>
-            <span className="text-xs text-slate-400 hidden sm:block">{user.email}</span>
+            <CreditsDisplay />
+            <span className="text-xs text-white/25 hidden sm:block">{user.email}</span>
             <SignOutButton />
           </div>
         </nav>
       </header>
 
       {/* Page content */}
-      <main className="pt-16">
+      <main className="relative z-10 pt-16">
         {children}
       </main>
     </div>

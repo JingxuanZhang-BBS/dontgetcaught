@@ -7,38 +7,26 @@ import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
   const router = useRouter()
-  const [email, setEmail] = useState('')
+  const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [error, setError]       = useState<string | null>(null)
+  const [loading, setLoading]   = useState(false)
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
     setLoading(true)
-
     try {
       const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
-
       if (isDevMode) {
-        // 开发模式：任何输入都通过
-        await new Promise(resolve => setTimeout(resolve, 500)) // 模拟网络延迟
-
-        // 设置开发模式 cookie
-        document.cookie = 'dev_logged_in=true; path=/; max-age=86400' // 24小时
-
+        await new Promise(resolve => setTimeout(resolve, 500))
+        document.cookie = 'dev_logged_in=true; path=/; max-age=86400'
         router.push('/dashboard')
         router.refresh()
       } else {
-        // 生产模式：真实 Supabase 认证
         const supabase = createClient()
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        })
-
+        const { error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
-
         router.push('/dashboard')
         router.refresh()
       }
@@ -50,77 +38,72 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center px-6">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome Back
-          </h1>
-          <p className="text-gray-600">
-            Sign in to continue to DontGetCaught.AI
-          </p>
+    <div className="min-h-screen flex items-center justify-center px-6" style={{ background: '#0d0d0d' }}>
+      <div className="w-full max-w-sm">
+
+        {/* Logo */}
+        <div className="text-center mb-10">
+          <Link href="/" className="text-xs font-medium tracking-[0.25em] uppercase text-white/30 hover:text-white/55 transition">
+            DontGetCaught.AI
+          </Link>
+          <h1 className="text-2xl font-semibold text-white/90 mt-6 mb-1">Welcome back</h1>
+          <p className="text-sm text-white/35">Sign in to continue</p>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-600 text-sm">{error}</p>
+          <div className="mb-5 px-4 py-3 rounded-xl border border-red-500/20 text-sm text-red-400" style={{ background: 'rgba(239,68,68,0.07)' }}>
+            {error}
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-6">
+        <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-              Email
+            <label htmlFor="email" className="block text-xs font-medium text-white/40 mb-2 tracking-wide">
+              EMAIL
             </label>
             <input
               id="email"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={e => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="you@example.com"
+              className="w-full px-4 py-3 rounded-xl text-sm text-white/85 placeholder-white/20 outline-none border border-white/10 focus:border-white/25 transition"
+              style={{ background: '#161616', colorScheme: 'dark' }}
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-              Password
+            <label htmlFor="password" className="block text-xs font-medium text-white/40 mb-2 tracking-wide">
+              PASSWORD
             </label>
             <input
               id="password"
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={e => setPassword(e.target.value)}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="••••••••"
+              className="w-full px-4 py-3 rounded-xl text-sm text-white/85 placeholder-white/20 outline-none border border-white/10 focus:border-white/25 transition"
+              style={{ background: '#161616', colorScheme: 'dark' }}
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-3 rounded-xl text-sm font-semibold text-black bg-white hover:bg-white/90 transition disabled:opacity-40 disabled:cursor-not-allowed mt-2"
           >
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
 
-        <div className="mt-6 text-center">
-          <p className="text-gray-600">
-            Don&apos;t have an account?{' '}
-            <Link href="/signup" className="text-blue-600 font-semibold hover:text-blue-700">
-              Sign up
-            </Link>
-          </p>
-        </div>
-
-        <div className="mt-6 text-center">
-          <Link href="/" className="text-gray-500 hover:text-gray-700 text-sm">
-            ← Back to home
+        <p className="mt-6 text-center text-sm text-white/30">
+          No account?{' '}
+          <Link href="/signup" className="text-white/60 hover:text-white transition underline underline-offset-2">
+            Sign up
           </Link>
-        </div>
+        </p>
       </div>
     </div>
   )
