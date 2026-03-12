@@ -25,3 +25,12 @@ export {
   type RevisionInput,
   type RevisionPrompt,
 } from './revision-builder'
+
+export {
+  checkForAIPatterns,
+  generateWithCleanup,
+  runCleanupPass,
+  AI_CHECK_THRESHOLD,
+  MAX_REWRITE_PASSES,
+  type AICheckResult,
+} from './ai-checker'

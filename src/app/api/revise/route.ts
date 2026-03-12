@@ -5,7 +5,7 @@ import { generateEmbedding, searchSimilarChunks } from '@/lib/vector'
 import { buildStyleProfile } from '@/lib/style'
 import {
   buildRevisionPrompt,
-  generateText,
+  generateWithCleanup,
   estimateCost,
 } from '@/lib/generation'
 
@@ -144,8 +144,8 @@ export async function POST(request: Request) {
       versionNumber: latestVersion.version_number,
     })
 
-    // Generate revised text
-    const generationResult = await generateText(revisionPrompt)
+    // Generate revised text with automatic AI pattern cleanup
+    const generationResult = await generateWithCleanup(revisionPrompt)
 
     if (!generationResult.success) {
       return NextResponse.json(
@@ -155,6 +155,10 @@ export async function POST(request: Request) {
         },
         { status: 500 }
       )
+    }
+
+    if (generationResult.rewritePasses > 0) {
+      console.log(`Revision required ${generationResult.rewritePasses} cleanup pass(es). Final AI score: ${generationResult.finalCheck.score}`)
     }
 
     // Save new version
@@ -194,6 +198,14 @@ export async function POST(request: Request) {
         completion_tokens: generationResult.usage.completion_tokens,
         total_tokens: generationResult.usage.total_tokens,
         estimated_cost: cost,
+      },
+      ai_check: {
+        rewrite_passes: generationResult.rewritePasses,
+        final_score: generationResult.finalCheck.score,
+        passed: generationResult.finalCheck.passed,
+        remaining_issues: generationResult.finalCheck.bannedWordsFound.length +
+          generationResult.finalCheck.bannedPhrasesFound.length +
+          generationResult.finalCheck.structuralIssues.length
       },
     })
   } catch (error) {

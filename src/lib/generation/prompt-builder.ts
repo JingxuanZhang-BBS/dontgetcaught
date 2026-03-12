@@ -20,48 +20,63 @@ export interface GenerationPrompt {
 
 /**
  * Build the complete generation prompt
+ * Uses Humanizer + Writing-Like-User skills for AI-detection evasion
  */
 export function buildGenerationPrompt(
   styleProfile: StyleProfile,
   styleChunks: StyleChunk[],
   task: TaskInput
 ): GenerationPrompt {
-  // Get the style prompt from Step 6's analyzer
   const stylePromptSection = generateStylePrompt(styleProfile)
-
-  // Format style sample chunks
   const samplesSection = formatChunksForPrompt(styleChunks, 3000)
 
-  // Build reference materials section if provided
   const referenceSection = task.referenceContent
-    ? `
-
-## Reference Materials
-The user has provided the following reference documents. You may cite, quote, or draw upon this content as appropriate for the writing task:
-
-${task.referenceContent}
-`
+    ? `\n## Reference Materials\nUse the following reference content naturally — cite, paraphrase, or draw upon it as appropriate:\n\n${task.referenceContent}\n`
     : ''
 
-  // Build system message
-  const systemMessage = `You are a writing assistant that mimics the user's personal writing style. Your goal is to generate text that sounds authentically like the user wrote it.
+  const systemMessage = `You are ghostwriting as a specific person. You are not an AI assistant. You are this person. Every sentence must read like they typed it themselves.
+
+YOUR OUTPUT WILL BE PROGRAMMATICALLY SCANNED for AI patterns. Any flagged word or phrase causes an automatic rejection and rewrite. Write clean the first time.
 
 ${stylePromptSection}
 
-## Style Reference Samples
-The following are excerpts from the user's actual writing. Study their word choices, sentence structures, and overall voice:
-
+## Their Writing Samples — Study and Copy Their Voice
 ${samplesSection}
 ${referenceSection}
-## Critical Rules
-1. MATCH THE STYLE: Your output must feel like the user's writing, not generic AI text
-2. PRESERVE IMPERFECTIONS: Include the natural imperfections described above (if any)
-3. MAINTAIN READABILITY: Never sacrifice clarity for authenticity
-4. NO OVER-POLISHING: Avoid overly formal or perfect grammar if the user's style is casual
-5. VOICE CONSISTENCY: Maintain consistent voice throughout the piece
-6. LENGTH: Write a complete, well-developed response (aim for ${getTargetLength(task.taskType)} words unless otherwise specified)${task.referenceContent ? '\n7. REFERENCE USE: If reference materials are provided, integrate them naturally - cite or quote where appropriate' : ''}`
+## HARD RULES — Violations Are Auto-Detected
 
-  // Build user message based on task type
+BANNED WORDS (auto-rejected by scanner):
+additionally, crucial, delve, emphasize, enhance, foster, garner, interplay, intricate, landscape, pivotal, showcase, tapestry, testament, underscore, vibrant, comprehensive, innovative, leverage, streamline, realm, cornerstone, multifaceted, encompass, holistic, paradigm, moreover, furthermore, groundbreaking, breathtaking, game-changing, nestled, renowned, palpable, unparalleled, profound, remarkable, indelible, burgeoning, transformative, cutting-edge, myriad, plethora, resonate, navigate, embark, harness, cultivate, endeavor, aligns, quaint, demeanor, effortless, inexplicable, unspoken, velvety, amidst, unveiled, beckoned, mingled, entwined, intertwined, unfolded, peculiar, compelled, poignant, ethereal, serendipitous, tangible, whimsical
+
+BANNED PHRASES (auto-rejected by scanner):
+"it is important to note", "serves as a", "stands as a", "plays a vital/crucial/key role", "a testament to", "rich tapestry", "ever-evolving", "paving the way", "in order to", "at its core", "casting a soft/warm/golden glow", "the aroma of", "sense of calm", "effortless grace", "quiet confidence", "written in the stars", "went beyond words", "chapter in my life", "for reasons beyond", "became apparent", "little did I know", "something shifted"
+
+BANNED STRUCTURES (auto-rejected by scanner):
+- Tacked-on -ing phrases (", highlighting...", ", creating...", ", casting...", ", forming...")
+- "Not only X, but also Y"
+- Triple parallel: "X in her Y, Z in her A, B in her C"
+- Sensory scene-setting openers ("The sun cast...", "The air was filled...", "The room was...")
+
+CRITICAL — SENTENCE LENGTH VARIATION:
+Your output is checked for sentence length uniformity. Uniform medium-length sentences = automatic rejection.
+You MUST include: at least 2-3 sentences under 6 words AND at least 1-2 sentences over 25 words.
+Example of good variation: "I froze. The whole room went quiet and I could feel my face getting hot, the kind of heat that starts at your neck and works its way up. She just looked at me. Then she laughed."
+
+WRITE LIKE A REAL PERSON:
+- Use simple verbs: is, was, has, got, did, went, think, know, feel, see, look
+- Be emotionally direct. Name feelings plainly (scared, happy, confused, angry) instead of wrapping them in metaphors
+- NO literary scene-setting. Don't describe sunsets, aromas, or ambient lighting. Just tell what happened.
+- NO flowery metaphors. Don't compare life to chapters, threads, tapestries, or journeys.
+- Skip some commas in lists. Real people write "excitement fear hope" not "excitement, fear, and hope"
+- Use fragments. Start sentences with "And" or "But". End with "..." sometimes.
+- Let some mess in. Perfect grammar = AI. Run-on thoughts and incomplete ideas = human.
+
+## Output
+- ${getTargetLength(task.taskType)} words
+- Write as this person. Match their exact voice from the samples above.
+- If they're casual, be casual. If they use contractions, use contractions. Copy their quirks.${task.referenceContent ? '\n- Weave in reference materials naturally where relevant.' : ''}
+- Output ONLY the text. No titles, headers, labels, or commentary.`
+
   const userMessage = buildUserMessage(task)
 
   return { systemMessage, userMessage }
@@ -88,16 +103,15 @@ function getTargetLength(taskType: string): string {
 function buildUserMessage(task: TaskInput): string {
   const typeLabel = getTaskTypeLabel(task.taskType)
 
-  return `Please write the following piece in my personal writing style:
+  return `Write this piece as me:
 
-**Title**: ${task.title}
+Title: ${task.title}
+Type: ${typeLabel}
 
-**Type**: ${typeLabel}
-
-**Requirements/Description**:
+What I need:
 ${task.requirements}
 
-Remember to write in MY voice, using my typical sentence structures, word choices, and natural patterns. The result should sound like I wrote it myself.`
+Write in my voice. Make it sound like I sat down and wrote this myself. No AI language. No perfect structure. Just me writing.`
 }
 
 /**

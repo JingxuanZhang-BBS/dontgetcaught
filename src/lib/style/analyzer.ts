@@ -299,60 +299,199 @@ export function buildStyleProfile(samples: string[]): StyleProfile {
 }
 
 /**
- * Generate a concise style description for LLM system prompts
- * This is what gets passed to the LLM when generating text
+ * Generate a rich style description for LLM system prompts
+ * Converts raw metrics into behavioral writing instructions
  */
 export function generateStylePrompt(profile: StyleProfile): string {
   const s = profile.summary
+  const p = profile.patterns
+  const v = profile.voice
+  const syn = profile.syntax
+  const lex = profile.lexical
+  const disc = profile.discourse
+  const err = profile.errors
 
-  const lines: string[] = [
-    '## Writing Style Profile',
-    '',
-    `**Complexity**: ${s.complexity_level} (avg ${Math.round(s.avg_sentence_length)} words/sentence)`,
-    `**Formality**: ${s.formality}`,
-    `**Tone**: ${s.emotional_tone}, ${s.confidence}`,
-    ''
-  ]
+  const lines: string[] = []
 
-  // Personal style markers
-  const markers: string[] = []
-  if (s.uses_contractions) markers.push('uses contractions')
-  if (s.uses_first_person) markers.push('uses first person')
-  if (s.uses_questions) markers.push('asks rhetorical questions')
-  if (s.uses_exclamations) markers.push('uses exclamations')
+  // --- Section 1: Writing Identity ---
+  lines.push('## This Writer\'s Identity')
 
-  if (markers.length > 0) {
-    lines.push(`**Style markers**: ${markers.join(', ')}`)
+  const registerMap: Record<string, string> = {
+    'formal': 'writes formally and precisely',
+    'semi-formal': 'writes in a polished but approachable tone',
+    'casual': 'writes casually and conversationally',
+    'very_casual': 'writes very informally, almost like texting'
+  }
+  const confidenceMap: Record<string, string> = {
+    'uncertain': 'tends to hedge and qualify statements',
+    'balanced': 'balances confidence with appropriate hedging',
+    'confident': 'states things directly and assertively'
+  }
+  const toneMap: Record<string, string> = {
+    'positive': 'generally upbeat and enthusiastic',
+    'neutral': 'measured and even-toned',
+    'negative': 'critical and skeptical'
   }
 
-  // Signature phrases
+  lines.push(`This person ${registerMap[s.formality] || 'writes naturally'}. They ${confidenceMap[s.confidence] || 'write with balanced confidence'} and are ${toneMap[s.emotional_tone] || 'even-toned'}.`)
+
+  if (v.self_mention.total_rate > 30) {
+    lines.push('They write from a strong first-person perspective — lots of "I", "my", "me".')
+  } else if (v.self_mention.total_rate > 15) {
+    lines.push('They use first person moderately.')
+  } else {
+    lines.push('They rarely use first person. The writing tends to be impersonal.')
+  }
+
+  // --- Section 2: Structural Signatures ---
+  lines.push('')
+  lines.push('## How They Structure Text')
+
+  const shortPct = Math.round(syn.sentence_length.distribution.short * 100)
+  const medPct = Math.round(syn.sentence_length.distribution.medium * 100)
+  const longPct = Math.round(syn.sentence_length.distribution.long * 100)
+  lines.push(`Sentence rhythm: ${shortPct}% short (under 10 words), ${medPct}% medium, ${longPct}% long (25+ words). Average sentence is ${Math.round(syn.sentence_length.avg_words)} words.`)
+
+  if (shortPct > 40 && longPct > 15) {
+    lines.push('They deliberately mix short punchy sentences with longer complex ones. Replicate this variation.')
+  } else if (shortPct > 50) {
+    lines.push('They favor short, clipped sentences. Keep most sentences under 15 words.')
+  } else if (longPct > 35) {
+    lines.push('They write in longer, flowing sentences. Don\'t chop things up artificially.')
+  }
+
+  lines.push(`Paragraphs average ${Math.round(syn.paragraph_length.avg_sentences)} sentences and ${Math.round(syn.paragraph_length.avg_words)} words.`)
+
   if (s.signature_openers.length > 0) {
-    lines.push(`**Common openers**: "${s.signature_openers.slice(0, 3).join('", "')}"`)
+    lines.push(`They often start sentences with: ${s.signature_openers.slice(0, 5).map(o => `"${o}"`).join(', ')}. Use these naturally.`)
   }
+
+  if (s.signature_closers.length > 0) {
+    lines.push(`They tend to end thoughts with phrases like: ${s.signature_closers.slice(0, 4).map(c => `"${c}"`).join(', ')}.`)
+  }
+
+  const punctNotes: string[] = []
+  if (p.punctuation_patterns.dash_rate > 0.1) punctNotes.push('uses dashes frequently for asides')
+  else if (p.punctuation_patterns.dash_rate < 0.02) punctNotes.push('rarely uses dashes')
+  if (p.punctuation_patterns.parenthetical_rate > 0.08) punctNotes.push('uses parenthetical asides')
+  if (p.punctuation_patterns.semicolon_rate > 0.03) punctNotes.push('uses semicolons')
+  if (p.punctuation_patterns.ellipsis_rate > 0.03) punctNotes.push('uses ellipses (...)')
+  if (p.punctuation_patterns.comma_density > 2.5) punctNotes.push('heavy comma usage')
+  else if (p.punctuation_patterns.comma_density < 1.0) punctNotes.push('minimal comma usage')
+
+  if (punctNotes.length > 0) {
+    lines.push(`Punctuation habits: ${punctNotes.join('; ')}.`)
+  }
+
+  if (syn.question_rate > 0.1) {
+    lines.push('They ask questions in their writing — use rhetorical questions naturally.')
+  }
+  if (syn.exclamation_rate > 0.05) {
+    lines.push('They use exclamation marks for emphasis.')
+  }
+
+  // --- Section 3: Voice and Tone ---
+  lines.push('')
+  lines.push('## Their Voice')
+
+  if (v.hedging.rate_per_1000 > 15 && v.hedging.top_hedges.length > 0) {
+    const topHedges = v.hedging.top_hedges.slice(0, 4).map(h => `"${h.word}"`).join(', ')
+    lines.push(`They hedge with words like ${topHedges}. Include this uncertainty naturally.`)
+  }
+  if (v.boosting.rate_per_1000 > 10 && v.boosting.top_boosters.length > 0) {
+    const topBoosters = v.boosting.top_boosters.slice(0, 4).map(b => `"${b.word}"`).join(', ')
+    lines.push(`They use confidence boosters like ${topBoosters}.`)
+  }
+
+  if (lex.contractions_rate > 20) {
+    const topContractions = lex.contractions_list.slice(0, 5).map(c => `"${c.word}"`).join(', ')
+    lines.push(`They use contractions freely: ${topContractions}. Always use contractions where natural.`)
+  } else if (lex.contractions_rate < 5) {
+    lines.push('They avoid contractions. Write out "do not", "cannot", "it is" in full.')
+  }
+
+  if (v.filler_word_rate > 8) {
+    lines.push('They use filler words (well, so, like, basically) — include some naturally.')
+  }
+
+  if (v.engagement.reader_address_rate > 10) {
+    lines.push('They address the reader directly ("you", "your"). Do this too.')
+  }
+
+  // --- Section 4: Word Choice ---
+  lines.push('')
+  lines.push('## Their Word Choice')
 
   if (s.favorite_transitions.length > 0) {
-    lines.push(`**Favorite transitions**: "${s.favorite_transitions.slice(0, 3).join('", "')}"`)
+    lines.push(`Favorite transitions: ${s.favorite_transitions.slice(0, 6).map(t => `"${t}"`).join(', ')}. Use THESE, not generic ones like "Furthermore" or "Additionally".`)
   }
 
-  // Error/imperfection guidance (crucial for human-like output)
+  if (lex.vocab_richness.mtld > 80) {
+    lines.push('They have a rich vocabulary. Use varied, precise word choices.')
+  } else if (lex.vocab_richness.mtld < 40) {
+    lines.push('They use simple, straightforward vocabulary. Don\'t reach for fancy words.')
+  }
+
+  if (lex.spelling_style === 'british') {
+    lines.push('They use British English spelling (colour, organise, favourite).')
+  } else if (lex.spelling_style === 'american') {
+    lines.push('They use American English spelling (color, organize, favorite).')
+  }
+
+  if (p.signature_ngrams.length > 0) {
+    const topNgrams = p.signature_ngrams.slice(0, 5).map(n => `"${n.phrase}"`).join(', ')
+    lines.push(`Distinctive phrases they reuse: ${topNgrams}.`)
+  }
+
+  // --- Section 5: Natural Imperfections ---
   lines.push('')
-  lines.push('## Natural Imperfections (IMPORTANT)')
-  lines.push(`**Error tendency**: ${s.error_tendency}`)
+  lines.push('## Their Natural Imperfections')
+  lines.push('Real human writing has imperfections. This writer\'s patterns:')
 
-  if (s.suggested_imperfections.length > 0) {
-    lines.push('**Include naturally**:')
-    for (const imp of s.suggested_imperfections) {
-      lines.push(`- ${imp}`)
+  if (s.error_tendency === 'clean') {
+    lines.push('They write cleanly with few errors. Don\'t inject artificial mistakes.')
+  } else {
+    if (err.error_signature.suggested_error_injection.typos && err.typo_rate > 2) {
+      lines.push(`They make occasional typos (about ${Math.round(err.typo_rate)} per 1000 words). Let a couple slip through naturally.`)
+    }
+    if (err.error_signature.suggested_error_injection.missing_apostrophes) {
+      lines.push('They sometimes skip apostrophes in contractions (dont, cant, wont).')
+    }
+    if (err.error_signature.suggested_error_injection.informal_spellings) {
+      lines.push('They use informal spellings sometimes (gonna, wanna, kinda).')
+    }
+    if (err.error_signature.suggested_error_injection.comma_issues) {
+      lines.push('They occasionally use comma splices — two independent clauses joined by just a comma.')
+    }
+    if (err.tense_consistency.consistency_score < 0.7) {
+      lines.push('They shift tenses sometimes. Don\'t force perfect tense consistency.')
     }
   }
 
-  // Generation hints
-  if (s.generation_hints.length > 0) {
-    lines.push('')
-    lines.push('## Generation Guidelines')
-    for (const hint of s.generation_hints) {
-      lines.push(`- ${hint}`)
-    }
+  if (err.capitalization.lowercase_i_count > 0 && err.capitalization.error_rate > 3) {
+    lines.push('They sometimes use lowercase "i" instead of "I".')
+  }
+
+  // --- Section 6: Discourse Organization ---
+  lines.push('')
+  lines.push('## How They Organize Ideas')
+
+  const orgStyle = disc.discourse_signature.organization_style
+  if (orgStyle === 'highly_structured') {
+    lines.push('They organize ideas in a clear, structured way with logical progression.')
+  } else if (orgStyle === 'loosely_structured') {
+    lines.push('Their writing flows loosely, more stream-of-consciousness. Don\'t impose rigid structure.')
+  } else {
+    lines.push('They use moderate structure — organized but not rigid.')
+  }
+
+  const argStyle = disc.discourse_signature.argumentation_style
+  if (argStyle === 'contrastive') {
+    lines.push('They often argue by contrast — presenting opposing views then their position.')
+  } else if (argStyle === 'causal') {
+    lines.push('They reason through cause and effect.')
+  } else if (argStyle === 'additive') {
+    lines.push('They build arguments by accumulation — adding point upon point.')
   }
 
   return lines.join('\n')

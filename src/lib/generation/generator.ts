@@ -6,14 +6,14 @@
 import OpenAI from 'openai'
 import { GenerationPrompt } from './prompt-builder'
 
-// Generation configuration
+// Generation configuration — tuned for human-like output
 export const GENERATION_CONFIG = {
   model: 'gpt-4o' as const,
-  temperature: 0.85,
+  temperature: 0.9,
   max_tokens: 4000,
   top_p: 1,
-  frequency_penalty: 0.1,  // Slight penalty to avoid repetition
-  presence_penalty: 0.1,   // Slight penalty to encourage variety
+  frequency_penalty: 0.35,  // Push away from repetitive AI patterns
+  presence_penalty: 0.25,   // Encourage varied word choice
 }
 
 // Lazy initialization for OpenAI client
