@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import SignOutButton from '@/components/SignOutButton'
 import CreditsDisplay from '@/components/CreditsDisplay'
-import GridBackgroundClient from '@/components/GridBackgroundClient'
 
 export default async function DashboardLayout({
   children,
@@ -25,22 +24,6 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen text-white" style={{ background: '#0d0d0d' }}>
-
-      {/* Very subtle grid background — full screen, low contrast */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <GridBackgroundClient
-          linesColor="#222222"
-          scanColor="#ffffff"
-          scanOpacity={0.08}
-          gridScale={0.13}
-          lineThickness={0.7}
-          bloomIntensity={0.1}
-          chromaticAberration={0.0002}
-          noiseIntensity={0.003}
-          scanDuration={6.0}
-          scanDelay={10.0}
-        />
-      </div>
 
       {/* Nav */}
 

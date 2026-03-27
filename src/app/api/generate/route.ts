@@ -1,155 +1,73 @@
-import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-import { parseFile } from '@/lib/parsing'
+import { claude, TEXT_TYPES } from '@/lib/claude'
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
-
-const VALID_WRITING_TYPES = [
-  'essay', 'research_paper', 'email', 'cover_letter', 'blog_post', 'creative', 'other'
-]
-
-const VALID_WORD_COUNTS = [250, 500, 700, 1000, 1500, 2000]
-
-/**
- * POST /api/generate
- *
- * Body (FormData):
- *   prompt       - string   - user's topic / instructions
- *   writingType  - string   - e.g. "essay"
- *   wordCount    - number   - e.g. 700
- *   file         - File?    - optional PDF or DOCX assignment/rubric
- */
 export async function POST(request: Request) {
   try {
-    // ── Auth ──────────────────────────────────────────────────────────────
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { prompt, citations, textType } = await request.json()
+    if (!prompt) {
+      return NextResponse.json({ error: 'Missing prompt' }, { status: 400 })
     }
 
-    // ── Parse FormData ────────────────────────────────────────────────────
-    const formData = await request.formData()
-    const prompt      = (formData.get('prompt') as string || '').trim()
-    const writingType = (formData.get('writingType') as string || 'essay').trim()
-    const wordCount   = Number(formData.get('wordCount') || 700)
-    const file        = formData.get('file') as File | null
+    const typeConfig = TEXT_TYPES[textType] || TEXT_TYPES.oped
+    const citationRule = citations
+      ? 'Add a short in-text citation in parentheses after each translated passage e.g. (Source Name, Year, translated from [language]). Always include a full SOURCES section at the end.'
+      : 'Do NOT include any in-text citations in the body. Always include a full SOURCES section at the end listing every URL used.'
 
-    // ── Validate ──────────────────────────────────────────────────────────
-    if (!prompt && !file) {
-      return NextResponse.json(
-        { error: 'Please provide a prompt or upload a file.' },
-        { status: 400 }
-      )
-    }
+    const system = `You are a Research Curator writing a ${typeConfig.name}. Find human-written source material in foreign languages, translate it literally into English, and assemble the piece from those translations.
 
-    if (!VALID_WRITING_TYPES.includes(writingType)) {
-      return NextResponse.json({ error: 'Invalid writing type.' }, { status: 400 })
-    }
+LANGUAGE STRATEGY:
+1. Think about which languages have the richest human-written content on this specific topic. Choose 3-4 languages that genuinely make sense.
+2. Search in those languages for human-written articles, academic pieces, or journalism.
+3. Find 5-7 sources total.
+4. Extract the longest useful consecutive block you can from each source — up to 5-6 sentences from one source if highly relevant.
+5. Translate each block into English:
+   - Stay close to the original sentence structure to preserve the foreign rhythm.
+   - When the source is scientific or academic, translate technical jargon into plain language appropriate for the text type.
+   - When a sentence uses a passive construction that hides who is doing what, rewrite it to make the agent clear.
+   - When a sentence references a mechanism or process without explaining it, either explain it in plain terms or cut it.
+   - When a statistic needs context to make sense, add minimal necessary context.
+   - Never leave a sentence that would confuse a reader with no background in the topic.
+   - Do NOT over-smooth into polished English — preserve the rhythm of the source language.
+6. Assemble the piece from translated blocks.
 
-    if (!VALID_WORD_COUNTS.includes(wordCount)) {
-      return NextResponse.json({ error: 'Invalid word count.' }, { status: 400 })
-    }
+CONNECTIVE TISSUE — keep it minimal (max 1-2 short sentences between blocks):
+- Sharp, slightly impatient human expert voice.
+- NO m-dashes. NO symmetry patterns. NO colons in connective sentences.
+- BANNED: delve, elevate, underscore, testament, navigate, foster, tapestry, unlock, robust, inherently, comprehensive, imperative, multifaceted
+- NO: Furthermore, In addition, Subsequently
+- USE: Then there is the fact that / What is wild is / But then you look at / This suggests that
 
-    // ── Parse file (if provided) ──────────────────────────────────────────
-    let fileContent = ''
-    if (file) {
-      if (file.size > MAX_FILE_SIZE) {
-        return NextResponse.json(
-          { error: 'File must be under 5MB.' },
-          { status: 400 }
-        )
-      }
+TEXT TYPE: ${typeConfig.name}
+${typeConfig.format}
 
-      const fileName = file.name.toLowerCase()
-      if (!fileName.endsWith('.pdf') && !fileName.endsWith('.docx')) {
-        return NextResponse.json(
-          { error: 'Only PDF and DOCX files are supported.' },
-          { status: 400 }
-        )
-      }
+WORD COUNT — CRITICAL: Hit the word count in the prompt accurately. Do not exceed by more than 20 words. Do not fall short by more than 20 words.
 
-      const arrayBuffer = await file.arrayBuffer()
-      const buffer = Buffer.from(arrayBuffer)
-      const fileType: 'docx' | 'pdf' = fileName.endsWith('.pdf') ? 'pdf' : 'docx'
-      const parseResult = await parseFile(buffer, fileType)
+BEFORE OUTPUTTING, fix:
+- Any named individual the reader has not met — rewrite without the name
+- Any phrase referencing a website's own tools or database — rewrite without it
+- Any numbered footnote markers — delete them
+- Any sentence that only makes sense in the original source context
+- Any incomplete ending — write a proper conclusion for the text type
+- Any two consecutive statistics that appear to contradict each other — explain or cut one
 
-      if (parseResult.success && parseResult.cleanedText) {
-        fileContent = parseResult.cleanedText.slice(0, 8000) // cap at 8k chars
-      }
-    }
+${citationRule}
+Do NOT bold any text. No markdown # headers. No footnote numbers.
+Output ONLY the finished piece and SOURCES section. Nothing else.`
 
-    // ── Build user message for AI ─────────────────────────────────────────
-    // userMessage will be passed to Gemini once integrated (suppress unused warning via void)
-    void buildUserMessage({ prompt, writingType, wordCount, fileContent })
-
-    // ──────────────────────────────────────────────────────────────────────
-    // TODO: Replace this section with Gemini Flash API call
-    //
-    // The final implementation will:
-    // 1. Call Gemini Flash with a hidden system prompt (humanization instructions)
-    //    that makes output undetectable by AI detectors
-    // 2. Pass `userMessage` as the user turn
-    // 3. Return the generated text
-    //
-    // Example structure:
-    //   const response = await geminiClient.generateContent({
-    //     systemInstruction: HIDDEN_SYSTEM_PROMPT,  // never exposed to frontend
-    //     contents: [{ role: 'user', parts: [{ text: userMessage }] }],
-    //   })
-    //   const generatedText = response.candidates[0].content.parts[0].text
-    //
-    // For now, returning a placeholder so the frontend UI is testable:
-    // ──────────────────────────────────────────────────────────────────────
-    const generatedText = buildPlaceholder(writingType, wordCount, prompt)
+    const draft = await claude(system, prompt, true)
 
     return NextResponse.json({
-      success: true,
-      generated_text: generatedText,
+      draft: draft
+        .replace(/^#{1,6}\s+/gm, '')
+        .replace(/\*\*/g, '')
+        .replace(/\[\d+\]/g, '')
+        .trim(),
     })
-
-  } catch (error) {
-    console.error('Generate API error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  } catch (err: unknown) {
+    const message = String(err)
+    return NextResponse.json(
+      { error: 'Generate error: ' + message },
+      { status: 500 }
+    )
   }
-}
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-function buildUserMessage({
-  prompt,
-  writingType,
-  wordCount,
-  fileContent,
-}: {
-  prompt: string
-  writingType: string
-  wordCount: number
-  fileContent: string
-}) {
-  const parts: string[] = []
-
-  if (fileContent) {
-    parts.push(`[Assignment / Rubric]\n${fileContent}`)
-  }
-
-  if (prompt) {
-    parts.push(`[User Instructions]\n${prompt}`)
-  }
-
-  parts.push(`[Task]\nWrite a ${writingType.replace('_', ' ')} of approximately ${wordCount} words based on the above.`)
-
-  return parts.join('\n\n')
-}
-
-function buildPlaceholder(writingType: string, wordCount: number, prompt: string) {
-  return `[Placeholder — Gemini Flash integration pending]
-
-Writing type: ${writingType}
-Target word count: ${wordCount}
-Topic: ${prompt || '(from uploaded file)'}
-
-Once the Gemini Flash API is connected with the hidden humanization system prompt,
-this placeholder will be replaced with the actual generated text.`
 }
