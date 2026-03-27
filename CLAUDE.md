@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**DontGetCaught.AI** - An English-only AI writing assistant that learns from user's writing samples and generates new content matching their personal style. Users upload 3-5 English documents, the system builds a vector style library, then generates authentic-sounding content with natural imperfections preserved.
+**DontGetCaught.AI** - AI writing tool that generates human-sounding content undetectable by AI detectors. Uses foreign-language source research → literal translation → assembly → GPTZero scanning → humanization loop → polish pipeline. Chat-style conversational UI guides users through prompt → clarification → text type/tone/citations/word count → generation.
 
-**Critical constraint**: English-only MVP. Non-English content must be detected and rejected at all entry points (upload, task creation, revision).
+**Core pipeline**: Anthropic Claude (claude-sonnet-4-20250514) with web search for source research + GPTZero API for AI detection scanning. Target: 85%+ human score.
 
 ## Development Commands
 
@@ -57,31 +57,30 @@ The project uses **@supabase/ssr** with three distinct client creation patterns:
 
 The project follows a sequential implementation plan (see `spec.md` and README):
 
-**Current status**: Step 1 complete (Foundation & Auth)
+**Current status**: Backend APIs merged, chat-style dashboard functional, FaultyTerminal landing page
 
-**Upcoming steps**:
-1. ✅ **Step 1**: Foundation & Auth (Next.js + Supabase setup)
-2. **Step 2**: Database Schema (pgvector) + File Upload API
-3. **Step 3**: Text Parsing (docx/pdf → cleaned text)
-4. **Step 4**: **Language Detection Gate** (reject non-English)
-5. **Step 5**: Chunking + OpenAI Embeddings → vector DB
-6. **Step 6**: Style Profile Analysis (sentence rhythm, punctuation, quirks)
-7. **Step 7**: Task Creation + Generation (vector search → LLM)
-8. **Step 8**: Revision with natural language instructions
-9. **Step 9**: Export to .docx
-10. **Step 10**: History, Settings, Data deletion
+### API Routes (merged from partner's Express backend)
 
-### Core Modules (Planned Structure)
+```
+src/app/api/
+├── clarify/     # Prompt ambiguity detection (1 question at a time)
+├── analyze/     # Pre-generation category analysis (research_based / semi_personal / highly_personal / impossible)
+├── generate/    # Core generation — Claude + web search, foreign-language sources → translate → assemble
+├── scan/        # GPTZero AI detection scanning
+├── humanize/    # Rewrite AI-flagged connective tissue
+├── polish/      # Final editing pass
+├── extract/     # File text extraction (docx via mammoth, txt)
+└── health/      # Health check
+```
+
+### Core Modules
 
 ```
 src/lib/
 ├── supabase/        # Three client patterns (browser/server/middleware)
-├── parsing/         # docx/pdf → clean text, chunking
-├── language/        # English-only detection (reject non-en)
-├── style/           # Style metrics extraction (sentence length, punctuation, quirks)
-├── vector/          # OpenAI embeddings + similarity search
-├── generation/      # Prompt building + LLM calls
-└── export/          # .docx generation
+├── claude.ts        # Shared Claude API helper with retry logic (429/529 backoff)
+└── generation/
+    └── ai-checker.ts # Post-generation AI pattern detection (banned words, structural patterns)
 ```
 
 ## Database Schema (Step 2)

@@ -4,6 +4,19 @@
 
 ---
 
+## 2026-03-27 后端融合 + 对话式交互 + FaultyTerminal 背景
+- 将 partner 的 Express 后端完整融合为 Next.js API Routes（clarify, analyze, generate, scan, humanize, polish, extract, health）
+- Dashboard 改为对话式聊天交互 UI（prompt → clarify → textType/tone/citations/wordCount → generate）
+- 新增 undo/back 按钮：所有用户消息（包括初始 prompt）都可撤销，级联回滚后续选择
+- 字数限制：最低 150 字，最高 4000 字，超出范围拒绝生成并提示
+- Landing page 背景替换：DotGrid + Prism → FaultyTerminal（WebGL 绿色终端效果）
+- FaultyTerminal 开发者调试面板：9 个参数实时调节（brightness, scale, scanline, glitch 等）
+- 新增 global-error.tsx（Next.js 15 错误边界）
+- Claude API helper（claude.ts）：retry 逻辑，429/529 指数退避
+- AI pattern checker（ai-checker.ts）：生成后检测 AI 特征词
+
+---
+
 ## 2026-03-12 UI polish: grid devtools + 界面优化
 - 新增 GridBackground (THREE.js shader 透视网格 + scan 动效)
 - 新增 GridDevTools 浮窗调试工具：实时滑块控制所有 grid 参数、颜色选择器、copy/reset
