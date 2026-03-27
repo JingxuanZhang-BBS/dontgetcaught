@@ -203,23 +203,38 @@ app.post("/humanize", async (req, res) => {
   const typeConfig = TEXT_TYPES[textType] || TEXT_TYPES.oped;
   const citationNote = citations ? "Preserve all existing in-text citations." : "Do not add any in-text citations.";
 
-  const system = `You are a humanization editor. Rewrite ONLY the connective tissue — the short bridging sentences between translated blocks. Do not touch the translated source passages.
+  const system = `You are a humanization editor. You receive a full draft and a list of AI-flagged sentences. For each flagged sentence, follow this exact process:
 
-RULES:
-- Sharp, slightly impatient human expert voice
-- Vary sentence length dramatically
-- Use contractions. Use abrupt stops. Add brief tangents or second-guessing.
-- NO m-dashes. NO symmetry patterns. NO colons.
-- BANNED: delve, elevate, underscore, testament, navigate, foster, tapestry, unlock, robust, inherently
+STEP 1 — SEARCH FOR A REPLACEMENT FIRST:
+Search the web in foreign languages (choose the language most likely to have good human-written content on this specific topic) for a human-written source that covers the same claim or fact as the flagged sentence. Try to find 1-3 consecutive sentences from a real human author that express the same idea.
+
+If you find a good source:
+- Extract the relevant sentences verbatim from the foreign language source
+- Translate them literally into English, preserving the original sentence structure and rhythm
+- Use this translation as the replacement for the flagged sentence
+- The replacement must cover the same factual ground — do not change the underlying claim
+
+If you cannot find a good foreign language source after searching:
+- Rewrite the flagged sentence to break its AI-like symmetry and structure
+- Add natural human messiness — interruptions, abrupt stops, incomplete thoughts, tangents
+- Keep the same fact but present it differently
+- Example: "His training combines explosive power with endurance work, speed work with agility exercises" becomes "The training is built around explosions. Short violent sprints. Then agility. Then strength — in that order, every time."
+
+RULES FOR ALL REPLACEMENTS:
+- Do NOT change any underlying facts or statistics
+- Do NOT bold anything
+- Do NOT use m-dashes
+- Avoid symmetrical list structures ("X with Y, A with B")
+- Vary sentence length dramatically in replacements
 - ${citationNote}
-- Do NOT bold anything. Do NOT change any translated factual content or statistics.
 
-Return the COMPLETE rewritten draft. No preamble. Just the full piece.`;
+After replacing all flagged sentences, return the COMPLETE rewritten draft with replacements inserted in the correct positions.
+No preamble. Just the full piece.`;
 
   const flaggedList = flaggedSentences.slice(0, 8).map((s, i) => (i + 1) + ". " + s).join("\n");
 
   try {
-    const humanized = await claude(system, `Text type: ${typeConfig.name}\n\nFlagged sentences:\n${flaggedList}\n\nFull draft:\n${draft}`);
+    const humanized = await claude(system, `Text type: ${typeConfig.name}\n\nFlagged sentences to replace:\n${flaggedList}\n\nFull draft:\n${draft}`, true);
     res.json({ humanized: humanized.replace(/\*\*/g, "").replace(/\[\d+\]/g, "").trim() });
   } catch (err) {
     res.status(500).json({ error: "Humanize error: " + (err.response?.data?.error?.message || err.message) });
@@ -272,27 +287,41 @@ app.post("/clarify", async (req, res) => {
     ? clarificationsSoFar.map(c => c.question + " -> " + c.answer).join("\n")
     : "None";
 
-  const system = `You are a writing assistant. Read the user prompt and decide if there is ONE genuine ambiguity that would meaningfully change the output.
+  const system = `You are a writing assistant with one specific goal: identify the single most important question to ask the user before writing begins. You have TWO reasons to ask a question:
 
-Examples that need clarification:
-- "Write about the big world war" -> ask: World War I or World War II?
-- "Write about the president's new policy" -> ask: which country's president?
-- "Write about the recent election" -> ask: which country's election?
-- "Write a review of the new Batman movie" -> ask: which Batman film?
-- "Write about immigration" -> ask: specific country or global?
-- "Write about the company's performance" -> ask: which company?
-- "Write about the war" -> ask: which conflict?
-- "Write about Apple's product" -> ask: which product specifically?
+REASON 1 — TOPIC AMBIGUITY: The prompt refers to something unclear that would produce a completely different piece depending on the answer.
+Examples:
+- "Write about the big world war" -> "Which world war are you referring to — World War I or World War II?"
+- "Write about the president's policy" -> "Which country's president are you referring to?"
+- "Write about the recent election" -> "Which country's election are you referring to?"
+- "Write about the war" -> "Which conflict are you referring to?"
+- "Write about the company" -> "Which company are you referring to?"
+- "Write a review of the new Batman movie" -> "Which Batman film are you referring to?"
 
-Do NOT ask about word count, tone, text type, or citations. Those are handled separately.
-Do NOT ask more than one question. Pick the single most important ambiguity.
-If the prompt is sufficiently clear, return needsClarification false.
+REASON 2 — TOO VAGUE TO SOURCE WELL: The prompt is so broad that searching for sources will return generic, formulaic content that AI detectors flag easily. A more specific angle will produce better, more distinctive human-written sources and a lower AI detection score.
+Examples:
+- "Why is Cristiano Ronaldo so good?" -> "Are you focusing on his athleticism, his career achievements, his mental strength, or his technical skills?"
+- "Write about climate change" -> "Are you focusing on the science behind it, the political response, the economic impact, or human stories affected by it?"
+- "Write about the Roman Empire" -> "Are you focusing on its rise, its fall, its military, its culture, or a specific period or figure?"
+- "Write about mental health" -> "Are you focusing on a specific condition, the stigma around it, treatment approaches, or its prevalence in society?"
+- "Write about technology" -> "Are you focusing on a specific technology, its societal impact, its ethical implications, or its future?"
+- "Write about football" -> "Are you focusing on a specific team, player, tournament, tactical evolution, or the culture around the sport?"
+- "Write about the economy" -> "Are you focusing on a specific country, a particular issue like inflation or unemployment, or the global picture?"
+- "Write about music" -> "Are you focusing on a specific genre, artist, era, or the music industry as a whole?"
+- "Write about social media" -> "Are you focusing on its impact on mental health, political influence, business use, or youth culture?"
+
+IMPORTANT RULES:
+- Ask only ONE question — the single most valuable one.
+- Do NOT ask about word count, tone, text type, or citations. Those are handled separately.
+- Do NOT ask a question if the prompt is already specific enough to find good targeted sources.
+- If clarifications have already been given, check if the prompt is now specific enough. If yes, return needsClarification false.
+- Prefer Reason 2 questions when the topic is clear but broad — specificity directly improves output quality.
 
 Previous clarifications already given:
-${prevAnswered}
+\${prevAnswered}
 
 Return ONLY valid JSON:
-{"needsClarification": true, "question": "Your question here?"}
+{"needsClarification": true, "question": "Your specific question here?"}
 or
 {"needsClarification": false}`;
 
