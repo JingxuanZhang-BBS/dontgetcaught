@@ -264,5 +264,46 @@ Output the full polished piece only. No preamble.`;
   }
 });
 
+app.post("/clarify", async (req, res) => {
+  const { prompt, clarificationsSoFar } = req.body;
+  if (!prompt) return res.status(400).json({ error: "Missing prompt" });
+
+  const prevAnswered = clarificationsSoFar && clarificationsSoFar.length > 0
+    ? clarificationsSoFar.map(c => c.question + " -> " + c.answer).join("\n")
+    : "None";
+
+  const system = `You are a writing assistant. Read the user prompt and decide if there is ONE genuine ambiguity that would meaningfully change the output.
+
+Examples that need clarification:
+- "Write about the big world war" -> ask: World War I or World War II?
+- "Write about the president's new policy" -> ask: which country's president?
+- "Write about the recent election" -> ask: which country's election?
+- "Write a review of the new Batman movie" -> ask: which Batman film?
+- "Write about immigration" -> ask: specific country or global?
+- "Write about the company's performance" -> ask: which company?
+- "Write about the war" -> ask: which conflict?
+- "Write about Apple's product" -> ask: which product specifically?
+
+Do NOT ask about word count, tone, text type, or citations. Those are handled separately.
+Do NOT ask more than one question. Pick the single most important ambiguity.
+If the prompt is sufficiently clear, return needsClarification false.
+
+Previous clarifications already given:
+${prevAnswered}
+
+Return ONLY valid JSON:
+{"needsClarification": true, "question": "Your question here?"}
+or
+{"needsClarification": false}`;
+
+  try {
+    const raw = await claude(system, "Prompt: " + prompt);
+    const parsed = JSON.parse(raw.replace(/```json|```/g, "").trim());
+    res.json(parsed);
+  } catch (err) {
+    res.json({ needsClarification: false });
+  }
+});
+
 const PORT = process.env.PORT || 3131;
 app.listen(PORT, () => console.log("Humanizer server running on http://localhost:" + PORT));
