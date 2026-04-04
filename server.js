@@ -63,32 +63,38 @@ The system works by:
 2. Translating those passages literally into English
 3. Stitching them together with minimal AI connective tissue
 
-This means the system performs BEST when:
-- The topic is widely covered by human journalists, academics, bloggers, researchers
-- Content exists in multiple languages (not just English)
-- The writing does not require personal experiences or private information
-- The content does not depend on a specific document the user has not provided
+CRITICAL RULE: Judge based on the UNDERLYING TOPIC, not the document format or framing.
+- An assignment brief asking students to research climate change = research_based (the topic is climate change)
+- A school task asking for a report on migration = research_based (the topic is migration)
+- A template or brief that asks for research on any well-known topic = research_based
+- Only flag as personal/impossible if the actual content required is personal memories, private information, or analysis of an unprovided document
 
-The system performs POORLY when:
-- The prompt requires personal experiences, memories, or private information only the user has
-- The prompt requires analysis of a specific document, poem, or text that has not been provided
-- The topic is so niche or personal that no online sources exist
-- The prompt is primarily creative/fictional with no factual basis to research
+The system performs BEST when the underlying topic is:
+- Widely covered by human journalists, academics, bloggers, researchers
+- A known global issue, historical event, scientific subject, cultural topic, or current event
+- Something that exists in multiple languages online
 
-Analyze the prompt and return ONLY a JSON object with this exact structure:
+The system performs POORLY when the actual content required is:
+- Personal experiences, memories, or private information only the user has
+- Analysis of a specific private document, poem, or text not provided
+- Purely fictional/creative with no factual basis to research
+
+Categories:
+- "research_based": Underlying topic is well-covered online in multiple languages by journalists, academics, bloggers. System will perform at 85%+. Examples: climate change, migration, poverty, conflict, history, science, culture, global issues, current events, any assignment asking for research on known real-world topics.
+- "semi_personal": Topic has personal elements but general themes are researchable. System will get 65-84%. Examples: personal essay on universal themes like resilience or family, opinion pieces where the argument can be sourced even if the voice is personal.
+- "highly_personal": Content requires specific personal information OR is a close literary/textual analysis of a specific known work. System will get 30-64%. Examples: "write about how my grandmother's death changed me", literary analysis of a specific poem or novel (e.g. Ozymandias, Hamlet, To Kill a Mockingbird), analysis of a specific piece of art or music, any task where the content must come from deep reading of one specific text rather than broad research.
+- "impossible": Almost entirely personal/private with no researchable component. System will get under 30%. Examples: analysis of a private unprovided document, purely fictional story with no factual basis, writing that requires information only the user holds.
+
+IMPORTANT: Literary analysis assignments (poetry analysis, novel analysis, close reading tasks) should ALWAYS be classified as "highly_personal" even if the text being analyzed is famous and well-known. The reason: our system sources from foreign language articles and translates them. This works for factual research topics but NOT for literary analysis, where the content must come from close reading of specific lines and structural features of one text. Foreign language articles about Ozymandias will not produce good literary analysis.
+
+Return ONLY a JSON object:
 {
   "estimatedHumanPct": <number between 5 and 98>,
   "category": "research_based" | "semi_personal" | "highly_personal" | "impossible",
   "reasoning": "<one sentence explaining why>"
 }
 
-Categories:
-- "research_based": Topic is well-covered online, system will perform at 85%+. Examples: science topics, history, current events, culture, academic subjects, opinion pieces on known topics.
-- "semi_personal": Topic has some personal element but general themes exist online. System will get 65-84%. Examples: personal essay on a universal theme like resilience or family, reflective writing on a common experience.
-- "highly_personal": Topic depends heavily on specific personal information or an unknown document. System will get 30-64%. Examples: "write about how my grandmother's death changed me", "analyze this poem my teacher wrote".
-- "impossible": Topic is almost entirely personal/private with nothing to research. System will get under 30%. Examples: analysis of a private document not provided, purely fictional story with no factual basis, writing that requires information only the user holds.
-
-Return ONLY the JSON. No preamble, no explanation.`;
+No preamble, no explanation.`;
 
   try {
     const raw = await claude(system, "Analyze this prompt for a " + (textType || "essay") + ":\n\n" + prompt);
@@ -124,10 +130,54 @@ app.post("/generate", async (req, res) => {
 
   const typeConfig = TEXT_TYPES[textType] || TEXT_TYPES.oped;
   const citationRule = citations
-    ? "Add a short in-text citation in parentheses after each translated passage e.g. (Source Name, Year, translated from [language]). Always include a full SOURCES section at the end."
+    ? "Add a short in-text citation in parentheses after each passage e.g. (Source Name, Year). Do NOT mention the language it was translated from. Always include a full SOURCES section at the end."
     : "Do NOT include any in-text citations in the body. Always include a full SOURCES section at the end listing every URL used.";
 
-  const system = `You are a Research Curator writing a ${typeConfig.name}. Find human-written source material in foreign languages, translate it literally into English, and assemble the piece from those translations.
+  const isDocumentBrief = prompt.length > 500 &&
+    /rubric|criterion|assignment|task|report structure|research question|marks|assessment|bibliography|learning objective|ATL|MYP|IB/i.test(prompt);
+
+  let system;
+
+  if (isDocumentBrief) {
+    system = `You are a Research Curator who writes structured pieces by sourcing real human-written content in foreign languages and translating it literally into English.
+
+OUTPUT LANGUAGE — NON-NEGOTIABLE: Every word of the final piece must be in English. No exceptions. You are translating foreign sources INTO English, not reproducing them. If you retrieved a Spanish article, a French blog post, a German study — translate every sentence into English before you write it down. Do not output a single word in any language other than English. If you catch yourself writing in Spanish, French, German, or any other language, stop and translate it immediately.
+
+A document brief or assignment rubric has been provided. Your job:
+1. READ the brief fully and understand ALL requirements — structure, word count, sections, research question format, citation style, criteria.
+2. IDENTIFY the topic and specific location/community to focus on. If the user specified one in their additional instructions, use that. If not, pick the most interesting and well-documented option from those listed.
+3. FORMULATE a proper research question following the format in the brief exactly (e.g. "How and to what extent does X affect Y, and what responses are most effective?").
+4. FOLLOW the required structure exactly — use every section heading in the brief, in the right order, with appropriate content in each.
+5. MEET all listed requirements — minimum sources, statistics, word count, section content, everything.
+6. SOURCE everything from foreign language human-written content, translated literally into English.
+
+SOURCING:
+- Choose 3-4 languages with rich content on the specific topic and chosen location
+- Find 5-7 sources covering background, local impact, responses, and evaluation
+- Extract 3-5 consecutive sentences from each source
+- Translate literally — preserve source rhythm, do not over-smooth into perfect English
+- MANDATORY: every sentence must be in English. Read through before outputting and translate anything remaining.
+
+CONNECTIVE TISSUE between source blocks — keep minimal:
+- Sharp, slightly impatient expert voice
+- NO m-dashes, NO colons in transitions
+- BANNED: delve, elevate, underscore, testament, navigate, foster, tapestry, unlock, robust, inherently
+- USE: Then there is the fact that / What is wild is / But then you look at
+
+CRITICAL OUTPUT RULES:
+- NEVER include the original foreign language text. Translate it and include ONLY the English version.
+- NEVER mention that you searched foreign language sources, gathered background material, or describe your process in any way. The reader should never know how the piece was created.
+- NEVER write phrases like "A French analysis reveals:", "Spanish sources indicate:", "According to a German report:", "I started gathering", "This analysis requires". Just state the content as fact.
+- If a citation is needed, format it as (Source Name, Year) only — never mention the language.
+- The piece must read as if written by a single knowledgeable human author. No trace of the sourcing process should appear anywhere.
+
+${citationRule}
+Do NOT bold any text. No markdown # headers. No footnote numbers.
+Output ONLY the finished piece with all required sections and SOURCES. Nothing else.`;
+  } else {
+    system = `You are a Research Curator writing a ${typeConfig.name}. Find human-written source material in foreign languages, translate it literally into English, and assemble the piece from those translations.
+
+OUTPUT LANGUAGE — NON-NEGOTIABLE: Every word of the final piece must be in English. No exceptions. You are translating foreign sources INTO English, not reproducing them. If you retrieved a Spanish article, a French blog post, a German study — translate every sentence into English before you write it down. Do not output a single word in any language other than English. The reader will never see the original sources. They see only your English translation. If you catch yourself writing in Spanish, French, German, or any other language, stop and translate it immediately.
 
 LANGUAGE STRATEGY:
 1. Think about which languages have the richest human-written content on this specific topic. Choose 3-4 languages that genuinely make sense.
@@ -142,7 +192,9 @@ LANGUAGE STRATEGY:
    - When a statistic needs context to make sense, add minimal necessary context.
    - Never leave a sentence that would confuse a reader with no background in the topic.
    - Do NOT over-smooth into polished English — preserve the rhythm of the source language.
-6. Assemble the piece from translated blocks.
+6. Translate EVERY extracted block into English before assembling. Do not leave any foreign language text in the final output — not a single word. Every sentence in the finished piece must be in English. If you find yourself including a foreign language sentence, stop and translate it first.
+7. Assemble the piece from translated blocks.
+8. MANDATORY SELF-CHECK before outputting: Read through your entire draft. If you find ANY sentence that is not in English — any word in French, Spanish, German, Portuguese, Chinese, Japanese, or any other language — translate it immediately. Do not output the piece until every single sentence is in English. This step is required every time.
 
 CONNECTIVE TISSUE — keep it minimal (max 1-2 short sentences between blocks):
 - Sharp, slightly impatient human expert voice.
@@ -164,17 +216,68 @@ BEFORE OUTPUTTING, fix:
 - Any incomplete ending — write a proper conclusion for the text type
 - Any two consecutive statistics that appear to contradict each other — explain or cut one
 
+
+
+CRITICAL OUTPUT RULES:
+- NEVER include the original foreign language text. Translate it and include ONLY the English version.
+- NEVER mention that you searched foreign language sources, gathered background material, or describe your process in any way. The reader should never know how the piece was created.
+- NEVER write phrases like "A French analysis reveals:", "Spanish sources indicate:", "According to a German report:", "I started gathering", "This analysis requires". Just state the content as fact.
+- If a citation is needed, format it as (Source Name, Year) only — never mention the language.
+- The piece must read as if written by a single knowledgeable human author. No trace of the sourcing process should appear anywhere.
+
 ${citationRule}
 Do NOT bold any text. No markdown # headers. No footnote numbers.
 Output ONLY the finished piece and SOURCES section. Nothing else.`;
+  }
 
   try {
-    const draft = await claude(system, prompt, true);
-    res.json({ draft: draft.replace(/^#{1,6}\s+/gm, "").replace(/\*\*/g, "").replace(/\[\d+\]/g, "").trim() });
+    let draft = await claude(system, prompt, true);
+    draft = draft.replace(/^#{1,6}\s+/gm, "").replace(/\*\*/g, "").replace(/\[\d+\]/g, "").trim();
+
+    // Post-process: enforce English paragraph by paragraph in parallel
+    // Claude detects the language of each paragraph itself — no regex, no missed cases
+    const paraLangSystem = `If the text below is already in English, return it word-for-word, unchanged. If it is in any other language, translate it into English. Output only the result — no explanation, no commentary, nothing else.`;
+
+    const paragraphs = draft.split(/\n\n+/);
+    const fixedParagraphs = await Promise.all(paragraphs.map(async (para) => {
+      if (para.trim().length < 15) return para; // skip blank lines / very short separators
+      try {
+        const result = await claude(paraLangSystem, para);
+        return result.replace(/^#{1,6}\s+/gm, "").replace(/\*\*/g, "").trim();
+      } catch (err) {
+        console.error("Para lang check failed:", err.message);
+        return para;
+      }
+    }));
+    draft = fixedParagraphs.join("\n\n");
+
+    // Third pass: fix translation artifacts — broken syntax, foreign word order, meaningless fragments
+    const artifactCleanupSystem = `You are a copy editor fixing translation artifacts in a text assembled from foreign language sources. Find and fix only sentences that are broken or unnatural due to bad translation. Do not touch sentences that read naturally.
+
+Fix ONLY these problems:
+1. Foreign word order that makes no sense in English — rewrite that sentence in natural English with the same meaning
+2. Completely meaningless or garbled fragments — delete them
+3. Literal translations of idioms that produce nonsense in English — replace with the natural English equivalent
+4. Wrong word choices from translation errors (e.g. "internal courts" → "domestic courts", "does not provide any paragraph" → "contains no provision") — fix the word only
+5. Bureaucratic copy-paste from UN resolutions or legal documents that reads like no human wrote it — simplify to plain English
+
+Do NOT rewrite sentences that already read naturally. Do NOT change facts, statistics, or claims. Do NOT add content.
+
+Output the complete corrected text. No commentary.`;
+
+    try {
+      const artifactCleaned = await claude(artifactCleanupSystem, draft);
+      draft = artifactCleaned.replace(/^#{1,6}\s+/gm, "").replace(/\*\*/g, "").trim();
+    } catch (err) {
+      console.error("Artifact cleanup failed:", err.message);
+    }
+
+    res.json({ draft });
   } catch (err) {
     res.status(500).json({ error: "Generate error: " + (err.response?.data?.error?.message || err.message) });
   }
 });
+
 
 app.post("/scan", async (req, res) => {
   const { text } = req.body;
@@ -250,26 +353,22 @@ app.post("/polish", async (req, res) => {
     ? "Keep all existing in-text citations exactly as they are."
     : "Remove any in-text citations from the body. Keep the SOURCES section at the end intact.";
 
-  const system = `You are a strict final editor reviewing a ${typeConfig.name} assembled from foreign-language sources translated into English.
+  const system = `You are a minimal final editor. The text has already passed AI detection at a high score. Your job is purely cosmetic — fix only the things listed below. Do NOT rewrite sentences. Do NOT improve phrasing. Do NOT smooth anything out. Every word you change risks lowering the human score.
 
-FIX:
-- Any named individual the reader has not met — cut or rewrite without the name
-- Any phrase referencing a website's own tools or database — rewrite without it
-- Numbered footnote markers like [1] [2] — delete them
-- Sentences that only make sense in the original source context
-- Phrases like "as we mentioned", "as noted above", "here is word for word"
-- Tonal shifts away from the expected ${typeConfig.name} voice
-- Any bolded text — remove it
-- Any incomplete ending — write a proper conclusion appropriate to the text type
-- Any passive construction hiding who is doing what — rewrite to make the agent clear
-- Any technical jargon inappropriate for this text type — translate to plain language
-- Any statistic missing essential context — add minimal context
-- Any two consecutive contradictory statistics — explain or cut one
+ONLY fix these specific things:
+- Named individuals the reader has not met (e.g. "Sam") — delete the name or replace with a pronoun
+- Phrases referencing a website database or tool (e.g. "in our database") — cut those words only
+- Numbered footnote markers like [1] [2] [3] — delete them
+- Phrases like "as we mentioned", "as noted above", "here is word for word" — cut them
+- Any bolded text — remove the bold formatting only, keep the words
+- An incomplete ending with no conclusion — add ONE closing sentence only
+- DUPLICATE SENTENCES: If two sentences within a few lines of each other say the same thing in different words — delete the weaker one entirely. Do not rewrite either. Just cut one. Example: "Income inequality describes the uneven distribution of income across society. Income inequality is the extent to which income is distributed unevenly among a population." — delete one of these.
+- DUPLICATE STATISTICS: If the same statistic or fact appears twice in the text — delete the second instance entirely.
 - ${citationNote}
 
-Do NOT over-smooth translated passages. Preserve the slightly foreign rhythm.
-Do NOT change the structure. Do NOT add new claims.
-Output the full polished piece only. No preamble.`;
+DO NOT touch anything else. Do not rephrase. Do not restructure. Do not improve flow. Do not smooth translations.
+The goal is to change as few words as possible while fixing only the above issues.
+Output the full piece. No preamble.`;
 
   try {
     const polished = await claude(system, "Polish this " + typeConfig.name + ":\n\n" + text);
@@ -287,46 +386,49 @@ app.post("/clarify", async (req, res) => {
     ? clarificationsSoFar.map(c => c.question + " -> " + c.answer).join("\n")
     : "None";
 
-  const system = `You are a writing assistant with one specific goal: identify the single most important question to ask the user before writing begins. You have TWO reasons to ask a question:
+  // Only use web search if the prompt contains words suggesting a recent/current event
+  const needsWebSearch = /\b(recent|latest|current|new|today|2024|2025|2026|now|ongoing|just|this year|this week)\b/i.test(prompt);
 
-REASON 1 — TOPIC AMBIGUITY: The prompt refers to something unclear that would produce a completely different piece depending on the answer.
+  const system = `You are a sharp, intelligent writing assistant. Your job is to read the user's prompt and any previous answers, think carefully about what they actually mean, and decide if one more clarifying question is needed.
+
+You have TWO reasons to ask a question:
+
+REASON 1 — TOPIC AMBIGUITY: The prompt refers to something unclear.
 Examples:
-- "Write about the big world war" -> "Which world war are you referring to — World War I or World War II?"
-- "Write about the president's policy" -> "Which country's president are you referring to?"
-- "Write about the recent election" -> "Which country's election are you referring to?"
-- "Write about the war" -> "Which conflict are you referring to?"
-- "Write about the company" -> "Which company are you referring to?"
-- "Write a review of the new Batman movie" -> "Which Batman film are you referring to?"
+- "Write about the world war" -> ask which world war
+- "Write about the president's policy" -> ask which country
+- "Write about the war" -> ask which conflict
+- "Write about the company" -> ask which company
+- After user says "neither, I meant the israel-palestine war" -> now ask something specific about THAT topic, like "Are you focusing on the humanitarian crisis, the military conflict, the political negotiations, or the historical roots of the conflict?"
 
-REASON 2 — TOO VAGUE TO SOURCE WELL: The prompt is so broad that searching for sources will return generic, formulaic content that AI detectors flag easily. A more specific angle will produce better, more distinctive human-written sources and a lower AI detection score.
+REASON 2 — TOO VAGUE TO SOURCE WELL: The prompt is broad enough that a more specific angle will produce better human-written sources and a lower AI score.
 Examples:
-- "Why is Cristiano Ronaldo so good?" -> "Are you focusing on his athleticism, his career achievements, his mental strength, or his technical skills?"
-- "Write about climate change" -> "Are you focusing on the science behind it, the political response, the economic impact, or human stories affected by it?"
-- "Write about the Roman Empire" -> "Are you focusing on its rise, its fall, its military, its culture, or a specific period or figure?"
-- "Write about mental health" -> "Are you focusing on a specific condition, the stigma around it, treatment approaches, or its prevalence in society?"
-- "Write about technology" -> "Are you focusing on a specific technology, its societal impact, its ethical implications, or its future?"
-- "Write about football" -> "Are you focusing on a specific team, player, tournament, tactical evolution, or the culture around the sport?"
-- "Write about the economy" -> "Are you focusing on a specific country, a particular issue like inflation or unemployment, or the global picture?"
-- "Write about music" -> "Are you focusing on a specific genre, artist, era, or the music industry as a whole?"
-- "Write about social media" -> "Are you focusing on its impact on mental health, political influence, business use, or youth culture?"
+- "Why is Ronaldo so good?" -> ask which aspect: athleticism, career, mentality, or technique
+- "Write about climate change" -> ask which angle: science, politics, economics, or human stories
+- "Write about social media" -> ask which angle: mental health, politics, business, or youth culture
+- "Write about the israel-palestine war" -> ask which angle: humanitarian impact, military conflict, political negotiations, or historical roots
 
-IMPORTANT RULES:
-- Ask only ONE question — the single most valuable one.
-- Do NOT ask about word count, tone, text type, or citations. Those are handled separately.
-- Do NOT ask a question if the prompt is already specific enough to find good targeted sources.
-- If clarifications have already been given, check if the prompt is now specific enough. If yes, return needsClarification false.
-- Prefer Reason 2 questions when the topic is clear but broad — specificity directly improves output quality.
+CRITICAL RULES:
+- After a user corrects you or gives an unexpected answer, always check if a follow-up is now needed about the NEW topic they revealed. Do not just accept and move on if the new topic is still vague.
+- "all" or "everything" = valid answer, move on
+- "none of those, I meant X" = update your understanding AND ask a follow-up about X if X is still vague
+- Do NOT ask about word count, tone, text type, or citations
+- Ask ONE question maximum per round
+- Stop asking when the topic is specific enough to find targeted sources
+- If the prompt appears to be a school assignment brief or rubric with multiple possible topics listed, ask the user: which topic and which specific country or community do you want to focus on? This is the most important question for an assignment brief.
+- If the user has already specified a topic and location from an assignment brief, do not ask again — proceed.
 
-Previous clarifications already given:
+Previous clarifications:
 \${prevAnswered}
 
 Return ONLY valid JSON:
-{"needsClarification": true, "question": "Your specific question here?"}
+{"needsClarification": true, "question": "Your question here?"}
 or
 {"needsClarification": false}`;
 
   try {
-    const raw = await claude(system, "Prompt: " + prompt);
+    const userMsg = "Prompt: " + prompt + (clarificationsSoFar && clarificationsSoFar.length > 0 ? "\nPrevious Q&A:\n" + clarificationsSoFar.map(c => "Q: " + c.question + "\nA: " + c.answer).join("\n") : "");
+    const raw = await claude(system, userMsg, needsWebSearch);
     const parsed = JSON.parse(raw.replace(/```json|```/g, "").trim());
     res.json(parsed);
   } catch (err) {

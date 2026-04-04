@@ -69,6 +69,13 @@
     .dot{width:6px;height:6px;background:#444;border-radius:50%;animation:bounce .8s infinite}
     .dot:nth-child(2){animation-delay:.15s}.dot:nth-child(3){animation-delay:.3s}
     @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+    .versions-panel{margin-top:.8rem;border-top:1px solid #1a1a1a;padding-top:.8rem}
+    .versions-label{font-size:.68rem;font-family:monospace;color:#444;margin-bottom:.5rem}
+    .version-tabs{display:flex;gap:.3rem;flex-wrap:wrap;margin-bottom:.6rem}
+    .vtab{padding:.25rem .6rem;border:1px solid #2a2a2a;border-radius:4px;font-family:monospace;font-size:.68rem;cursor:pointer;color:#555;background:transparent;transition:.15s}
+    .vtab:hover{border-color:#555;color:#888}
+    .vtab.active{border-color:#7eb8f7;color:#7eb8f7;background:rgba(126,184,247,.06)}
+    .version-text{background:#0a0a0a;border:1px solid #1a1a1a;border-radius:6px;padding:.8rem 1rem;font-size:.82rem;line-height:1.75;white-space:pre-wrap;font-family:'Georgia',serif;color:#b8b4ac;max-height:300px;overflow-y:auto}
   </style>
 </head>
 <body>
@@ -102,6 +109,7 @@ let uploadedText="",uploadedFileName="";
 let workingText="";
 let warningGiven=false;
 let inputLocked=false;
+let versions=[]; // {label, score, text}
 
 // State machine
 let state={
@@ -330,8 +338,11 @@ async function checkClarifications(){
     const data=await res.json();
     removeTyping();
     if(data.needsClarification && data.question){
-      addFreetextQ(data.question,"Type your answer...", (answer)=>{
+      const prefixedQ="Quick clarifying question: "+data.question;
+      addFreetextQ(prefixedQ,"Type your answer...", (answer)=>{
         state.clarifications.push({question:data.question,answer});
+        // Enrich the prompt with the answer so it doesnt ask again
+        state.prompt=state.prompt+" (specifically: "+answer+")";
         checkClarifications();
       });
     } else {
@@ -457,7 +468,7 @@ async function generate(){
     return data;
   }
 
-  workingText="";let finalScore=0;
+  workingText="";let finalScore=0;versions=[];
 
   try{
     const health=await fetch(SERVER+"/health").catch(()=>null);
@@ -480,21 +491,35 @@ async function generate(){
       plog("Humanizing connective tissue...","step");
       const{humanized}=await apiFetch("/humanize",{draft:workingText,flaggedSentences:flagged.map(s=>s.text),textType:state.textType,citations:state.citations});
       plog("Rewritten. Re-scanning...","info");workingText=humanized;
+      versions.push({label:"Round "+round+" rewrite",score:null,text:humanized});
     }
 
     plog("Phase 3 — polishing...","step");
+    // Save pre-polish version
+    const prePolishText=workingText;
     const{polished}=await apiFetch("/polish",{text:workingText,textType:state.textType,citations:state.citations});
     workingText=polished;plog("Polish complete.","success");
+
+    // Show pre-polish scan for comparison
+    plog("Scanning pre-polish version for comparison...","info");
+    const preScan=await apiFetch("/scan",{text:prePolishText});
+    const prePct=Math.round((1-preScan.overallAiProb)*100);
+    plog("Pre-polish score was: "+prePct+"% human","info");
 
     plog("Phase 4 — final scan...","step");
     const finalScan=await apiFetch("/scan",{text:workingText});
     finalScore=Math.round((1-finalScan.overallAiProb)*100);
     plog("✓ Final score: "+finalScore+"% human. Done!","success");
+    versions.push({label:"Final (after polish)",score:finalScore,text:workingText});
 
     const scoreClass=finalScore>=90?"score-green":finalScore>=80?"score-yellow":"score-red";
     const resultWrap=document.createElement("div");resultWrap.className="msg ai";resultWrap.style.maxWidth="100%";resultWrap.style.width="100%";
     const resultBubble=document.createElement("div");resultBubble.className="bubble";resultBubble.style.maxWidth="100%";
     const formatted=workingText.split(/\n\n+/).map(p=>'<p style="margin-bottom:1rem">'+p.replace(/\n/g,'<br>')+'</p>').join('');
+    // Build versions panel
+    let vTabsHtml=versions.map((v,i)=>'<div class="vtab'+(i===versions.length-1?' active':'')+'" onclick="showVersion('+i+',this)">'+v.label+'</div>').join('');
+    let vPanelHtml='<div class="versions-panel"><div class="versions-label">ALL VERSIONS — click to compare</div><div class="version-tabs">'+vTabsHtml+'</div><div class="version-text" id="versionText">'+versions[versions.length-1].text+'</div></div>';
+
     resultBubble.innerHTML=
       '<div style="font-size:.72rem;font-family:monospace;color:#555;margin-bottom:.8rem">Here is your finished piece <span class="score-badge '+scoreClass+'">'+finalScore+'% human</span></div>'+
       '<div class="result-box">'+formatted+'</div>'+
@@ -502,7 +527,7 @@ async function generate(){
         '<button class="raction rewrite" onclick="doRewrite()">↺ Rewrite</button>'+
         '<button class="raction copy" onclick="doCopyResult(this)">⎘ Copy</button>'+
         '<button class="raction save">⬇ Save</button>'+
-      '</div>';
+      '</div>'+vPanelHtml;
     resultWrap.appendChild(resultBubble);chat.appendChild(resultWrap);
 
     if(!warningGiven&&finalScore<TARGET){
@@ -523,6 +548,14 @@ async function generate(){
     history=[];
     unlockInput();
   }
+}
+
+function showVersion(idx, tabEl){
+  const v=versions[idx];
+  if(!v)return;
+  document.getElementById("versionText").textContent=v.text;
+  document.querySelectorAll(".vtab").forEach(t=>t.classList.remove("active"));
+  tabEl.classList.add("active");
 }
 
 function doCopyResult(btn){
