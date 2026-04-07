@@ -92,12 +92,12 @@ export default function LandingPage() {
 
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault()
-    if (prompt.trim()) sessionStorage.setItem('pending_prompt', prompt.trim())
     const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
     if (isDevMode) {
-      document.cookie = 'dev_logged_in=true; path=/; max-age=86400'
-      router.push('/dashboard')
+      if (prompt.trim()) sessionStorage.setItem('pending_prompt', prompt.trim())
+      window.location.href = '/demo.html'
     } else {
+      if (prompt.trim()) sessionStorage.setItem('pending_prompt', prompt.trim())
       router.push('/signup')
     }
   }
