@@ -4,6 +4,18 @@
 
 ---
 
+## 2026-04-07 demo UI 重设计 + 动画组件整理
+
+- **demo.html** Glass Icons 移入 Card Nav 展开区域，4 个图标横排，颜色改为单色深灰
+- **demo.html** Folders 替换为 Recent Tasks 列表（侧栏，显示最近任务标题+日期）
+- **demo.html** Tilted Cards 移除，改为简洁的文字建议列表（箭头行样式）
+- **demo.html** Staggered Menu 触发按钮移至侧栏底部，配色全改为中性黑灰色，链接指向 HOME / GENERATE / HOW IT WORKS / HISTORY
+- **demo.html** 全站去除彩色渐变，统一深色/中性色系
+- 新增背景动画组件：ColorBends、Dither、Galaxy、GradientBlinds、LiquidEther、PixelBlast、ShapeGrid、Shuffle、SoftAurora
+- API routes 合并 partner backend 更新（clarify、analyze、generate、humanize、polish）
+
+---
+
 ## 2026-03-27 后端融合 + 对话式交互 + FaultyTerminal 背景
 - 将 partner 的 Express 后端完整融合为 Next.js API Routes（clarify, analyze, generate, scan, humanize, polish, extract, health）
 - Dashboard 改为对话式聊天交互 UI（prompt → clarify → textType/tone/citations/wordCount → generate）
