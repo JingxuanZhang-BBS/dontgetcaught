@@ -15,23 +15,39 @@ export async function POST(request: Request) {
             .join('\n')
         : 'None'
 
-    const system = `You are a writing assistant. Read the user prompt and decide if there is ONE genuine ambiguity that would meaningfully change the output.
+    // Use web search only if prompt suggests a recent/current event
+    const needsWebSearch = /\b(recent|latest|current|new|today|2024|2025|2026|now|ongoing|just|this year|this week)\b/i.test(prompt)
 
-Examples that need clarification:
-- "Write about the big world war" -> ask: World War I or World War II?
-- "Write about the president's new policy" -> ask: which country's president?
-- "Write about the recent election" -> ask: which country's election?
-- "Write a review of the new Batman movie" -> ask: which Batman film?
-- "Write about immigration" -> ask: specific country or global?
-- "Write about the company's performance" -> ask: which company?
-- "Write about the war" -> ask: which conflict?
-- "Write about Apple's product" -> ask: which product specifically?
+    const system = `You are a sharp, intelligent writing assistant. Your job is to read the user's prompt and any previous answers, think carefully about what they actually mean, and decide if one more clarifying question is needed.
 
-Do NOT ask about word count, tone, text type, or citations. Those are handled separately.
-Do NOT ask more than one question. Pick the single most important ambiguity.
-If the prompt is sufficiently clear, return needsClarification false.
+You have TWO reasons to ask a question:
 
-Previous clarifications already given:
+REASON 1 — TOPIC AMBIGUITY: The prompt refers to something unclear.
+Examples:
+- "Write about the world war" -> ask which world war
+- "Write about the president's policy" -> ask which country
+- "Write about the war" -> ask which conflict
+- "Write about the company" -> ask which company
+- After user says "neither, I meant the israel-palestine war" -> now ask something specific about THAT topic, like "Are you focusing on the humanitarian crisis, the military conflict, the political negotiations, or the historical roots of the conflict?"
+
+REASON 2 — TOO VAGUE TO SOURCE WELL: The prompt is broad enough that a more specific angle will produce better human-written sources and a lower AI score.
+Examples:
+- "Why is Ronaldo so good?" -> ask which aspect: athleticism, career, mentality, or technique
+- "Write about climate change" -> ask which angle: science, politics, economics, or human stories
+- "Write about social media" -> ask which angle: mental health, politics, business, or youth culture
+- "Write about the israel-palestine war" -> ask which angle: humanitarian impact, military conflict, political negotiations, or historical roots
+
+CRITICAL RULES:
+- After a user corrects you or gives an unexpected answer, always check if a follow-up is now needed about the NEW topic they revealed. Do not just accept and move on if the new topic is still vague.
+- "all" or "everything" = valid answer, move on
+- "none of those, I meant X" = update your understanding AND ask a follow-up about X if X is still vague
+- Do NOT ask about word count, tone, text type, or citations
+- Ask ONE question maximum per round
+- Stop asking when the topic is specific enough to find targeted sources
+- If the prompt appears to be a school assignment brief or rubric with multiple possible topics listed, ask the user: which topic and which specific country or community do you want to focus on? This is the most important question for an assignment brief.
+- If the user has already specified a topic and location from an assignment brief, do not ask again — proceed.
+
+Previous clarifications:
 ${prevAnswered}
 
 Return ONLY valid JSON:
@@ -39,7 +55,17 @@ Return ONLY valid JSON:
 or
 {"needsClarification": false}`
 
-    const raw = await claude(system, 'Prompt: ' + prompt)
+    const userMsg =
+      'Prompt: ' +
+      prompt +
+      (clarificationsSoFar && clarificationsSoFar.length > 0
+        ? '\nPrevious Q&A:\n' +
+          clarificationsSoFar
+            .map((c: { question: string; answer: string }) => 'Q: ' + c.question + '\nA: ' + c.answer)
+            .join('\n')
+        : '')
+
+    const raw = await claude(system, userMsg, needsWebSearch)
     const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim())
     return NextResponse.json(parsed)
   } catch {

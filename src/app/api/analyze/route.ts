@@ -15,32 +15,38 @@ The system works by:
 2. Translating those passages literally into English
 3. Stitching them together with minimal AI connective tissue
 
-This means the system performs BEST when:
-- The topic is widely covered by human journalists, academics, bloggers, researchers
-- Content exists in multiple languages (not just English)
-- The writing does not require personal experiences or private information
-- The content does not depend on a specific document the user has not provided
+CRITICAL RULE: Judge based on the UNDERLYING TOPIC, not the document format or framing.
+- An assignment brief asking students to research climate change = research_based (the topic is climate change)
+- A school task asking for a report on migration = research_based (the topic is migration)
+- A template or brief that asks for research on any well-known topic = research_based
+- Only flag as personal/impossible if the actual content required is personal memories, private information, or analysis of an unprovided document
 
-The system performs POORLY when:
-- The prompt requires personal experiences, memories, or private information only the user has
-- The prompt requires analysis of a specific document, poem, or text that has not been provided
-- The topic is so niche or personal that no online sources exist
-- The prompt is primarily creative/fictional with no factual basis to research
+The system performs BEST when the underlying topic is:
+- Widely covered by human journalists, academics, bloggers, researchers
+- A known global issue, historical event, scientific subject, cultural topic, or current event
+- Something that exists in multiple languages online
 
-Analyze the prompt and return ONLY a JSON object with this exact structure:
+The system performs POORLY when the actual content required is:
+- Personal experiences, memories, or private information only the user has
+- Analysis of a specific private document, poem, or text not provided
+- Purely fictional/creative with no factual basis to research
+
+Categories:
+- "research_based": Underlying topic is well-covered online in multiple languages by journalists, academics, bloggers. System will perform at 85%+. Examples: climate change, migration, poverty, conflict, history, science, culture, global issues, current events, any assignment asking for research on known real-world topics.
+- "semi_personal": Topic has personal elements but general themes are researchable. System will get 65-84%. Examples: personal essay on universal themes like resilience or family, opinion pieces where the argument can be sourced even if the voice is personal.
+- "highly_personal": Content requires specific personal information OR is a close literary/textual analysis of a specific known work. System will get 30-64%. Examples: "write about how my grandmother's death changed me", literary analysis of a specific poem or novel (e.g. Ozymandias, Hamlet, To Kill a Mockingbird), analysis of a specific piece of art or music, any task where the content must come from deep reading of one specific text rather than broad research.
+- "impossible": Almost entirely personal/private with no researchable component. System will get under 30%. Examples: analysis of a private unprovided document, purely fictional story with no factual basis, writing that requires information only the user holds.
+
+IMPORTANT: Literary analysis assignments (poetry analysis, novel analysis, close reading tasks) should ALWAYS be classified as "highly_personal" even if the text being analyzed is famous and well-known. The reason: our system sources from foreign language articles and translates them. This works for factual research topics but NOT for literary analysis, where the content must come from close reading of specific lines and structural features of one text. Foreign language articles about Ozymandias will not produce good literary analysis.
+
+Return ONLY a JSON object:
 {
   "estimatedHumanPct": <number between 5 and 98>,
   "category": "research_based" | "semi_personal" | "highly_personal" | "impossible",
   "reasoning": "<one sentence explaining why>"
 }
 
-Categories:
-- "research_based": Topic is well-covered online, system will perform at 85%+. Examples: science topics, history, current events, culture, academic subjects, opinion pieces on known topics.
-- "semi_personal": Topic has some personal element but general themes exist online. System will get 65-84%. Examples: personal essay on a universal theme like resilience or family, reflective writing on a common experience.
-- "highly_personal": Topic depends heavily on specific personal information or an unknown document. System will get 30-64%. Examples: "write about how my grandmother's death changed me", "analyze this poem my teacher wrote".
-- "impossible": Topic is almost entirely personal/private with nothing to research. System will get under 30%. Examples: analysis of a private document not provided, purely fictional story with no factual basis, writing that requires information only the user holds.
-
-Return ONLY the JSON. No preamble, no explanation.`
+No preamble, no explanation.`
 
     const raw = await claude(
       system,
