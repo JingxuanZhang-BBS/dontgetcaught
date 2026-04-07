@@ -4,6 +4,15 @@
 
 ---
 
+## 2026-04-07 前后端合并：demo.html 接替旧 dashboard
+
+- **dashboard/page.tsx**：旧黑色聊天界面完全移除，改为重定向到 `/demo.html`
+- **page.tsx (landing)**：Get Started / prompt 发送后跳转到 `/demo.html`（全页面跳转，非客户端路由）
+- **next.config.js**：移除无效的 rewrite 配置
+- 后端 API 全部保持不变（`/api/clarify`, `/api/generate`, `/api/scan`, `/api/humanize`, `/api/polish`），由 demo.html 前端驱动
+
+---
+
 ## 2026-04-07 demo UI 重设计 + 动画组件整理
 
 - **demo.html** Glass Icons 移入 Card Nav 展开区域，4 个图标横排，颜色改为单色深灰
