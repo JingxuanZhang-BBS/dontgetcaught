@@ -864,6 +864,13 @@ document.addEventListener('DOMContentLoaded', () => {
   initStaggeredMenu()
   setTimeout(animateSplitText, 250)
   homeInput.focus()
+
+  // Pick up prompt from landing page
+  const pending = sessionStorage.getItem('pending_prompt')
+  if (pending) {
+    sessionStorage.removeItem('pending_prompt')
+    setTimeout(() => handleSend(pending), 400)
+  }
 })
 </script>
 </body>
