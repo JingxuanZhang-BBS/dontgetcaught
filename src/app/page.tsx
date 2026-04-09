@@ -136,7 +136,18 @@ export default function LandingPage() {
     return () => clearInterval(id)
   }, [])
 
-  useEffect(() => { window.scrollTo(0, 0) }, [])
+  useEffect(() => {
+    const target = sessionStorage.getItem('scroll_to')
+    if (target) {
+      sessionStorage.removeItem('scroll_to')
+      setTimeout(() => {
+        const el = document.getElementById(target)
+        if (el) el.scrollIntoView({ behavior: 'smooth' })
+      }, 600)
+    } else {
+      window.scrollTo(0, 0)
+    }
+  }, [])
 
   useEffect(() => {
     const onScroll = () => {
@@ -191,7 +202,7 @@ export default function LandingPage() {
   }
 
   return (
-    <div className={`${dmSans.className} text-white`} style={{ background: '#050505' }}>
+    <div className={`${dmSans.className} text-white`} style={{ background: '#050505', overflowX: 'hidden', maxWidth: '100vw' }}>
 
       {/* ── Fixed backgrounds ── */}
       <div className="fixed inset-0 z-0">
@@ -219,7 +230,7 @@ export default function LandingPage() {
 
 
       {/* ═══ SECTION 1 — Intro typing ═══ */}
-      <section className="h-screen flex flex-col items-center justify-center px-6 relative z-10">
+      <section id="home" className="h-screen flex flex-col items-center justify-center px-6 relative z-10">
         <div className="max-w-4xl w-full text-center">
           {(introPhase === 'typing1' || introPhase === 'pause') && (
             <div className="transition-opacity duration-700" style={{ opacity: introPhase === 'pause' ? 0 : 1 }}>
@@ -344,6 +355,7 @@ export default function LandingPage() {
 
       {/* ═══ SECTION 4 — How It Works ═══ */}
       <section
+        id="how-it-works"
         className="relative z-10 overflow-hidden"
         style={{ background: '#08080f', minHeight: '100vh' }}
       >
