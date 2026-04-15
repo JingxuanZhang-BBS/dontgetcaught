@@ -210,6 +210,18 @@ html,body{height:100%;background:var(--sb);color:var(--text);font-family:var(--s
 .hist-card-meta{font-size:11.5px;color:var(--text3);margin-bottom:8px}
 .hist-card-snippet{font-size:13px;color:var(--text2);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .hist-empty{text-align:center;color:var(--text3);font-size:14px;padding:60px 0}
+
+/* ━━ FUN FACT BUBBLE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.fun-fact-wrap{display:flex;align-items:flex-start;gap:11px}
+.ff-spinner{width:15px;height:15px;border:1.5px solid rgba(232,168,53,.2);border-top-color:var(--amber);border-radius:50%;animation:ffSpin .75s linear infinite;flex-shrink:0;margin-top:3px}
+@keyframes ffSpin{to{transform:rotate(360deg)}}
+.fun-fact-content{flex:1}
+.fun-fact-tag{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);margin-bottom:5px;opacity:.8}
+.fun-fact-body{font-size:14.5px;color:var(--text);line-height:1.8;min-height:1.3em}
+.ff-cursor{display:inline-block;width:2px;height:.85em;background:var(--text);margin-left:1px;vertical-align:text-bottom;border-radius:1px;animation:ffBlink .6s ease-in-out infinite}
+@keyframes ffBlink{0%,100%{opacity:1}50%{opacity:0}}
+.fun-fact-body.pulsing{animation:ffPulse 2.5s ease-in-out infinite}
+@keyframes ffPulse{0%,100%{opacity:1}50%{opacity:.15}}
 </style>
 </head>
 <body>
@@ -823,6 +835,12 @@ async function generate(){
   const pid=addProgressMsg()
   const plog=(t,type='info')=>addLog(pid,t,C[type]||'#909090')
   workingText='';let finalScore=0
+
+  // Fun facts — separate bubble, fires in parallel, doesn't block generation
+  let funFact=null
+  fetch('/api/fun-facts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:state.prompt})})
+    .then(r=>r.json()).then(data=>{if(data.facts?.length)funFact=createFunFactBubble(data.facts)}).catch(()=>{})
+
   try{
     setPhase(pid,1,'active')
     plog('Phase 1 — searching foreign language sources…','step')
@@ -864,7 +882,7 @@ async function generate(){
     const msg=e instanceof Error?e.message:String(e)
     plog('Error: '+msg,'error');[1,2,3,4].forEach(n=>setPhase(pid,n,'error'))
     addAiMsg('Something went wrong: '+msg+'. Please try again.')
-  }finally{resetState();setLock(false)}
+  }finally{if(funFact){funFact.stop();removeMsg(funFact.msgId)};resetState();setLock(false)}
 }
 
 function doUndo(userMsgId){
@@ -887,6 +905,56 @@ homeInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.prev
 chatInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleSend()}})
 homeSend.onclick=()=>handleSend()
 chatSend.onclick=()=>handleSend()
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// FUN FACT BUBBLE — shared helper
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function createFunFactBubble(facts){
+  let idx=0,cycleInterval=null,typeInterval=null,cursor=null
+  const msgId=newId()
+  const el=mkRow(msgId,'ai')
+  el.innerHTML=`<div><div class="ai-label">DontGetCaught</div><div class="fun-fact-wrap"><div class="ff-spinner"></div><div class="fun-fact-content"><div class="fun-fact-tag">Fun Fact</div><div class="fun-fact-body" id="ffb-${msgId}"></div></div></div></div>`
+  const bodyEl=document.getElementById('ffb-'+msgId)
+
+  const showFact=()=>{
+    if(typeInterval){clearInterval(typeInterval);typeInterval=null}
+    bodyEl.classList.remove('pulsing')
+    // fade out current content
+    bodyEl.style.transition='opacity .2s ease'
+    bodyEl.style.opacity='0'
+    setTimeout(()=>{
+      // dots
+      bodyEl.innerHTML='<span class="typing-dots" style="display:inline-flex;gap:5px;align-items:center;padding:2px 0"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></span>'
+      bodyEl.style.transition='none'
+      bodyEl.style.opacity='1'
+      scrollBottom()
+      setTimeout(()=>{
+        // type out fact
+        const fact=facts[idx%facts.length];idx++
+        bodyEl.innerHTML=''
+        cursor=document.createElement('span')
+        cursor.className='ff-cursor'
+        bodyEl.appendChild(cursor)
+        let ci=0
+        typeInterval=setInterval(()=>{
+          if(ci<fact.length){
+            bodyEl.insertBefore(document.createTextNode(fact[ci]),cursor);ci++
+            if(ci%12===0)scrollBottom()
+          }else{
+            clearInterval(typeInterval);typeInterval=null
+            // typing done — cursor stays, whole text starts pulsing
+            bodyEl.classList.add('pulsing')
+          }
+        },8)
+      },750)
+    },220)
+  }
+
+  showFact()
+  cycleInterval=setInterval(showFact,17000)
+  return{msgId,stop:()=>{if(cycleInterval)clearInterval(cycleInterval);if(typeInterval)clearInterval(typeInterval)}}
+}
+
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // INIT
