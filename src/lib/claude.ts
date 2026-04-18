@@ -16,11 +16,12 @@ function headers() {
 export async function claude(
   systemText: string,
   userMessage: string,
-  useWebSearch = false
+  useWebSearch = false,
+  maxTokens = 4000
 ): Promise<string> {
   const body: Record<string, unknown> = {
     model: MODEL,
-    max_tokens: 4000,
+    max_tokens: maxTokens,
     system: [
       { type: 'text', text: systemText, cache_control: { type: 'ephemeral' } },
     ],

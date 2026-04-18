@@ -1,11 +1,134 @@
 import { NextResponse } from 'next/server'
 import { claude, TEXT_TYPES } from '@/lib/claude'
 
+const PARA_ENGLISH_SYSTEM = `If the text below is already in English, return it word-for-word, unchanged. If it is in any other language, translate it into English. Output only the result — no explanation, no commentary, nothing else.`
+
+const FULL_DOC_ENGLISH_SYSTEM = `The text between ===DOCUMENT START=== and ===DOCUMENT END=== may contain sentences in languages other than English. Go through it sentence by sentence. For each sentence: if it is in English, copy it exactly. If it is in any other language, translate it into English. Output the corrected document only — no explanation, no markers.`
+
+function detectNonTextDeliverable(prompt: string): boolean {
+  if (!prompt || typeof prompt !== 'string') return false
+  const t = prompt.trim()
+  if (/\bhelp me write\b/i.test(t) || /\bwrite (my |the |a )(reflection|essay|paper)\b/i.test(t)) return false
+  return /\bI want to (make|create) a drawing\.?\s*$/i.test(t)
+    || /\bI want to (make|create) a painting\.?\s*$/i.test(t)
+}
+
+function looksLikeMetaRefusal(text: string): boolean {
+  if (!text || typeof text !== 'string') return true
+  const head = text.slice(0, 1200).toLowerCase()
+  const signals = [
+    /i apologize/,
+    /you're absolutely right/,
+    /haven't (actually )?shared/,
+    /please (go ahead and )?(share|paste|provide)/,
+    /feel free to (share|paste|send)/,
+    /you haven't (actually )?(given|provided|shared)/,
+    /could you (please )?(share|provide|paste)/,
+    /what (specific )?text (would you|do you want)/,
+    /i (don't|do not) have (the |any )?(document|text)/,
+    /translation task, but you/,
+    /let me know (what|if)/,
+    /i don't see any (document|text)/,
+    /no actual (document|essay|text) (has been |)/,
+    /you've given me (detailed )?instructions/,
+    /please share the (text|document)/,
+    /however, no actual/,
+  ]
+  return signals.some(re => re.test(head))
+}
+
+function enforceOutputPlausible(input: string, output: string): boolean {
+  if (!output || !String(output).trim()) return false
+  if (looksLikeMetaRefusal(output)) return false
+  const inL = input.length
+  const outL = output.length
+  if (inL > 600 && outL < inL * 0.3) return false
+  if (inL > 2000 && outL < 400) return false
+  return true
+}
+
+async function enforceEnglishDraft(draft: string): Promise<string> {
+  if (!draft || !draft.trim()) return draft
+
+  const paragraphs = draft.split(/\n\n+/)
+  const fixedParagraphs = await Promise.all(
+    paragraphs.map(async para => {
+      if (para.trim().length < 12) return para
+      try {
+        const raw = await claude(PARA_ENGLISH_SYSTEM, para, false, 8192)
+        const out = raw.replace(/^#{1,6}\s+/gm, '').replace(/\*\*/g, '').trim()
+        if (enforceOutputPlausible(para, out)) return out
+        return para
+      } catch {
+        return para
+      }
+    })
+  )
+  let out = fixedParagraphs.join('\n\n')
+
+  const maxWhole = 45000
+  if (out.length <= maxWhole) {
+    try {
+      const wrapped = '===DOCUMENT START===\n' + out + '\n===DOCUMENT END==='
+      const wholeRaw = await claude(FULL_DOC_ENGLISH_SYSTEM, wrapped, false, 16384)
+      const whole = wholeRaw.replace(/^#{1,6}\s+/gm, '').replace(/\*\*/g, '').trim()
+      if (enforceOutputPlausible(out, whole)) out = whole
+    } catch {
+      // keep paragraph-stage output
+    }
+  } else {
+    const parts = out.split(/\n\n+/)
+    const chunks: string[] = []
+    let buf: string[] = []
+    let len = 0
+    for (const p of parts) {
+      if (len + p.length > 12000 && buf.length) {
+        chunks.push(buf.join('\n\n'))
+        buf = [p]
+        len = p.length
+      } else {
+        buf.push(p)
+        len += p.length + 2
+      }
+    }
+    if (buf.length) chunks.push(buf.join('\n\n'))
+
+    const merged = await Promise.all(
+      chunks.map(async chunk => {
+        if (chunk.trim().length < 20) return chunk
+        try {
+          const wrapped = '===DOCUMENT START===\n' + chunk + '\n===DOCUMENT END==='
+          const wRaw = await claude(FULL_DOC_ENGLISH_SYSTEM, wrapped, false, 16384)
+          const w = wRaw.replace(/^#{1,6}\s+/gm, '').replace(/\*\*/g, '').trim()
+          if (enforceOutputPlausible(chunk, w)) return w
+          return chunk
+        } catch {
+          return chunk
+        }
+      })
+    )
+    out = merged.join('\n\n')
+  }
+
+  return out
+}
+
 export async function POST(request: Request) {
   try {
-    const { prompt, citations, textType } = await request.json()
+    const { prompt, citations, textType, category, writingMode } = await request.json()
     if (!prompt) {
       return NextResponse.json({ error: 'Missing prompt' }, { status: 400 })
+    }
+
+    if (detectNonTextDeliverable(prompt)) {
+      return NextResponse.json(
+        {
+          error: 'NON_TEXT',
+          message:
+            "DontGetCaught only outputs written text — we can't create drawings, paintings, filmed dances, or other non-text art. If you need the written part of an assignment (for example a reflection or essay about your creative work), ask specifically for that written piece and we'll help.",
+        },
+        { status: 400 }
+      )
     }
 
     const typeConfig = TEXT_TYPES[textType] || TEXT_TYPES.oped
@@ -13,6 +136,43 @@ export async function POST(request: Request) {
       ? 'Add a short in-text citation in parentheses after each passage e.g. (Source Name, Year). Do NOT mention the language it was translated from. Always include a full SOURCES section at the end.'
       : 'Do NOT include any in-text citations in the body. Always include a full SOURCES section at the end listing every URL used.'
 
+    let resolvedMode = writingMode
+    if (!resolvedMode) {
+      resolvedMode = !category || category === 'research_based' ? 'research' : 'best_effort'
+    }
+    const useResearchPipeline = resolvedMode === 'research'
+
+    // ── BEST EFFORT MODE ───────────────────────────────────────────────────
+    if (!useResearchPipeline) {
+      const bestEffortSystem = `You are dontgetcaught in direct writing mode. The user's request does not fit our usual workflow (finding foreign news and translating it). You must write the full piece yourself in strong, natural English.
+
+STRICT RULES:
+- Output ONLY the completed written work (essay, reflection, memoir, literary analysis, etc.). No title line like "Here is your essay." No preamble or postscript.
+- NEVER refuse. NEVER say you don't see a document, never ask the user to paste or attach text, never apologize for lacking a file, never describe translation or editing workflows you cannot perform.
+- If the prompt contains a long course handout, read it and produce what the student actually needs (often a personal reflection, creative rationale, or analysis) using details from their instructions.
+- Match the text type and tone implied by the prompt. Use "I" for personal reflection when appropriate.
+- Respect word count, MLA, or format requirements stated in the prompt when present.
+- ${citationRule}
+
+TEXT TYPE: ${typeConfig.name}
+${typeConfig.format}`
+
+      try {
+        let draft = await claude(bestEffortSystem, prompt, false, 16384)
+        draft = draft.replace(/^#{1,6}\s+/gm, '').replace(/\*\*/g, '').replace(/\[\d+\]/g, '').trim()
+        if (looksLikeMetaRefusal(draft)) {
+          return NextResponse.json(
+            { error: "The model refused to write. Try rephrasing your request as a clear writing task (e.g. 'Write a 700-word reflection about…')." },
+            { status: 500 }
+          )
+        }
+        return NextResponse.json({ draft, writingMode: 'best_effort' })
+      } catch (err: unknown) {
+        return NextResponse.json({ error: 'Generate error: ' + String(err) }, { status: 500 })
+      }
+    }
+
+    // ── RESEARCH PIPELINE MODE ─────────────────────────────────────────────
     const isDocumentBrief =
       prompt.length > 500 &&
       /rubric|criterion|assignment|task|report structure|research question|marks|assessment|bibliography|learning objective|ATL|MYP|IB/i.test(prompt)
@@ -47,10 +207,10 @@ CONNECTIVE TISSUE between source blocks — keep minimal:
 
 CRITICAL OUTPUT RULES:
 - NEVER include the original foreign language text. Translate it and include ONLY the English version.
-- NEVER mention that you searched foreign language sources, gathered background material, or describe your process in any way. The reader should never know how the piece was created.
-- NEVER write phrases like "A French analysis reveals:", "Spanish sources indicate:", "According to a German report:", "I started gathering", "This analysis requires". Just state the content as fact.
+- NEVER mention that you searched foreign language sources, gathered background material, or describe your process in any way.
+- NEVER write phrases like "A French analysis reveals:", "Spanish sources indicate:", "According to a German report:". Just state the content as fact.
 - If a citation is needed, format it as (Source Name, Year) only — never mention the language.
-- The piece must read as if written by a single knowledgeable human author. No trace of the sourcing process should appear anywhere.
+- The piece must read as if written by a single knowledgeable human author.
 
 ${citationRule}
 Do NOT bold any text. No markdown # headers. No footnote numbers.
@@ -73,9 +233,9 @@ LANGUAGE STRATEGY:
    - When a statistic needs context to make sense, add minimal necessary context.
    - Never leave a sentence that would confuse a reader with no background in the topic.
    - Do NOT over-smooth into polished English — preserve the rhythm of the source language.
-6. Translate EVERY extracted block into English before assembling. Do not leave any foreign language text in the final output — not a single word. Every sentence in the finished piece must be in English. If you find yourself including a foreign language sentence, stop and translate it first.
+6. Translate EVERY extracted block into English before assembling. Not a single word of another language in the final output.
 7. Assemble the piece from translated blocks.
-8. MANDATORY SELF-CHECK before outputting: Read through your entire draft. If you find ANY sentence that is not in English — any word in French, Spanish, German, Portuguese, Chinese, Japanese, or any other language — translate it immediately. Do not output the piece until every single sentence is in English. This step is required every time.
+8. MANDATORY SELF-CHECK before outputting: Read through your entire draft. If you find ANY sentence that is not in English — translate it immediately. Do not output the piece until every single sentence is in English.
 
 CONNECTIVE TISSUE — keep it minimal (max 1-2 short sentences between blocks):
 - Sharp, slightly impatient human expert voice.
@@ -98,11 +258,11 @@ BEFORE OUTPUTTING, fix:
 - Any two consecutive statistics that appear to contradict each other — explain or cut one
 
 CRITICAL OUTPUT RULES:
-- NEVER include the original foreign language text. Translate it and include ONLY the English version.
-- NEVER mention that you searched foreign language sources, gathered background material, or describe your process in any way. The reader should never know how the piece was created.
-- NEVER write phrases like "A French analysis reveals:", "Spanish sources indicate:", "According to a German report:", "I started gathering", "This analysis requires". Just state the content as fact.
-- If a citation is needed, format it as (Source Name, Year) only — never mention the language.
-- The piece must read as if written by a single knowledgeable human author. No trace of the sourcing process should appear anywhere.
+- NEVER include the original foreign language text.
+- NEVER mention that you searched foreign language sources or describe your process.
+- NEVER write phrases like "A French analysis reveals:", "Spanish sources indicate:". Just state content as fact.
+- If a citation is needed, format it as (Source Name, Year) only.
+- The piece must read as if written by a single knowledgeable human author.
 
 ${citationRule}
 Do NOT bold any text. No markdown # headers. No footnote numbers.
@@ -110,50 +270,30 @@ Output ONLY the finished piece and SOURCES section. Nothing else.`
     }
 
     let draft = await claude(system, prompt, true)
-    draft = draft
-      .replace(/^#{1,6}\s+/gm, '')
-      .replace(/\*\*/g, '')
-      .replace(/\[\d+\]/g, '')
-      .trim()
+    draft = draft.replace(/^#{1,6}\s+/gm, '').replace(/\*\*/g, '').replace(/\[\d+\]/g, '').trim()
 
-    // Pass 2: paragraph-level English enforcement in parallel
-    const paraLangSystem = `If the text below is already in English, return it word-for-word, unchanged. If it is in any other language, translate it into English. Output only the result — no explanation, no commentary, nothing else.`
-    const paragraphs = draft.split(/\n\n+/)
-    const fixedParagraphs = await Promise.all(
-      paragraphs.map(async para => {
-        if (para.trim().length < 15) return para
-        try {
-          const result = await claude(paraLangSystem, para)
-          return result.replace(/^#{1,6}\s+/gm, '').replace(/\*\*/g, '').trim()
-        } catch {
-          return para
-        }
-      })
-    )
-    draft = fixedParagraphs.join('\n\n')
+    draft = await enforceEnglishDraft(draft)
 
-    // Pass 3: translation artifact cleanup
     const artifactCleanupSystem = `You are a copy editor fixing translation artifacts in a text assembled from foreign language sources. Find and fix only sentences that are broken or unnatural due to bad translation. Do not touch sentences that read naturally.
 
 Fix ONLY these problems:
 1. Foreign word order that makes no sense in English — rewrite that sentence in natural English with the same meaning
 2. Completely meaningless or garbled fragments — delete them
 3. Literal translations of idioms that produce nonsense in English — replace with the natural English equivalent
-4. Wrong word choices from translation errors (e.g. "internal courts" → "domestic courts", "does not provide any paragraph" → "contains no provision") — fix the word only
+4. Wrong word choices from translation errors — fix the word only
 5. Bureaucratic copy-paste from UN resolutions or legal documents that reads like no human wrote it — simplify to plain English
 
 Do NOT rewrite sentences that already read naturally. Do NOT change facts, statistics, or claims. Do NOT add content.
-
 Output the complete corrected text. No commentary.`
 
     try {
       const artifactCleaned = await claude(artifactCleanupSystem, draft)
       draft = artifactCleaned.replace(/^#{1,6}\s+/gm, '').replace(/\*\*/g, '').trim()
     } catch {
-      // artifact cleanup is best-effort, proceed with current draft
+      // best-effort
     }
 
-    return NextResponse.json({ draft })
+    return NextResponse.json({ draft, writingMode: 'research' })
   } catch (err: unknown) {
     return NextResponse.json(
       { error: 'Generate error: ' + String(err) },
