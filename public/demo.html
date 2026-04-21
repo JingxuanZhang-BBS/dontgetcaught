@@ -24,16 +24,22 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --sb:#191919;--sb-border:rgba(255,255,255,0.07);--sb-text:rgba(255,255,255,0.68);--sb-dim:rgba(255,255,255,0.28);--sb-hover:rgba(255,255,255,0.055);
-  --bg:#ffffff;--bg2:#f7f6f4;--bg3:#f0efed;
-  --border:rgba(0,0,0,0.09);--border-md:rgba(0,0,0,0.14);
-  --text:#191919;--text2:#787878;--text3:#bbb;
+  --sb:#0f0f0f;--sb-border:rgba(255,255,255,0.07);--sb-text:rgba(255,255,255,0.68);--sb-dim:rgba(255,255,255,0.28);--sb-hover:rgba(255,255,255,0.055);
+  --bg:#141414;--bg2:#1c1c1c;--bg3:#232323;
+  --border:rgba(255,255,255,0.08);--border-md:rgba(255,255,255,0.13);
+  --text:#e8e8e8;--text2:#888;--text3:#4a4a4a;
   --green:#2ecc71;--amber:#e8a835;--blue:#5b8fbe;--red:#c0392b;
   --mono:'SF Mono','Fira Code','Consolas',monospace;--serif:Georgia,serif;--sans:'DM Sans',sans-serif;
   --r:8px;--sbw:220px;
 }
+[data-theme="light"]{
+  --sb:#191919;--sb-border:rgba(255,255,255,0.07);--sb-text:rgba(255,255,255,0.68);--sb-dim:rgba(255,255,255,0.28);--sb-hover:rgba(255,255,255,0.055);
+  --bg:#ffffff;--bg2:#f7f6f4;--bg3:#f0efed;
+  --border:rgba(0,0,0,0.09);--border-md:rgba(0,0,0,0.14);
+  --text:#191919;--text2:#787878;--text3:#bbb;
+}
 html,body{height:100%;background:var(--sb);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased}
-::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.12);border-radius:99px}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:99px}
 
 /* ━━ LAYOUT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 #app{display:flex;height:100vh;overflow:hidden}
@@ -88,10 +94,10 @@ html,body{height:100%;background:var(--sb);color:var(--text);font-family:var(--s
 #sm-toggle.open .sm-bar:last-child{bottom:4px;transform:rotate(-45deg)}
 #sm-prelayers{position:fixed;top:0;right:0;bottom:0;width:clamp(280px,38vw,460px);pointer-events:none;z-index:201}
 .sm-prelayer{position:absolute;top:0;right:0;width:100%;height:100%}
-#sm-panel{position:fixed;top:0;right:0;width:clamp(280px,38vw,460px);height:100%;background:#fff;display:flex;flex-direction:column;padding:5em 2.5em 2em;overflow-y:auto;z-index:202;pointer-events:auto}
+#sm-panel{position:fixed;top:0;right:0;width:clamp(280px,38vw,460px);height:100%;background:#1a1a1a;display:flex;flex-direction:column;padding:5em 2.5em 2em;overflow-y:auto;z-index:202;pointer-events:auto}
 .sm-panel-list{list-style:none;display:flex;flex-direction:column;gap:.4rem;margin-bottom:auto}
 .sm-panel-item-wrap{overflow:hidden;line-height:1}
-.sm-panel-item{display:block;color:#111;font-weight:700;font-size:2.8rem;cursor:pointer;line-height:1.05;letter-spacing:-1.5px;text-transform:uppercase;text-decoration:none;transition:color .2s;padding-right:1.2em}
+.sm-panel-item{display:block;color:#e8e8e8;font-weight:700;font-size:2.8rem;cursor:pointer;line-height:1.05;letter-spacing:-1.5px;text-transform:uppercase;text-decoration:none;transition:color .2s;padding-right:1.2em}
 .sm-panel-item:hover{color:#555}
 .sm-item-label{display:inline-block;will-change:transform;transform-origin:50% 100%}
 .sm-item-num{font-size:11px;font-weight:400;color:#aaa;margin-left:6px;letter-spacing:0;font-family:var(--mono);vertical-align:super}
@@ -99,7 +105,7 @@ html,body{height:100%;background:var(--sb);color:var(--text);font-family:var(--s
 .sm-socials-title{font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#999;margin-bottom:12px}
 .sm-socials-links{display:flex;gap:20px}
 .sm-socials-link{font-size:13px;color:#aaa;text-decoration:none;transition:color .15s;font-weight:500}
-.sm-socials-link:hover{color:#191919}
+.sm-socials-link:hover{color:#e8e8e8}
 
 /* ━━ MAIN ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 #main{flex:1;background:var(--bg);display:flex;flex-direction:column;overflow:hidden;position:relative}
@@ -117,7 +123,7 @@ html,body{height:100%;background:var(--sb);color:var(--text);font-family:var(--s
 .hi-btn{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;border:none;background:transparent;font-size:12.5px;font-family:var(--sans);color:var(--text2);cursor:pointer;transition:background .12s}
 .hi-btn:hover{background:var(--bg2);color:var(--text)}
 #upload-name-home{font-size:11.5px;color:var(--green);margin-left:4px}
-#home-send{width:34px;height:34px;border-radius:8px;border:none;background:var(--text);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity .15s;flex-shrink:0}
+#home-send{width:34px;height:34px;border-radius:8px;border:none;background:var(--text);color:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity .15s;flex-shrink:0}
 #home-send:disabled{opacity:.25;cursor:not-allowed}
 #home-send:not(:disabled):hover{opacity:.78}
 
@@ -178,14 +184,14 @@ html,body{height:100%;background:var(--sb);color:var(--text);font-family:var(--s
 .tl-sub{font-size:11px;color:var(--text3);margin-top:2px}
 .log-wrap{border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
 .log-head{padding:8px 12px;border-bottom:1px solid var(--border);font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);background:var(--bg2)}
-.log-body{background:#f9f8f7;padding:10px 12px;font-family:var(--mono);font-size:11.5px;line-height:2;max-height:170px;overflow-y:auto;color:var(--text2)}
+.log-body{background:var(--bg3);padding:10px 12px;font-family:var(--mono);font-size:11.5px;line-height:2;max-height:170px;overflow-y:auto;color:var(--text2)}
 .result-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
 .result-title{font-size:10.5px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:var(--text3)}
 .score-tag{font-size:11px;font-family:var(--mono);padding:3px 10px;border-radius:99px;font-weight:500;letter-spacing:.04em}
 .score-green{background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3);color:#1a9954}
 .score-yellow{background:rgba(232,168,53,.1);border:1px solid rgba(232,168,53,.3);color:#9e6e10}
 .score-red{background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.3);color:var(--red)}
-.result-body{border:1px solid var(--border);border-radius:var(--r);padding:20px 22px;background:var(--bg2);font-family:var(--serif);font-size:15px;line-height:1.95;color:#333;max-height:500px;overflow-y:auto}
+.result-body{border:1px solid var(--border);border-radius:var(--r);padding:20px 22px;background:var(--bg2);font-family:var(--serif);font-size:15px;line-height:1.95;color:var(--text);max-height:500px;overflow-y:auto}
 .result-body p{margin-bottom:1em}
 .result-actions{display:flex;gap:7px;margin-top:12px}
 .act-btn{padding:7px 18px;border-radius:7px;font-size:12px;font-family:var(--sans);font-weight:500;letter-spacing:.02em;cursor:pointer;border:1px solid var(--border-md);transition:all .13s;background:transparent;color:var(--text2)}
@@ -203,7 +209,7 @@ html,body{height:100%;background:var(--sb);color:var(--text);font-family:var(--s
 .ci-btn{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;border:none;background:transparent;cursor:pointer;color:var(--text2);font-size:14px;transition:background .12s}
 .ci-btn:hover{background:var(--bg2);color:var(--text)}
 #upload-name-chat{font-size:11px;color:var(--green);margin-left:4px}
-#chat-send{width:30px;height:30px;border-radius:7px;border:none;background:var(--text);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity .15s;flex-shrink:0}
+#chat-send{width:30px;height:30px;border-radius:7px;border:none;background:var(--text);color:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity .15s;flex-shrink:0}
 #chat-send:disabled{opacity:.25;cursor:not-allowed}
 #chat-send:not(:disabled):hover{opacity:.8}
 .chat-hint{font-size:11px;color:var(--text3);margin-top:7px}
@@ -213,6 +219,33 @@ html,body{height:100%;background:var(--sb);color:var(--text);font-family:var(--s
 .home-sub{animation:homeIn .45s .08s ease both}
 .home-input-wrap{animation:homeIn .45s .13s ease both}
 .quick-guide{animation:homeIn .45s .2s ease both}
+
+/* ━━ SETTINGS VIEW ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#settings{display:none;flex:1;flex-direction:column;overflow-y:auto}
+#settings-inner{max-width:480px;width:100%;margin:0 auto;padding:48px 28px 60px}
+.settings-title{font-size:22px;font-weight:600;color:var(--text);margin-bottom:32px;letter-spacing:-.01em}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:18px 0;border-bottom:1px solid var(--border)}
+.settings-row-label{font-size:14px;color:var(--text);font-weight:500}
+.settings-row-sub{font-size:12px;color:var(--text2);margin-top:2px}
+.theme-toggle{display:flex;gap:6px;background:var(--bg2);border-radius:99px;padding:3px}
+.theme-btn{padding:5px 16px;border-radius:99px;border:none;font-size:12.5px;font-family:var(--sans);font-weight:500;cursor:pointer;transition:all .15s;color:var(--text2);background:transparent}
+.theme-btn.active{background:var(--text);color:var(--bg)}
+
+/* ━━ PROFILE VIEW ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#profile{display:none;flex:1;flex-direction:column;overflow-y:auto}
+#profile-inner{max-width:480px;width:100%;margin:0 auto;padding:48px 28px 60px;display:flex;flex-direction:column}
+.prof-avatar{width:64px;height:64px;border-radius:50%;background:var(--text);color:#fff;font-size:22px;font-weight:600;display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+.prof-email{font-size:16px;font-weight:500;color:var(--text);margin-bottom:6px}
+.prof-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:rgba(91,143,190,.12);border:1px solid rgba(91,143,190,.25);color:var(--blue);margin-bottom:28px}
+.prof-divider{border:none;border-top:1px solid var(--border);margin:0 0 24px}
+.prof-section-label{font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.prof-credits-bar-wrap{background:var(--bg2);border-radius:99px;height:6px;overflow:hidden;margin-bottom:8px}
+.prof-credits-bar{height:100%;border-radius:99px;background:var(--text);transition:width .5s ease}
+.prof-credits-text{font-size:13px;color:var(--text2);margin-bottom:28px}
+.prof-meta-label{color:var(--text3);font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
+.prof-meta-val{font-size:13px;color:var(--text2);margin-bottom:28px}
+.prof-signout{padding:9px 22px;border-radius:8px;border:1px solid var(--border-md);background:transparent;font-size:13px;font-family:var(--sans);font-weight:500;color:var(--text2);cursor:pointer;transition:all .13s}
+.prof-signout:hover{background:rgba(192,57,43,.06);border-color:rgba(192,57,43,.3);color:var(--red)}
 
 /* ━━ HISTORY VIEW ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 #history{display:none;flex:1;flex-direction:column;overflow:hidden}
@@ -229,9 +262,9 @@ html,body{height:100%;background:var(--sb);color:var(--text);font-family:var(--s
 /* ━━ MODE TABS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 .mode-tabs{display:flex;gap:4px;padding:10px 12px 8px;border-bottom:1px solid var(--border)}
 .mode-tab{padding:4px 13px;border-radius:99px;border:none;font-size:12.5px;font-family:var(--sans);font-weight:500;cursor:pointer;transition:all .13s;letter-spacing:.01em;line-height:1.5}
-.mode-tab.active{background:var(--text);color:#fff}
-.mode-tab:not(.active){background:transparent;color:var(--text2)}
-.mode-tab:not(.active):hover{background:var(--bg2);color:var(--text)}
+.mode-tab.active{background:var(--text);color:var(--bg)}
+.mode-tab:not(.active){background:transparent;color:var(--text2);border:1px solid var(--border-md)}
+.mode-tab:not(.active):hover{background:var(--bg2);color:var(--text);border-color:var(--text3)}
 
 /* ━━ FUN FACT BUBBLE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 .fun-fact-wrap{display:flex;align-items:flex-start;gap:11px}
@@ -276,11 +309,17 @@ html,body{height:100%;background:var(--sb);color:var(--text);font-family:var(--s
         </svg>
         Upload
       </button>
-      <button class="sb-nav-item" id="sb-settings">
+      <button class="sb-nav-item" id="sb-settings" onclick="goSettings()">
         <svg class="sb-nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
           <circle cx="8" cy="8" r="2"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/>
         </svg>
         Settings
+      </button>
+      <button class="sb-nav-item" id="sb-profile" onclick="goProfile()">
+        <svg class="sb-nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+          <circle cx="8" cy="5.5" r="2.5"/><path d="M2.5 13.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/>
+        </svg>
+        Profile
       </button>
     </nav>
 
@@ -315,7 +354,7 @@ html,body{height:100%;background:var(--sb);color:var(--text);font-family:var(--s
 
     <!-- Home screen -->
     <div id="home">
-      <div class="home-icon">DGC</div>
+      <img src="/776e97c779b6f253df59a1034b9fbf25.png" alt="DontGetCaught" style="width:88px;height:88px;object-fit:cover;margin-bottom:18px;border-radius:50%">
       <h1 id="hero-heading">Write anything.<br>Get caught by nothing.</h1>
       <p class="home-sub">AI writing that passes every detector, every time.</p>
 
@@ -382,6 +421,41 @@ html,body{height:100%;background:var(--sb);color:var(--text);font-family:var(--s
       </div>
     </div>
 
+    <!-- Settings screen -->
+    <div id="settings">
+      <div id="settings-inner">
+        <div class="settings-title">Settings</div>
+        <div class="settings-row">
+          <div>
+            <div class="settings-row-label">Appearance</div>
+            <div class="settings-row-sub">Choose your preferred theme</div>
+          </div>
+          <div class="theme-toggle">
+            <button class="theme-btn" id="theme-btn-dark" onclick="setTheme('dark')">Dark</button>
+            <button class="theme-btn" id="theme-btn-light" onclick="setTheme('light')">Light</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile screen -->
+    <div id="profile">
+      <div id="profile-inner">
+        <div class="prof-avatar" id="prof-avatar">–</div>
+        <div class="prof-email" id="prof-email">–</div>
+        <div class="prof-badge">Beta Member</div>
+        <hr class="prof-divider">
+        <div class="prof-section-label">Credits</div>
+        <div class="prof-credits-bar-wrap"><div class="prof-credits-bar" id="prof-bar" style="width:100%"></div></div>
+        <div class="prof-credits-text" id="prof-credits-text">– / 10 credits remaining</div>
+        <hr class="prof-divider">
+        <div class="prof-meta-label">Member since</div>
+        <div class="prof-meta-val" id="prof-since">–</div>
+        <hr class="prof-divider">
+        <button class="prof-signout" onclick="signOut()">Sign Out</button>
+      </div>
+    </div>
+
     <!-- History screen -->
     <div id="history">
       <div id="history-inner">
@@ -437,6 +511,7 @@ html,body{height:100%;background:var(--sb);color:var(--text);font-family:var(--s
       <li class="sm-panel-item-wrap"><a class="sm-panel-item" onclick="smClose();smStartGenerate()"><span class="sm-item-label">GENERATE</span><span class="sm-item-num">02</span></a></li>
       <li class="sm-panel-item-wrap"><a class="sm-panel-item" onclick="smClose();smGoHowItWorks()"><span class="sm-item-label">HOW IT WORKS</span><span class="sm-item-num">03</span></a></li>
       <li class="sm-panel-item-wrap"><a class="sm-panel-item" onclick="smClose();smGoHistory()"><span class="sm-item-label">HISTORY</span><span class="sm-item-num">04</span></a></li>
+      <li class="sm-panel-item-wrap"><a class="sm-panel-item" onclick="smClose();setTimeout(goProfile,120)"><span class="sm-item-label">PROFILE</span><span class="sm-item-num">05</span></a></li>
     </ul>
     <div class="sm-socials">
       <div class="sm-socials-title">Follow</div>
@@ -607,10 +682,15 @@ function setActiveNav(id) {
   if (el) el.classList.add('active')
 }
 
+function hideAllViews(){
+  ['home','chat','history','profile','settings'].forEach(id=>{
+    const el=document.getElementById(id)
+    if(el) el.style.display='none'
+  })
+}
 function goHome(){
+  hideAllViews()
   document.getElementById('home').style.display='flex'
-  document.getElementById('chat').style.display='none'
-  document.getElementById('history').style.display='none'
   chatWrap.innerHTML=''
   resetState();setLock(false)
   setActiveNav('sb-generate')
@@ -618,18 +698,54 @@ function goHome(){
   homeInput.focus()
 }
 function goChat(title){
-  document.getElementById('home').style.display='none'
+  hideAllViews()
   document.getElementById('chat').style.display='flex'
-  document.getElementById('history').style.display='none'
   if(title) document.getElementById('chat-title-text').textContent=title.slice(0,50)+(title.length>50?'…':'')
   chatInput.focus()
 }
 function goHistory(){
-  document.getElementById('home').style.display='none'
-  document.getElementById('chat').style.display='none'
+  hideAllViews()
   document.getElementById('history').style.display='flex'
   setActiveNav('sb-history')
   renderHistoryList()
+}
+function goSettings(){
+  hideAllViews()
+  document.getElementById('settings').style.display='flex'
+  setActiveNav('sb-settings')
+  const theme=localStorage.getItem('dgc_theme')||'dark'
+  document.getElementById('theme-btn-dark').classList.toggle('active',theme==='dark')
+  document.getElementById('theme-btn-light').classList.toggle('active',theme==='light')
+}
+function setTheme(t){
+  localStorage.setItem('dgc_theme',t)
+  document.documentElement.setAttribute('data-theme', t==='light'?'light':'')
+  document.getElementById('theme-btn-dark').classList.toggle('active',t==='dark')
+  document.getElementById('theme-btn-light').classList.toggle('active',t==='light')
+}
+async function goProfile(){
+  hideAllViews()
+  document.getElementById('profile').style.display='flex'
+  setActiveNav('sb-profile')
+  try {
+    const res = await fetch('/api/auth/check')
+    if (!res.ok) { window.location.replace('/login'); return }
+    const d = await res.json()
+    const initials = (d.email||'?').slice(0,2).toUpperCase()
+    document.getElementById('prof-avatar').textContent = initials
+    document.getElementById('prof-email').textContent = d.email || ''
+    const c = d.credits ?? 10
+    document.getElementById('prof-bar').style.width = Math.round(c/10*100)+'%'
+    document.getElementById('prof-credits-text').textContent = c+' / 10 credits remaining'
+    if (d.createdAt) {
+      const dt = new Date(d.createdAt)
+      document.getElementById('prof-since').textContent = dt.toLocaleDateString('en-US',{month:'long',year:'numeric'})
+    }
+  } catch(e) { console.error(e) }
+}
+async function signOut(){
+  await fetch('/api/auth/signout', { method: 'POST' })
+  window.location.replace('/login')
 }
 function renderHistoryList(){
   const list = document.getElementById('hist-list')
@@ -1062,6 +1178,8 @@ function createFunFactBubble(facts){
 // INIT
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 document.addEventListener('DOMContentLoaded', () => {
+  const savedTheme = localStorage.getItem('dgc_theme') || 'dark'
+  if (savedTheme === 'light') document.documentElement.setAttribute('data-theme', 'light')
   initStaggeredMenu()
   setTimeout(animateSplitText, 250)
   homeInput.focus()

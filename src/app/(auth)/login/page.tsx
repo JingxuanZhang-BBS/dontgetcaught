@@ -42,8 +42,8 @@ export default function LoginPage() {
 
         {/* Logo */}
         <div className="text-center mb-10">
-          <Link href="/" className="text-xs font-medium tracking-[0.25em] uppercase text-white/30 hover:text-white/55 transition">
-            DontGetCaught.AI
+          <Link href="/" className="inline-block">
+            <img src="/776e97c779b6f253df59a1034b9fbf25.png" alt="DontGetCaught" style={{ width: 64, height: 64, borderRadius: '50%', background: '#f7f6f4', padding: 8, objectFit: 'contain', boxSizing: 'border-box' }} />
           </Link>
           <h1 className="text-2xl font-semibold text-white/90 mt-6 mb-1">Welcome back</h1>
           <p className="text-sm text-white/35">Sign in to continue</p>

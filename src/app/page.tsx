@@ -265,6 +265,7 @@ export default function LandingPage() {
         <header className="shrink-0">
           <nav className="mx-auto max-w-7xl px-6 py-5 flex justify-between items-center">
             <div className="flex items-center gap-2.5">
+              <img src="/776e97c779b6f253df59a1034b9fbf25.png" alt="DontGetCaught" style={{ width: 32, height: 32, borderRadius: '50%', background: '#f7f6f4', padding: 4, objectFit: 'contain', boxSizing: 'border-box' }} />
               <span className="text-[15px] font-semibold tracking-tight text-white">DontGetCaught</span>
               <span className="text-[10px] font-medium tracking-wider uppercase px-1.5 py-0.5 rounded-full border border-white/20 text-white/50">beta</span>
             </div>
