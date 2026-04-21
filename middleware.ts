@@ -20,36 +20,39 @@ export async function middleware(request: NextRequest) {
     }
   } else {
     // 生产模式：使用真实 Supabase 认证
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return request.cookies.getAll()
+    try {
+      const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          cookies: {
+            getAll() {
+              return request.cookies.getAll()
+            },
+            setAll(cookiesToSet) {
+              cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+              supabaseResponse = NextResponse.next({
+                request,
+              })
+              cookiesToSet.forEach(({ name, value, options }) =>
+                supabaseResponse.cookies.set(name, value, options)
+              )
+            },
           },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
-            supabaseResponse = NextResponse.next({
-              request,
-            })
-            cookiesToSet.forEach(({ name, value, options }) =>
-              supabaseResponse.cookies.set(name, value, options)
-            )
-          },
-        },
-      }
-    )
+        }
+      )
 
-    // Refresh session if expired
-    const {
-      data: { user: supabaseUser },
-    } = await supabase.auth.getUser()
-    user = supabaseUser
+      const {
+        data: { user: supabaseUser },
+      } = await supabase.auth.getUser()
+      user = supabaseUser
+    } catch {
+      // Supabase 出错时 user 保持 null，受保护路由正常跳转登录
+    }
   }
 
   // Protected routes that require authentication
-  const protectedPaths = ['/dashboard', '/style-library', '/new-task', '/history', '/settings']
+  const protectedPaths = ['/dashboard', '/style-library', '/new-task', '/history', '/settings', '/demo.html']
   const isProtectedPath = protectedPaths.some(path => request.nextUrl.pathname.startsWith(path))
 
   // Redirect to login if accessing protected route without auth
@@ -62,7 +65,7 @@ export async function middleware(request: NextRequest) {
   // Redirect to dashboard if accessing auth pages while logged in
   if ((request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/signup') && user) {
     const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
+    url.pathname = '/demo.html'
     return NextResponse.redirect(url)
   }
 

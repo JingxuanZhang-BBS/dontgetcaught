@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server'
 import { claude, TEXT_TYPES } from '@/lib/claude'
+import { createClient } from '@/lib/supabase/server'
 
 export async function POST(request: Request) {
   try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
     const { text, textType, citations } = await request.json()
     if (!text) {
       return NextResponse.json({ error: 'Missing text' }, { status: 400 })

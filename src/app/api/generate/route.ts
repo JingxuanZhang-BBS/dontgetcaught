@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { claude, TEXT_TYPES } from '@/lib/claude'
+import { createClient } from '@/lib/supabase/server'
 
 const PARA_ENGLISH_SYSTEM = `If the text below is already in English, return it word-for-word, unchanged. If it is in any other language, translate it into English. Output only the result — no explanation, no commentary, nothing else.`
 
@@ -115,6 +116,10 @@ async function enforceEnglishDraft(draft: string): Promise<string> {
 
 export async function POST(request: Request) {
   try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
     const { prompt, citations, textType, category, writingMode } = await request.json()
     if (!prompt) {
       return NextResponse.json({ error: 'Missing prompt' }, { status: 400 })

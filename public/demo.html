@@ -4,6 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DontGetCaught</title>
+<style>html{display:none}</style>
+<script>
+(async function() {
+  try {
+    const res = await fetch('/api/auth/check')
+    if (!res.ok) {
+      window.location.replace('/login')
+      return
+    }
+    document.documentElement.style.display = 'block'
+  } catch(e) {
+    window.location.replace('/login')
+  }
+})()
+</script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <style>
