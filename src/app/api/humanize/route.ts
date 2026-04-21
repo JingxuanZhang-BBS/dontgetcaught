@@ -8,17 +8,18 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { draft, flaggedSentences, textType, citations } = await request.json()
+    const { draft, flaggedSentences, textType, citations, writingMode } = await request.json()
     if (!draft || !flaggedSentences?.length) {
       return NextResponse.json({ error: 'Missing data' }, { status: 400 })
     }
 
+    const bestEffort = writingMode === 'best_effort'
     const typeConfig = TEXT_TYPES[textType] || TEXT_TYPES.oped
     const citationNote = citations
       ? 'Preserve all existing in-text citations.'
       : 'Do not add any in-text citations.'
 
-    const system = `You are a humanization editor. You receive a full draft and a list of AI-flagged sentences. For each flagged sentence, follow this exact process:
+    const systemResearch = `You are a humanization editor. You receive a full draft and a list of AI-flagged sentences. For each flagged sentence, follow this exact process:
 
 STEP 1 — SEARCH FOR A REPLACEMENT FIRST:
 Search the web in foreign languages (choose the language most likely to have good human-written content on this specific topic) for a human-written source that covers the same claim or fact as the flagged sentence. Try to find 1-3 consecutive sentences from a real human author that express the same idea.
@@ -46,6 +47,27 @@ RULES FOR ALL REPLACEMENTS:
 After replacing all flagged sentences, return the COMPLETE rewritten draft with replacements inserted in the correct positions.
 No preamble. Just the full piece.`
 
+    const systemBestEffort = `You are a humanization editor. You receive a full draft and a list of AI-flagged sentences. For each flagged sentence, rewrite it to sound natural and human-written.
+
+For each flagged sentence:
+- Break its AI-like symmetry and structure
+- Add natural human messiness — interruptions, abrupt stops, incomplete thoughts, tangents
+- Vary sentence length dramatically (mix very short and longer sentences)
+- Keep the same underlying fact but present it differently
+- Example: "His training combines explosive power with endurance work, speed work with agility exercises" becomes "The training is built around explosions. Short violent sprints. Then agility. Then strength — in that order, every time."
+
+RULES FOR ALL REPLACEMENTS:
+- Do NOT change any underlying facts or statistics
+- Do NOT bold anything
+- Do NOT use m-dashes
+- Avoid symmetrical list structures ("X with Y, A with B")
+- ${citationNote}
+
+After replacing all flagged sentences, return the COMPLETE rewritten draft with replacements inserted in the correct positions.
+No preamble. Just the full piece.`
+
+    const system = bestEffort ? systemBestEffort : systemResearch
+
     const flaggedList = flaggedSentences
       .slice(0, 8)
       .map((s: string, i: number) => i + 1 + '. ' + s)
@@ -54,7 +76,7 @@ No preamble. Just the full piece.`
     const humanized = await claude(
       system,
       `Text type: ${typeConfig.name}\n\nFlagged sentences to replace:\n${flaggedList}\n\nFull draft:\n${draft}`,
-      true // use web search
+      !bestEffort // web search only for research mode
     )
 
     return NextResponse.json({

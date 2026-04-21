@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { claude, TEXT_TYPES } from '@/lib/claude'
 import { createClient } from '@/lib/supabase/server'
+import { enforceEnglishDraft } from '@/lib/enforce-english'
 
 export async function POST(request: Request) {
   try {
@@ -8,10 +9,12 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { text, textType, citations } = await request.json()
+    const { text, textType, citations, writingMode } = await request.json()
     if (!text) {
       return NextResponse.json({ error: 'Missing text' }, { status: 400 })
     }
+
+    const bestEffort = writingMode === 'best_effort'
 
     const typeConfig = TEXT_TYPES[textType] || TEXT_TYPES.oped
     const citationNote = citations
@@ -35,14 +38,17 @@ DO NOT touch anything else. Do not rephrase. Do not restructure. Do not improve 
 The goal is to change as few words as possible while fixing only the above issues.
 Output the full piece. No preamble.`
 
-    const polished = await claude(
+    let polished = await claude(
       system,
       'Polish this ' + typeConfig.name + ':\n\n' + text
     )
+    polished = polished.replace(/\*\*/g, '').replace(/\[\d+\]/g, '').trim()
 
-    return NextResponse.json({
-      polished: polished.replace(/\*\*/g, '').replace(/\[\d+\]/g, '').trim(),
-    })
+    if (!bestEffort) {
+      polished = await enforceEnglishDraft(polished)
+    }
+
+    return NextResponse.json({ polished })
   } catch (err: unknown) {
     return NextResponse.json(
       { error: 'Polish error: ' + String(err) },
