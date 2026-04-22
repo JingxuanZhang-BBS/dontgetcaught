@@ -1,16 +1,24 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [error, setError]       = useState<string | null>(null)
   const [loading, setLoading]   = useState(false)
+  const [notice, setNotice]     = useState<string | null>(null)
+
+  useEffect(() => {
+    if (searchParams.get('reset') === 'success') {
+      setNotice('Password updated. Sign in with your new password.')
+    }
+  }, [searchParams])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -48,6 +56,12 @@ export default function LoginPage() {
           <h1 className="text-2xl font-semibold text-white/90 mt-6 mb-1">Welcome back</h1>
           <p className="text-sm text-white/35">Sign in to continue</p>
         </div>
+
+        {notice && (
+          <div className="mb-5 px-4 py-3 rounded-xl border border-green-500/20 text-sm text-green-400" style={{ background: 'rgba(34,197,94,0.07)' }}>
+            {notice}
+          </div>
+        )}
 
         {error && (
           <div className="mb-5 px-4 py-3 rounded-xl border border-red-500/20 text-sm text-red-400" style={{ background: 'rgba(239,68,68,0.07)' }}>
@@ -97,7 +111,13 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-white/30">
+        <p className="mt-4 text-center text-sm">
+          <Link href="/forgot-password" className="text-white/35 hover:text-white/60 transition underline underline-offset-2">
+            Forgot password?
+          </Link>
+        </p>
+
+        <p className="mt-4 text-center text-sm text-white/30">
           No account?{' '}
           <Link href="/signup" className="text-white/60 hover:text-white transition underline underline-offset-2">
             Sign up

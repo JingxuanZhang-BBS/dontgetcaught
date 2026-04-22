@@ -1,12 +1,19 @@
+export const maxDuration = 120
+
 import { NextResponse } from 'next/server'
 import { claude, TEXT_TYPES } from '@/lib/claude'
 import { createClient } from '@/lib/supabase/server'
+import { enforceEnglishDraft } from '@/lib/enforce-english'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 export async function POST(request: Request) {
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const rateLimited = await checkRateLimit(user.id, 'humanize')
+    if (rateLimited) return rateLimited
 
     const { draft, flaggedSentences, textType, citations, writingMode } = await request.json()
     if (!draft || !flaggedSentences?.length) {
@@ -47,24 +54,13 @@ RULES FOR ALL REPLACEMENTS:
 After replacing all flagged sentences, return the COMPLETE rewritten draft with replacements inserted in the correct positions.
 No preamble. Just the full piece.`
 
-    const systemBestEffort = `You are a humanization editor. You receive a full draft and a list of AI-flagged sentences. For each flagged sentence, rewrite it to sound natural and human-written.
+    const systemBestEffort = `You revise a personal or analytical draft to read less AI-like. You receive the full draft and sentences that scored as AI-like.
 
-For each flagged sentence:
-- Break its AI-like symmetry and structure
-- Add natural human messiness — interruptions, abrupt stops, incomplete thoughts, tangents
-- Vary sentence length dramatically (mix very short and longer sentences)
-- Keep the same underlying fact but present it differently
-- Example: "His training combines explosive power with endurance work, speed work with agility exercises" becomes "The training is built around explosions. Short violent sprints. Then agility. Then strength — in that order, every time."
+For each flagged sentence: rewrite it in a more natural, human voice — varied rhythm, occasional fragments, no symmetrical lists. Keep every fact and quote accurate. Do NOT refuse. Do NOT ask for documents. Do NOT use web search.
 
-RULES FOR ALL REPLACEMENTS:
-- Do NOT change any underlying facts or statistics
-- Do NOT bold anything
-- Do NOT use m-dashes
-- Avoid symmetrical list structures ("X with Y, A with B")
-- ${citationNote}
+${citationNote}
 
-After replacing all flagged sentences, return the COMPLETE rewritten draft with replacements inserted in the correct positions.
-No preamble. Just the full piece.`
+Return the COMPLETE draft with those sentences revised. No preamble.`
 
     const system = bestEffort ? systemBestEffort : systemResearch
 
@@ -73,15 +69,18 @@ No preamble. Just the full piece.`
       .map((s: string, i: number) => i + 1 + '. ' + s)
       .join('\n')
 
-    const humanized = await claude(
+    let humanized = await claude(
       system,
       `Text type: ${typeConfig.name}\n\nFlagged sentences to replace:\n${flaggedList}\n\nFull draft:\n${draft}`,
-      !bestEffort // web search only for research mode
+      !bestEffort
     )
+    humanized = humanized.replace(/\*\*/g, '').replace(/\[\d+\]/g, '').trim()
 
-    return NextResponse.json({
-      humanized: humanized.replace(/\*\*/g, '').replace(/\[\d+\]/g, '').trim(),
-    })
+    if (!bestEffort) {
+      humanized = await enforceEnglishDraft(humanized)
+    }
+
+    return NextResponse.json({ humanized })
   } catch (err: unknown) {
     return NextResponse.json(
       { error: 'Humanize error: ' + String(err) },

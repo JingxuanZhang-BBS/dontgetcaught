@@ -1,0 +1,759 @@
+
+> dontgetcaught@0.1.0 dev
+> next dev
+
+ ⚠ Port 3000 is in use by process 16700, using available port 3005 instead.
+   ▲ Next.js 15.5.10
+   - Local:        http://localhost:3005
+   - Network:      http://155.48.106.218:3005
+   - Environments: .env.local
+   - Experiments (use with caution):
+     · serverActions
+
+ ✓ Starting...
+ ✓ Ready in 2.4s
+ ○ Compiling / ...
+ ✓ Compiled / in 5.8s (867 modules)
+ ✓ Compiled in 802ms (344 modules)
+ GET / 200 in 6692ms
+ ✓ Compiled in 398ms (344 modules)
+ GET / 200 in 42ms
+ ✓ Compiled in 205ms (344 modules)
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\next-devtools\userspace\app\segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>) {
+  digest: '2858885173'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\client\components\layout-router.js#" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '2184944548'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\client\components\render-from-template-context.js#" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>)
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '1351716324'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\client\components\layout-router.js#" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '2684698015'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\client\components\render-from-template-context.js#" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '4074810207'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\next-devtools\userspace\app\segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '2598773503'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\next-devtools\userspace\app\segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '2598773503'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\next-devtools\userspace\app\segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '2598773503'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\next-devtools\userspace\app\segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>) {
+  digest: '2858885173'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\client\components\client-page.js#ClientPageRoot" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>) {
+  digest: '665754773'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\src\app\page.tsx#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>) {
+  digest: '1861199161'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\lib\framework\boundary-components.js#OutletBoundary" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>) {
+  digest: '16367189'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\client\components\metadata\async-metadata.js#AsyncMetadataOutlet" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '203324927'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\lib\framework\boundary-components.js#ViewportBoundary" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '1417678943'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\lib\framework\boundary-components.js#MetadataBoundary" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '2718225759'
+}
+ GET / 200 in 1987ms
+ ✓ Compiled in 190ms (344 modules)
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\next-devtools\userspace\app\segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>) {
+  digest: '2858885173'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\client\components\layout-router.js#" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '2184944548'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\client\components\render-from-template-context.js#" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>)
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '1351716324'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\client\components\layout-router.js#" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '2684698015'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\client\components\render-from-template-context.js#" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '4074810207'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\next-devtools\userspace\app\segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '2598773503'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\next-devtools\userspace\app\segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '2598773503'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\next-devtools\userspace\app\segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '2598773503'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\next-devtools\userspace\app\segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>) {
+  digest: '2858885173'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\client\components\client-page.js#ClientPageRoot" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>) {
+  digest: '665754773'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\src\app\page.tsx#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>) {
+  digest: '1861199161'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\lib\framework\boundary-components.js#OutletBoundary" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>) {
+  digest: '16367189'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\client\components\metadata\async-metadata.js#AsyncMetadataOutlet" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '203324927'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\lib\framework\boundary-components.js#ViewportBoundary" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '1417678943'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\lib\framework\boundary-components.js#MetadataBoundary" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '2718225759'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\src\app\global-error.tsx#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>) {
+  digest: '1168280149'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\next-devtools\userspace\app\segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>) {
+  digest: '2858885173'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\lib\framework\boundary-components.js#ViewportBoundary" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '1417678943'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\lib\framework\boundary-components.js#MetadataBoundary" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '2718225759'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\src\app\global-error.tsx#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>) {
+  digest: '1168280149'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\node_modules\next\dist\next-devtools\userspace\app\segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>) {
+  digest: '2858885173'
+}
+[0m[7m Server [0m Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\src\app\global-error.tsx#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>:1:18) {
+  environmentName: 'Server',
+  digest: '1168280149'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\src\app\global-error.tsx#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>:1:18) {
+  environmentName: 'Server',
+  digest: '1168280149'
+}
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\src\app\global-error.tsx#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>:1:18) {
+  environmentName: 'Server',
+  digest: '1168280149',
+  page: '/'
+}
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ○ Compiling /_error ...
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ✓ Compiled /_error in 1106ms (1083 modules)
+ GET / 200 in 589ms
+ GET / 500 in 4883ms
+ ✓ Compiled in 504ms (494 modules)
+ GET / 200 in 385ms
+ ○ Compiling /signup ...
+ ✓ Compiled /signup in 1414ms (1159 modules)
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET /signup 200 in 1653ms
+ GET / 200 in 337ms
+ GET /signup 200 in 35ms
+ ✓ Compiled /login in 383ms (1166 modules)
+ GET /login 200 in 494ms
+ ○ Compiling /api/auth/check ...
+ ✓ Compiled /api/auth/check in 941ms (1242 modules)
+ GET /api/auth/check 200 in 1964ms
+ GET / 200 in 376ms
+ GET /signup 200 in 53ms
+ ○ Compiling /style-library ...
+ ✓ Compiled /style-library in 1160ms (1257 modules)
+ GET /style-library 200 in 2191ms
+ ✓ Compiled /api/samples in 328ms (1276 modules)
+ GET /api/samples 200 in 945ms
+ ✓ Compiled /history in 434ms (1283 modules)
+ GET /history 200 in 1009ms
+ ✓ Compiled /api/tasks in 363ms (1285 modules)
+ GET /api/tasks 200 in 737ms
+ ✓ Compiled /new-task in 498ms (1296 modules)
+ GET /new-task 200 in 1030ms
+ ✓ Compiled /api/style-profile in 468ms (1307 modules)
+ GET /api/style-profile 200 in 831ms
+ ○ Compiling /settings ...
+ ✓ Compiled /settings in 513ms (1314 modules)
+ GET /settings 200 in 961ms
+ GET / 200 in 426ms
+ ✓ Compiled /_not-found in 1713ms (1061 modules)
+ GET /settings 404 in 708ms
+ GET /settings 404 in 49ms
+ GET / 200 in 609ms
+ GET /settings 404 in 28ms
+ GET /settings 404 in 43ms
+ GET / 200 in 72ms
+ GET /settings 404 in 43ms
+ GET /settings 404 in 27ms
+ GET / 200 in 116ms
+ GET /settings 404 in 105ms
+ GET / 200 in 51ms
+ GET / 200 in 29ms
+ GET / 200 in 26ms
+ ✓ Compiled in 181ms (564 modules)
+ GET /settings 404 in 40ms
+ GET / 200 in 69ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET /settings 404 in 42ms
+ GET / 200 in 402ms
+ ✓ Compiled /signup in 317ms (617 modules)
+ GET /signup 200 in 527ms
+ ○ Compiling /login ...
+ ✓ Compiled /login in 656ms (622 modules)
+ GET /login 200 in 780ms
+ ✓ Compiled /api/auth/check in 331ms (697 modules)
+ GET /api/auth/check 200 in 863ms
+ GET /api/auth/check 200 in 321ms
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'c:\Users\jzhang23\Desktop\dontgetcaught\.next\cache\webpack\client-development\0.pack.gz_' -> 'c:\Users\jzhang23\Desktop\dontgetcaught\.next\cache\webpack\client-development\0.pack.gz'
+ ✓ Compiled in 242ms (560 modules)
+ GET /api/auth/check 200 in 843ms
+ ✓ Compiled in 391ms (560 modules)
+ ✓ Compiled in 199ms (560 modules)
+ ✓ Compiled in 583ms (1162 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'c:\Users\jzhang23\Desktop\dontgetcaught\.next\cache\webpack\client-development\0.pack.gz_' -> 'c:\Users\jzhang23\Desktop\dontgetcaught\.next\cache\webpack\client-development\0.pack.gz'
+ ✓ Compiled /api/history in 239ms (691 modules)
+ ✓ Compiled in 203ms (546 modules)
+ GET /api/history 200 in 1279ms
+ GET /api/auth/check 200 in 1301ms
+ GET /api/auth/check 200 in 338ms
+ ○ Compiling /api/transplant ...
+ ✓ Compiled /api/transplant in 1011ms (1375 modules)
+(node:16520) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ POST /api/fun-facts 200 in 7826ms
+ POST /api/transplant 200 in 41794ms
+ ✓ Compiled /api/scan in 310ms (1374 modules)
+ POST /api/scan 200 in 1798ms
+ ✓ Compiled /api/humanize in 304ms (1377 modules)
+ POST /api/humanize 200 in 45570ms
+ POST /api/scan 200 in 1360ms
+ ✓ Compiled /api/polish in 337ms (1375 modules)
+ POST /api/polish 200 in 13915ms
+ POST /api/scan 200 in 1266ms
+ ✓ Compiled /api/history in 198ms (829 modules)
+ ✓ Compiled (831 modules)
+ GET /api/history 200 in 946ms
+ GET /api/auth/check 200 in 1003ms
+ ○ Compiling /api/clarify ...
+ ✓ Compiled /api/clarify in 515ms (1327 modules)
+ POST /api/clarify 200 in 1926ms
+ ✓ Compiled /api/analyze in 284ms (1315 modules)
+ POST /api/analyze 200 in 2739ms
+ ✓ Compiled /api/generate in 267ms (771 modules)
+ ✓ Compiled in 237ms (546 modules)
+ POST /api/fun-facts 200 in 6855ms
+ POST /api/generate 200 in 58208ms
+ ✓ Compiled /api/scan in 280ms (832 modules)
+ POST /api/scan 200 in 1569ms
+ ✓ Compiled /api/polish in 187ms (834 modules)
+ POST /api/polish 200 in 18855ms
+ POST /api/scan 200 in 1137ms
+ ✓ Compiled /api/history in 214ms (829 modules)
+ POST /api/history 200 in 576ms
+ GET /api/history 200 in 296ms
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\app-paths-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\app-paths-manifest.json',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\pages-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\pages-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\app-paths-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\app-paths-manifest.json',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\pages-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\pages-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\routes-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\routes-manifest.json'
+}
+ GET / 500 in 2020ms
+ GET / 500 in 55ms
+ ✓ Compiled /_not-found in 232ms (1279 modules)
+ GET / 404 in 382ms
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\pages\\_document.js'
+}
+ GET / 500 in 56ms
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\pages\\_document.js'
+}
+ GET / 500 in 43ms
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\pages\\_document.js'
+}
+ GET / 500 in 57ms
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\pages\\_document.js'
+}
+ GET / 500 in 46ms
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\pages\\_document.js'
+}
+ GET / 500 in 47ms
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\pages\\_document.js'
+}
+ GET / 500 in 51ms
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\pages\\_document.js'
+}
+ GET / 500 in 45ms
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\pages\\_document.js'
+}
+ GET / 500 in 48ms
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\pages\\_document.js'
+}
+ GET / 500 in 41ms
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\pages\\_document.js'
+}
+ GET / 500 in 39ms
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\pages\\_document.js'
+}
+ GET / 500 in 43ms
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\pages\\_document.js'
+}
+ GET / 500 in 57ms
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\pages\\_document.js'
+}
+ GET / 500 in 56ms
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\pages\\_document.js'
+}
+ GET / 500 in 53ms
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\pages\\_document.js'
+}
+ GET / 500 in 39ms
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\pages\\_document.js'
+}
+ GET / 500 in 47ms
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\pages\\_document.js'
+}
+ GET / 500 in 66ms
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\pages\\_document.js'
+}
+ GET / 500 in 43ms
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\pages\\_document.js'
+}
+ GET / 500 in 54ms
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\pages\\_document.js'
+}
+ GET / 500 in 50ms
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\pages\\_document.js'
+}
+ GET / 500 in 78ms
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\pages\\_document.js'
+}
+ GET / 500 in 54ms
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\pages\\_document.js'
+}
+ GET / 500 in 110ms
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ GET / 500 in 39ms
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\src\app\page.tsx#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>) {
+  digest: '355252697'
+}
+ GET / 500 in 263ms
+ ⨯ Error: Could not find the module "c:\Users\jzhang23\Desktop\dontgetcaught\src\app\page.tsx#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>) {
+  digest: '355252697'
+}
+ GET / 500 in 236ms
+[Error: ENOENT: no such file or directory, stat 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\cache\webpack\client-development\1.pack.gz'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\cache\\webpack\\client-development\\1.pack.gz'
+}
+ ⨯ unhandledRejection: [Error: ENOENT: no such file or directory, stat 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\cache\webpack\client-development\1.pack.gz'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\cache\\webpack\\client-development\\1.pack.gz'
+}
+ ⨯ unhandledRejection:  [Error: ENOENT: no such file or directory, stat 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\cache\webpack\client-development\1.pack.gz'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\cache\\webpack\\client-development\\1.pack.gz'
+}
+[Error: ENOENT: no such file or directory, stat 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\cache\webpack\client-development\3.pack.gz'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\cache\\webpack\\client-development\\3.pack.gz'
+}
+ ⨯ unhandledRejection: [Error: ENOENT: no such file or directory, stat 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\cache\webpack\client-development\3.pack.gz'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\cache\\webpack\\client-development\\3.pack.gz'
+}
+ ⨯ unhandledRejection:  [Error: ENOENT: no such file or directory, stat 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\cache\webpack\client-development\3.pack.gz'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\cache\\webpack\\client-development\\3.pack.gz'
+}
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, stat 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\cache\webpack\client-development\1.pack.gz'
+[Error: ENOENT: no such file or directory, stat 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\cache\webpack\server-development\4.pack.gz'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\cache\\webpack\\server-development\\4.pack.gz'
+}
+ ⨯ unhandledRejection: [Error: ENOENT: no such file or directory, stat 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\cache\webpack\server-development\4.pack.gz'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\cache\\webpack\\server-development\\4.pack.gz'
+}
+ ⨯ unhandledRejection:  [Error: ENOENT: no such file or directory, stat 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\cache\webpack\server-development\4.pack.gz'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: 'C:\\Users\\jzhang23\\Desktop\\dontgetcaught\\.next\\cache\\webpack\\server-development\\4.pack.gz'
+}
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, stat 'C:\Users\jzhang23\Desktop\dontgetcaught\.next\cache\webpack\server-development\4.pack.gz'
+ ✓ Compiled in 476ms (565 modules)
+ ✓ Compiled in 287ms (565 modules)
+ ✓ Compiled in 246ms (565 modules)
+ ✓ Compiled in 471ms (565 modules)
+ ✓ Compiled in 1360ms (1288 modules)

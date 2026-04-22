@@ -1,3 +1,5 @@
+export const maxDuration = 120
+
 import { NextResponse } from 'next/server'
 import { claude, TEXT_TYPES } from '@/lib/claude'
 import { createClient } from '@/lib/supabase/server'

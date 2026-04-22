@@ -1,12 +1,16 @@
 import { NextResponse } from 'next/server'
 import axios from 'axios'
 import { createClient } from '@/lib/supabase/server'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 export async function POST(request: Request) {
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const rateLimited = await checkRateLimit(user.id, 'scan')
+    if (rateLimited) return rateLimited
 
     const { text } = await request.json()
     if (!text) {
@@ -42,13 +46,12 @@ export async function POST(request: Request) {
       ),
     })
   } catch (err: unknown) {
+    console.error('GPTZero scan error:', err)
+    const status = axios.isAxiosError(err) ? (err.response?.status ?? 500) : 500
     const message =
-      axios.isAxiosError(err)
-        ? err.response?.data?.message || err.message
-        : String(err)
-    return NextResponse.json(
-      { error: 'GPTZero error: ' + message },
-      { status: 500 }
-    )
+      status === 429 ? 'Scan limit reached. Please try again shortly.' :
+      status === 401 ? 'Scan service authentication failed. Contact support.' :
+      'Scan service unavailable. Please try again.'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

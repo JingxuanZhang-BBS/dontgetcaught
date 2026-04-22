@@ -487,52 +487,42 @@ export default function LandingPage() {
       <section className="relative z-10 px-6 py-20" style={{ background: '#0a0a12', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
         <div className="max-w-4xl mx-auto">
           <p className="text-[10.5px] font-semibold tracking-[0.2em] uppercase mb-3" style={{ color: 'rgba(255,255,255,0.25)' }}>About us</p>
-          <p className="text-[clamp(18px,2.5vw,26px)] font-semibold mb-12 tracking-tight" style={{ color: '#fff' }}>
+          <p className="text-[clamp(18px,2.5vw,26px)] font-semibold mb-4 tracking-tight" style={{ color: '#fff' }}>
             Two freshmen. One problem worth solving.
+          </p>
+          <p className="text-[15px] mb-2" style={{ color: 'rgba(255,255,255,0.45)', maxWidth: 560, lineHeight: 1.7 }}>
+            We're crazy enough to think we can change the world. In five years, we plan to be the kind of founders people have actually heard of.
+          </p>
+          <p className="text-[14px] mb-12" style={{ color: 'rgba(255,255,255,0.25)', maxWidth: 560, lineHeight: 1.7 }}>
+            For now, we stay anonymous. The work speaks.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[
-              { name: 'Founder A', role: 'Co-founder', initials: 'FA' },
-              { name: 'Founder B', role: 'Co-founder', initials: 'FB' },
-            ].map(f => (
-              <div key={f.name} className="rounded-2xl p-6 flex flex-col gap-5"
+              { alias: '?', label: 'Frontend Engineer', detail: 'Freshman · Beijing', initials: '?' },
+              { alias: '?', label: 'Backend Engineer',  detail: 'Freshman · Portugal', initials: '?' },
+            ].map((f, i) => (
+              <div key={i} className="rounded-2xl p-6 flex flex-col gap-5"
                 style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                {/* Avatar + name */}
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full flex items-center justify-center text-[13px] font-bold shrink-0"
-                    style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                    {f.initials}
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center text-[18px] font-bold shrink-0"
+                    style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.3)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                    ?
                   </div>
                   <div>
-                    <p className="text-[14px] font-semibold" style={{ color: '#fff' }}>{f.name}</p>
-                    <p className="text-[12px]" style={{ color: 'rgba(255,255,255,0.35)' }}>{f.role} · DontGetCaught.AI</p>
+                    <p className="text-[14px] font-semibold" style={{ color: '#fff' }}>{f.label}</p>
+                    <p className="text-[12px]" style={{ color: 'rgba(255,255,255,0.35)' }}>{f.detail} · DontGetCaught.AI</p>
                   </div>
                 </div>
 
-                {/* Social links */}
                 <div className="flex items-center gap-2">
-                  {/* Instagram */}
-                  <a href="#" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all hover:bg-white/10"
+                  <a href="https://www.instagram.com/dontgetcaught_ai/" target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all hover:bg-white/10"
                     style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.08)' }}>
                     <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                     </svg>
-                    Instagram
-                  </a>
-                  {/* TikTok */}
-                  <a href="#" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all hover:bg-white/10"
-                    style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                    <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.76a4.85 4.85 0 01-1.01-.07z"/>
-                    </svg>
-                    TikTok
-                  </a>
-                  {/* Douyin */}
-                  <a href="#" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all hover:bg-white/10"
-                    style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.02em' }}>抖音</span>
-                    Douyin
+                    @dontgetcaught_ai
                   </a>
                 </div>
               </div>

@@ -1,7 +1,11 @@
+export const maxDuration = 300
+
 import { NextResponse } from 'next/server'
 import { claude, TEXT_TYPES } from '@/lib/claude'
 import { createClient } from '@/lib/supabase/server'
 import { enforceEnglishDraft, looksLikeMetaRefusal } from '@/lib/enforce-english'
+import { deductCredit, refundCredit } from '@/lib/credits-server'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 function detectNonTextDeliverable(prompt: string): boolean {
   if (!prompt || typeof prompt !== 'string') return false
@@ -13,10 +17,15 @@ function detectNonTextDeliverable(prompt: string): boolean {
 
 
 export async function POST(request: Request) {
+  let userId: string | null = null
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    userId = user.id
+
+    const rateLimited = await checkRateLimit(userId, 'generate')
+    if (rateLimited) return rateLimited
 
     const { prompt, citations, textType, category, writingMode } = await request.json()
     if (!prompt) {
@@ -31,6 +40,15 @@ export async function POST(request: Request) {
             "DontGetCaught only outputs written text — we can't create drawings, paintings, filmed dances, or other non-text art. If you need the written part of an assignment (for example a reflection or essay about your creative work), ask specifically for that written piece and we'll help.",
         },
         { status: 400 }
+      )
+    }
+
+    // ── CREDIT CHECK ───────────────────────────────────────────────────────────
+    const refundToken = await deductCredit(userId!)
+    if (!refundToken) {
+      return NextResponse.json(
+        { error: 'INSUFFICIENT_CREDITS', message: "You've used all your credits. Upgrade to keep generating." },
+        { status: 402 }
       )
     }
 
@@ -64,13 +82,15 @@ ${typeConfig.format}`
         let draft = await claude(bestEffortSystem, prompt, false, 16384)
         draft = draft.replace(/^#{1,6}\s+/gm, '').replace(/\*\*/g, '').replace(/\[\d+\]/g, '').trim()
         if (looksLikeMetaRefusal(draft)) {
+          await refundCredit(userId!)
           return NextResponse.json(
             { error: "The model refused to write. Try rephrasing your request as a clear writing task (e.g. 'Write a 700-word reflection about…')." },
             { status: 500 }
           )
         }
-        return NextResponse.json({ draft, writingMode: 'best_effort' })
+        return NextResponse.json({ draft, writingMode: 'best_effort', refundToken })
       } catch (err: unknown) {
+        await refundCredit(userId!)
         return NextResponse.json({ error: 'Generate error: ' + String(err) }, { status: 500 })
       }
     }
@@ -196,8 +216,9 @@ Output the complete corrected text. No commentary.`
       // best-effort
     }
 
-    return NextResponse.json({ draft, writingMode: 'research' })
+    return NextResponse.json({ draft, writingMode: 'research', refundToken })
   } catch (err: unknown) {
+    await refundCredit(userId!).catch(() => {})
     return NextResponse.json(
       { error: 'Generate error: ' + String(err) },
       { status: 500 }

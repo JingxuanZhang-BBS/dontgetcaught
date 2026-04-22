@@ -115,9 +115,9 @@ html,body{height:100%;background:var(--sb);color:var(--text);font-family:var(--s
 .home-icon{width:52px;height:52px;border-radius:50%;background:var(--bg2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--text2);margin-bottom:18px}
 #hero-heading{font-size:32px;font-weight:600;color:var(--text);text-align:center;line-height:1.25;letter-spacing:-.02em;margin-bottom:10px;max-width:500px;overflow:visible}
 .home-sub{font-size:15px;color:var(--text2);text-align:center;margin-bottom:26px;max-width:400px}
-.home-input-wrap{width:100%;max-width:600px;background:var(--bg);border:1px solid var(--border-md);border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,.06);overflow:hidden;margin-bottom:22px;transition:border-color .2s,box-shadow .2s}
+.home-input-wrap{width:100%;max-width:600px;background:var(--bg);border:1px solid var(--border-md);border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,.06);overflow:visible;margin-bottom:22px;transition:border-color .2s,box-shadow .2s}
 .home-input-wrap:focus-within{border-color:rgba(0,0,0,.22);box-shadow:0 4px 24px rgba(0,0,0,.1)}
-#home-input{width:100%;border:none;outline:none;resize:none;font-size:15px;font-family:var(--sans);color:var(--text);padding:15px 18px 6px;min-height:28px;max-height:160px;line-height:1.65;background:transparent}
+#home-input{width:100%;border:none;outline:none;resize:none;font-size:15px;font-family:var(--sans);color:var(--text);padding:15px 18px 6px;min-height:52px;max-height:180px;overflow-y:auto;line-height:1.65;background:transparent;border-radius:0}
 #home-input::placeholder{color:var(--text3)}
 .home-input-footer{display:flex;align-items:center;justify-content:space-between;padding:7px 10px 9px}
 .hi-btn{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;border:none;background:transparent;font-size:12.5px;font-family:var(--sans);color:var(--text2);cursor:pointer;transition:background .12s}
@@ -197,13 +197,19 @@ html,body{height:100%;background:var(--sb);color:var(--text);font-family:var(--s
 .act-btn{padding:7px 18px;border-radius:7px;font-size:12px;font-family:var(--sans);font-weight:500;letter-spacing:.02em;cursor:pointer;border:1px solid var(--border-md);transition:all .13s;background:transparent;color:var(--text2)}
 .act-btn:hover{background:var(--bg2);color:var(--text);border-color:var(--text)}
 .act-btn.done{color:#1a9954;border-color:rgba(46,204,113,.4);background:rgba(46,204,113,.06)}
+.humanize-notice{display:none;margin:8px 14px 2px;padding:11px 14px;background:rgba(91,143,190,.07);border:1px solid rgba(91,143,190,.2);border-radius:8px;font-size:12.5px;color:var(--text2);line-height:1.6}
+.humanize-notice strong{color:var(--text);display:block;margin-bottom:5px;font-size:13px}
+.humanize-notice ul{margin:0;padding-left:16px;color:var(--text3);font-size:12px}
+.humanize-notice ul li{margin-bottom:2px}
+mark.ai-flagged{background:rgba(200,140,32,.18);border-bottom:1.5px solid rgba(200,140,32,.5);border-radius:2px;padding:0 1px;cursor:help}
+.flagged-note{margin-top:10px;padding:9px 12px;background:rgba(200,140,32,.07);border:1px solid rgba(200,140,32,.22);border-radius:7px;font-size:12px;color:#c88c20;line-height:1.55}
 .undo-btn{margin-top:5px;font-size:11px;color:rgba(192,57,43,.4);background:none;border:none;cursor:pointer;font-family:var(--sans);transition:color .13s;padding:0}
 .undo-btn:hover{color:var(--red)}
 #chat-input-zone{flex-shrink:0;padding:10px 22px 22px;border-top:1px solid var(--border);background:var(--bg)}
 #chat-input-inner{max-width:660px;margin:0 auto}
-#chat-input-box{background:var(--bg);border:1px solid var(--border-md);border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.05);transition:border-color .2s}
+#chat-input-box{background:var(--bg);border:1px solid var(--border-md);border-radius:12px;overflow:visible;box-shadow:0 2px 12px rgba(0,0,0,.05);transition:border-color .2s}
 #chat-input-box:focus-within{border-color:rgba(0,0,0,.22)}
-#chat-input{width:100%;border:none;outline:none;resize:none;font-size:14px;font-family:var(--sans);color:var(--text);padding:13px 16px 4px;min-height:24px;max-height:140px;line-height:1.65;background:transparent}
+#chat-input{width:100%;border:none;outline:none;resize:none;font-size:14px;font-family:var(--sans);color:var(--text);padding:13px 16px 4px;min-height:24px;max-height:180px;overflow-y:auto;line-height:1.65;background:transparent}
 #chat-input::placeholder{color:var(--text3)}
 .chat-input-footer{display:flex;align-items:center;justify-content:space-between;padding:6px 10px 8px}
 .ci-btn{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;border:none;background:transparent;cursor:pointer;color:var(--text2);font-size:14px;transition:background .12s}
@@ -324,20 +330,8 @@ html,body{height:100%;background:var(--sb);color:var(--text);font-family:var(--s
     </nav>
 
     <div class="sb-section">Recent</div>
-
-    <div class="sb-recents">
-      <div class="sb-recent-item" onclick="openHistoryTask(0)">
-        <div class="sb-recent-title">Essay on climate change and international policy</div>
-        <div class="sb-recent-meta">2 days ago · 720 words</div>
-      </div>
-      <div class="sb-recent-item" onclick="openHistoryTask(1)">
-        <div class="sb-recent-title">Report on global income inequality trends</div>
-        <div class="sb-recent-meta">4 days ago · 1,100 words</div>
-      </div>
-      <div class="sb-recent-item" onclick="openHistoryTask(2)">
-        <div class="sb-recent-title">Op-ed on social media and teen mental health</div>
-        <div class="sb-recent-meta">1 week ago · 850 words</div>
-      </div>
+    <div class="sb-recents" id="sb-recents-list">
+      <div class="sb-recent-meta" style="padding:6px 10px;opacity:0.4">Loading…</div>
     </div>
 
     <div class="sb-bottom">
@@ -362,6 +356,14 @@ html,body{height:100%;background:var(--sb);color:var(--text);font-family:var(--s
         <div class="mode-tabs">
           <button class="mode-tab active" id="tab-write" onclick="setInputMode('write')">✦ Write</button>
           <button class="mode-tab" id="tab-humanize" onclick="setInputMode('humanize')">⟳ Humanize</button>
+        </div>
+        <div class="humanize-notice" id="humanize-notice">
+          <strong>Paste your AI-generated text below</strong>
+          <ul>
+            <li>Paste the full text — do not type a new prompt here</li>
+            <li>Original meaning, structure &amp; citations are fully preserved</li>
+            <li>AI-flagged passages are rewritten; all facts &amp; requirements stay intact</li>
+          </ul>
         </div>
         <textarea id="home-input" rows="1" placeholder="Ask DontGetCaught to write anything…"></textarea>
         <div class="home-input-footer">
@@ -638,7 +640,7 @@ const TYPE_NAMES = {article:'Article',blog:'Blog Post',oped:'Op-Ed',essay:'Essay
 const TONES = ['Persuasive','Neutral','Optimistic','Critical','Urgent','Reflective','Humorous','Empathetic']
 const TARGET = 85
 
-let locked=false, uploadedText='', uploadedName='', workingText='', warningGiven=false, generationStarted=false, currentInputMode='write'
+let locked=false, uploadedText='', uploadedName='', workingText='', warningGiven=false, generationStarted=false, currentInputMode='write', pendingRefundToken=null
 const state = {prompt:'',clarifications:[],textType:null,tone:null,citations:null,wordCount:null,analysisCategory:null}
 const callbacks={}, history=[]
 let seq=0
@@ -655,7 +657,9 @@ const uploadNameChat=document.getElementById('upload-name-chat')
 function scrollBottom(){setTimeout(()=>{const m=document.getElementById('chat-msgs');if(m)m.scrollTop=9e9},60)}
 function newId(){return ++seq}
 
-const HIST_TASKS = [
+let HIST_TASKS = []
+
+const HIST_TASKS_PLACEHOLDER = [
   {
     title:'Essay on climate change and international policy',
     date:'2 days ago', words:720, score:91, type:'Essay', tone:'Persuasive',
@@ -747,49 +751,96 @@ async function signOut(){
   await fetch('/api/auth/signout', { method: 'POST' })
   window.location.replace('/login')
 }
-function renderHistoryList(){
-  const list = document.getElementById('hist-list')
-  list.innerHTML = HIST_TASKS.map((t,i) => {
-    const sc = t.score>=90?'score-green':t.score>=80?'score-yellow':'score-red'
-    return `<div class="hist-card" onclick="openHistoryTask(${i})">
-      <div class="hist-card-top">
-        <div class="hist-card-title">${t.title}</div>
-        <span class="score-tag ${sc}">${t.score}% human</span>
-      </div>
-      <div class="hist-card-meta">${t.date} · ${t.words.toLocaleString()} words · ${t.type} · ${t.tone}</div>
-      <div class="hist-card-snippet">${t.snippet}</div>
+async function loadHistory(){
+  try{
+    const r=await fetch('/api/history')
+    if(!r.ok) return
+    const d=await r.json()
+    HIST_TASKS=d.history||[]
+    renderSidebarHistory()
+    renderHistoryList()
+  }catch(e){console.error('history load error',e)}
+}
+
+function renderSidebarHistory(){
+  const el=document.getElementById('sb-recents-list')
+  if(!el) return
+  if(!HIST_TASKS.length){
+    el.innerHTML='<div class="sb-recent-meta" style="padding:6px 10px;opacity:0.4">No history yet</div>'
+    return
+  }
+  el.innerHTML=HIST_TASKS.map((t,i)=>{
+    const title=t.prompt.slice(0,60)+(t.prompt.length>60?'…':'')
+    const words=t.word_count?t.word_count.toLocaleString()+' words':''
+    const ago=timeAgo(t.created_at)
+    return `<div class="sb-recent-item" onclick="openHistoryTask(${i})">
+      <div class="sb-recent-title">${title}</div>
+      <div class="sb-recent-meta">${ago}${words?' · '+words:''}</div>
     </div>`
   }).join('')
 }
+
+function renderHistoryList(){
+  const list = document.getElementById('hist-list')
+  if(!list) return
+  if(!HIST_TASKS.length){
+    list.innerHTML='<div style="color:var(--text3);font-size:13px;padding:20px 0">No generations yet. Start writing to build your history.</div>'
+    return
+  }
+  list.innerHTML = HIST_TASKS.map((t,i) => {
+    const sc = (t.score||0)>=90?'score-green':(t.score||0)>=80?'score-yellow':'score-red'
+    const snippet=t.draft.slice(0,200).replace(/\n/g,' ')+'…'
+    const ago=timeAgo(t.created_at)
+    const words=t.word_count?t.word_count.toLocaleString()+' words':''
+    return `<div class="hist-card" onclick="openHistoryTask(${i})">
+      <div class="hist-card-top">
+        <div class="hist-card-title">${t.prompt.slice(0,80)+(t.prompt.length>80?'…':'')}</div>
+        ${t.score?`<span class="score-tag ${sc}">${t.score}% human</span>`:''}
+      </div>
+      <div class="hist-card-meta">${ago}${words?' · '+words:''}${t.text_type?' · '+t.text_type:''}</div>
+      <div class="hist-card-snippet">${snippet}</div>
+    </div>`
+  }).join('')
+}
+
 function openHistoryTask(i){
   const t = HIST_TASKS[i]
-  goChat(t.title)
+  goChat(t.prompt.slice(0,60))
   setActiveNav(null)
   chatWrap.innerHTML=''
   const id = newId()
   const el = mkRow(id,'ai')
-  const sc = t.score>=90?'score-green':t.score>=80?'score-yellow':'score-red'
+  const sc = (t.score||0)>=90?'score-green':(t.score||0)>=80?'score-yellow':'score-red'
+  const bodyHtml = t.draft.split(/\n\n+/).filter(Boolean).map(p=>`<p>${p.trim()}</p>`).join('')
   el.innerHTML=`<div>
     <div class="result-meta">
-      <span class="result-title">${t.type} · ${t.tone}</span>
-      <span class="score-tag ${sc}">${t.score}% human · GPTZero</span>
+      <span class="result-title">${t.text_type||'Draft'}</span>
+      ${t.score?`<span class="score-tag ${sc}">${t.score}% human</span>`:''}
     </div>
-    <div class="result-body">${t.body}</div>
+    <div class="result-body">${bodyHtml}</div>
     <div class="result-actions">
       <button class="act-btn" id="copy-hist-${i}">Copy</button>
-      <button class="act-btn">Export .docx</button>
     </div>
-    <div style="font-size:11px;color:var(--text3);margin-top:8px">${t.date} · ${t.words.toLocaleString()} words</div>
+    <div style="font-size:11px;color:var(--text3);margin-top:8px">${timeAgo(t.created_at)}${t.word_count?' · '+t.word_count.toLocaleString()+' words':''}</div>
   </div>`
   setTimeout(()=>{
     const btn=document.getElementById('copy-hist-'+i)
     if(btn) btn.onclick=()=>{
-      navigator.clipboard.writeText(t.body.replace(/<[^>]+>/g,'').trim())
+      navigator.clipboard.writeText(t.draft.trim())
       btn.textContent='Copied!';btn.classList.add('done')
       setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('done')},2000)
     }
   },0)
   scrollBottom()
+}
+
+function timeAgo(iso){
+  const diff=Date.now()-new Date(iso).getTime()
+  const m=Math.floor(diff/60000),h=Math.floor(m/60),d=Math.floor(h/24)
+  if(d>0) return d===1?'1 day ago':d+' days ago'
+  if(h>0) return h===1?'1 hour ago':h+' hours ago'
+  if(m>0) return m===1?'1 min ago':m+' mins ago'
+  return 'Just now'
 }
 
 async function apiFetch(ep,body){
@@ -839,7 +890,7 @@ function addWarnMsg(text,opts){
 }
 function addProgressMsg(customPhases){
   const id=newId(),el=mkRow(id,'ai')
-  const phases=customPhases||[['Phase 1','Researching foreign sources'],['Phase 2','Scanning & humanizing'],['Phase 3','Polishing'],['Phase 4','Final verification']]
+  const phases=customPhases||[['Phase 1','Generating your draft'],['Phase 2','Optimizing content'],['Phase 3','Finishing touches'],['Phase 4','Final verification']]
   el.innerHTML=`<div><div class="ai-label">DontGetCaught</div><div class="timeline">${phases.map(([t,s],i)=>`<div class="tl-row"><div class="tl-track"><div class="tl-dot" id="tldt-${id}-${i+1}"></div><div class="tl-line" id="tlln-${id}-${i+1}"></div></div><div class="tl-content"><div class="tl-title" id="tltl-${id}-${i+1}">${t}</div><div class="tl-sub">${s}</div></div></div>`).join('')}</div><div class="log-wrap"><div class="log-head">Activity log</div><div class="log-body" id="log-${id}"></div></div></div>`
   return id
 }
@@ -852,14 +903,22 @@ function addLog(pid,text,color){
   const d=document.createElement('div');d.style.color=color||'#787878';d.textContent=text
   box.appendChild(d);box.scrollTop=box.scrollHeight;scrollBottom()
 }
-function addResultMsg(text,score){
+function addResultMsg(text,score,flaggedSentences=[]){
   const id=newId(),el=mkRow(id,'ai')
   const cls=score>=90?'score-green':score>=80?'score-yellow':'score-red'
-  const ps=text.split(/\n\n+/).map(p=>`<p>${esc(p)}</p>`).join('')
-  el.innerHTML=`<div><div class="ai-label">DontGetCaught</div><div class="result-meta"><div class="result-title">Finished piece</div><span class="score-tag ${cls}">${score}% human</span></div><div class="result-body">${ps}</div><div class="result-actions"><button class="act-btn" id="cp-${id}">Copy text</button><button class="act-btn" id="rw-${id}">Write another</button></div></div>`
+  let bodyHtml=esc(text)
+  const stillFlagged=flaggedSentences.filter(Boolean)
+  stillFlagged.forEach(s=>{
+    const e=esc(s.trim())
+    if(e)bodyHtml=bodyHtml.split(e).join(`<mark class="ai-flagged" title="This passage may still read as AI-generated — consider revising manually.">${e}</mark>`)
+  })
+  const ps=bodyHtml.split(/\n\n+/).map(p=>`<p>${p}</p>`).join('')
+  const flagNote=stillFlagged.length?`<div class="flagged-note">⚠ ${stillFlagged.length} highlighted passage${stillFlagged.length>1?'s':''} may still read as AI-generated. Revising them manually will further improve your score.</div>`:''
+  el.innerHTML=`<div><div class="ai-label">DontGetCaught</div><div class="result-meta"><div class="result-title">Finished piece</div><span class="score-tag ${cls}">${score}% human</span></div><div class="result-body">${ps}</div>${flagNote}<div class="result-actions"><button class="act-btn" id="cp-${id}">Copy text</button><button class="act-btn" id="dl-${id}">Download .docx</button><button class="act-btn" id="rw-${id}">Write another</button></div></div>`
   setTimeout(()=>{
-    const c=document.getElementById('cp-'+id),r=document.getElementById('rw-'+id)
+    const c=document.getElementById('cp-'+id),d=document.getElementById('dl-'+id),r=document.getElementById('rw-'+id)
     if(c)c.onclick=()=>{navigator.clipboard.writeText(workingText);c.textContent='Copied';c.classList.add('done');setTimeout(()=>{c.textContent='Copy text';c.classList.remove('done')},2000)}
+    if(d)d.onclick=()=>exportDocx(workingText)
     if(r)r.onclick=goHome
   },0);return id
 }
@@ -912,7 +971,10 @@ function setInputMode(m){
   currentInputMode=m
   document.getElementById('tab-write').classList.toggle('active',m==='write')
   document.getElementById('tab-humanize').classList.toggle('active',m==='humanize')
-  homeInput.placeholder=m==='write'?'Ask DontGetCaught to write anything…':'Paste your AI-generated text here — we\'ll replace each paragraph with human-sourced content…'
+  homeInput.placeholder=m==='write'?'Ask DontGetCaught to write anything…':'Paste your AI-generated text here (Ctrl+V / Cmd+V)…'
+  const notice=document.getElementById('humanize-notice')
+  if(notice)notice.style.display=m==='humanize'?'block':'none'
+  homeInput.style.background=m==='humanize'?'rgba(91,143,190,.03)':'transparent'
   homeInput.focus()
 }
 
@@ -1008,26 +1070,29 @@ async function generate(writingMode='research'){
 
   try{
     setPhase(pid,1,'active')
-    plog('Phase 1 — searching foreign language sources…','step')
-    const {draft}=await apiFetch('/generate',{prompt:full,citations:state.citations,textType:state.textType,writingMode,category:state.analysisCategory||'research_based'})
+    plog('Phase 1 — generating your draft…','step')
+    let slowTimer=setTimeout(()=>plog('Still working — this topic requires deeper research. Hang tight…','warn'),60000)
+    const {draft,refundToken}=await apiFetch('/generate',{prompt:full,citations:state.citations,textType:state.textType,writingMode,category:state.analysisCategory||'research_based'})
+    clearTimeout(slowTimer)
     workingText=draft
+    pendingRefundToken=refundToken||null
     plog('Draft assembled — pass 1 complete.','success')
-    plog('Pass 2 — English enforcement done.','success')
-    plog('Pass 3 — artifact cleanup done.','success')
+    plog('Pass 2 — quality check done.','success')
+    plog('Pass 3 — content cleanup done.','success')
     setPhase(pid,1,'done')
     setPhase(pid,2,'active')
     for(let round=1;round<=3;round++){
-      plog(`── Round ${round} GPTZero scan…`,'step')
+      plog(`── Round ${round} quality check…`,'step')
       const scan=await apiFetch('/scan',{text:workingText})
       const hp=Math.round((1-scan.overallAiProb)*100);finalScore=hp
       const flagged=scan.sentences.filter(s=>s.aiProb*100>=60)
-      plog(`Score: ${hp}% human — ${flagged.length} flagged`,hp>=TARGET?'success':'warn')
+      plog(`Quality: ${hp}% — ${flagged.length ? flagged.length+' passages need work' : 'looking great'}`,hp>=TARGET?'success':'warn')
       if(hp>=TARGET){plog(`✓ Reached ${hp}% — moving to polish.`,'success');break}
       if(!flagged.length){plog('No sentences above threshold.','warn');break}
       if(round===3){plog('Max rounds. Proceeding to polish.','warn');break}
-      plog('Humanizing flagged sentences…','step')
+      plog('Refining flagged passages…','step')
       const {humanized}=await apiFetch('/humanize',{draft:workingText,flaggedSentences:flagged.map(s=>s.text),textType:state.textType,citations:state.citations})
-      workingText=humanized;plog('Rewritten. Re-scanning…','info')
+      workingText=humanized;plog('Refined. Checking again…','info')
     }
     setPhase(pid,2,'done')
     setPhase(pid,3,'active')
@@ -1036,13 +1101,36 @@ async function generate(writingMode='research'){
     workingText=polished;plog('Polish complete.','success')
     setPhase(pid,3,'done')
     setPhase(pid,4,'active')
-    plog('Phase 4 — final verification scan…','step')
+    plog('Phase 4 — final verification…','step')
     const fs=await apiFetch('/scan',{text:workingText})
     finalScore=Math.round((1-fs.overallAiProb)*100)
     plog(`✓ Final score: ${finalScore}% human.`,'success')
     setPhase(pid,4,'done')
-    addResultMsg(workingText,finalScore)
-    if(!warningGiven&&finalScore<TARGET)addAiMsg('Your credits have been refunded — this result fell below our 85% threshold.')
+    const remainingFlagged=(fs.sentences||[]).filter(s=>s.aiProb>=0.4).map(s=>s.text)
+    addResultMsg(workingText,finalScore,remainingFlagged)
+
+    // Save to history
+    const wc=workingText.trim().split(/\s+/).length
+    fetch('/api/history',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      prompt:full,draft:workingText,score:finalScore,word_count:wc,text_type:state.textType,writing_mode:writingMode
+    })}).then(async r=>{
+      const d=await r.json()
+      if(!r.ok) plog('History save failed: '+JSON.stringify(d),'error')
+      else loadHistory()
+    }).catch(e=>plog('History save error: '+e.message,'error'))
+
+    if(!warningGiven&&finalScore<TARGET){
+      if(pendingRefundToken){
+        apiFetch('/refund',{refundToken:pendingRefundToken}).then(()=>{
+          addAiMsg('Your credit has been refunded — this result fell below our 85% threshold.')
+        }).catch(()=>{
+          addAiMsg('This result fell below our 85% threshold. Please contact support for a refund.')
+        })
+        pendingRefundToken=null
+      } else {
+        addAiMsg('This result fell below our 85% threshold.')
+      }
+    }
   }catch(e){
     const msg=e instanceof Error?e.message:String(e)
     plog('Error: '+msg,'error');[1,2,3,4].forEach(n=>setPhase(pid,n,'error'))
@@ -1053,7 +1141,7 @@ async function generate(writingMode='research'){
 async function runTransplant(text){
   generationStarted=true
   const C={step:'#5b8fbe',info:'#909090',warn:'#c88c20',success:'#1e9e55',error:'#b0322a'}
-  const phases=[['Phase 1','Transplanting paragraphs'],['Phase 2','Scanning & humanizing'],['Phase 3','Polishing'],['Phase 4','Final verification']]
+  const phases=[['Phase 1','Processing your text'],['Phase 2','Optimizing content'],['Phase 3','Finishing touches'],['Phase 4','Final verification']]
   const pid=addProgressMsg(phases)
   const plog=(t,type='info')=>addLog(pid,t,C[type]||'#909090')
   workingText='';let finalScore=0
@@ -1064,24 +1152,24 @@ async function runTransplant(text){
 
   try{
     setPhase(pid,1,'active')
-    plog('Replacing each paragraph with foreign-sourced human content…','step')
+    plog('Rewriting your content through our algorithm…','step')
     const {draft}=await apiFetch('/transplant',{text,granularity:'paragraph',citations:false})
     workingText=draft
-    plog('Transplant complete.','success')
+    plog('Rewrite complete.','success')
     setPhase(pid,1,'done')
     setPhase(pid,2,'active')
     for(let round=1;round<=3;round++){
-      plog(`── Round ${round} GPTZero scan…`,'step')
+      plog(`── Round ${round} quality check…`,'step')
       const scan=await apiFetch('/scan',{text:workingText})
       const hp=Math.round((1-scan.overallAiProb)*100);finalScore=hp
       const flagged=scan.sentences.filter(s=>s.aiProb*100>=60)
-      plog(`Score: ${hp}% human — ${flagged.length} flagged`,hp>=TARGET?'success':'warn')
+      plog(`Quality: ${hp}% — ${flagged.length ? flagged.length+' passages need work' : 'looking great'}`,hp>=TARGET?'success':'warn')
       if(hp>=TARGET){plog(`✓ Reached ${hp}% — moving to polish.`,'success');break}
       if(!flagged.length){plog('No sentences above threshold.','warn');break}
       if(round===3){plog('Max rounds. Proceeding to polish.','warn');break}
-      plog('Humanizing flagged sentences…','step')
+      plog('Refining flagged passages…','step')
       const {humanized}=await apiFetch('/humanize',{draft:workingText,flaggedSentences:flagged.map(s=>s.text),textType:'essay',citations:false})
-      workingText=humanized;plog('Rewritten. Re-scanning…','info')
+      workingText=humanized;plog('Refined. Checking again…','info')
     }
     setPhase(pid,2,'done')
     setPhase(pid,3,'active')
@@ -1090,17 +1178,36 @@ async function runTransplant(text){
     workingText=polished;plog('Polish complete.','success')
     setPhase(pid,3,'done')
     setPhase(pid,4,'active')
-    plog('Phase 4 — final verification scan…','step')
+    plog('Phase 4 — final verification…','step')
     const fs=await apiFetch('/scan',{text:workingText})
     finalScore=Math.round((1-fs.overallAiProb)*100)
     plog(`✓ Final score: ${finalScore}% human.`,'success')
     setPhase(pid,4,'done')
-    addResultMsg(workingText,finalScore)
+    const remainingFlaggedT=(fs.sentences||[]).filter(s=>s.aiProb>=0.4).map(s=>s.text)
+    addResultMsg(workingText,finalScore,remainingFlaggedT)
+
+    const wcT=workingText.trim().split(/\s+/).length
+    fetch('/api/history',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      prompt:'[Humanized] '+text.slice(0,200),draft:workingText,score:finalScore,word_count:wcT,text_type:state.textType,writing_mode:'humanize'
+    })}).then(async r=>{
+      const d=await r.json()
+      if(!r.ok) plog('History save failed: '+JSON.stringify(d),'error')
+      else loadHistory()
+    }).catch(e=>plog('History save error: '+e.message,'error'))
   }catch(e){
     const msg=e instanceof Error?e.message:String(e)
     plog('Error: '+msg,'error');[1,2,3,4].forEach(n=>setPhase(pid,n,'error'))
     addAiMsg('Something went wrong: '+msg+'. Please try again.')
   }finally{if(funFact){funFact.stop();removeMsg(funFact.msgId)};resetState();setLock(false)}
+}
+
+async function exportDocx(text){
+  try{
+    const r=await fetch('/api/export',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})})
+    if(!r.ok)throw new Error((await r.json()).error||'Export failed')
+    const blob=await r.blob()
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='dontgetcaught.docx';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(a.href)
+  }catch(e){addAiMsg('Export failed: '+e.message)}
 }
 
 function doUndo(userMsgId){
@@ -1118,8 +1225,14 @@ fileInput.onchange=async e=>{
   catch(err){addAiMsg('Could not read that file: '+err.message)}
 }
 
-;[homeInput,chatInput].forEach(inp=>{inp.addEventListener('input',()=>{inp.style.height='auto';inp.style.height=Math.min(inp.scrollHeight,160)+'px'})})
-homeInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleSend()}})
+;[homeInput,chatInput].forEach(inp=>{inp.addEventListener('input',()=>{inp.style.height='0';inp.style.height=Math.min(inp.scrollHeight,180)+'px'})})
+homeInput.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleSend();return}
+  if(currentInputMode==='humanize'){
+    const allowed=['Backspace','Delete','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Tab','Home','End','Escape']
+    if(!allowed.includes(e.key)&&!e.ctrlKey&&!e.metaKey){e.preventDefault()}
+  }
+})
 chatInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleSend()}})
 homeSend.onclick=()=>handleSend()
 chatSend.onclick=()=>handleSend()
@@ -1183,6 +1296,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initStaggeredMenu()
   setTimeout(animateSplitText, 250)
   homeInput.focus()
+  loadHistory()
 
   // Pick up prompt from landing page
   const pending = sessionStorage.getItem('pending_prompt')

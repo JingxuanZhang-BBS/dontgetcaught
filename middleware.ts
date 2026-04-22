@@ -34,8 +34,8 @@ export async function middleware(request: NextRequest) {
               supabaseResponse = NextResponse.next({
                 request,
               })
-              cookiesToSet.forEach(({ name, value, options }) =>
-                supabaseResponse.cookies.set(name, value, options)
+              cookiesToSet.forEach(({ name, value, options: opts }) =>
+                supabaseResponse.cookies.set(name, value, opts)
               )
             },
           },
@@ -52,7 +52,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Protected routes that require authentication
-  const protectedPaths = ['/dashboard', '/style-library', '/new-task', '/history', '/settings', '/demo.html']
+  const protectedPaths = ['/demo.html']
   const isProtectedPath = protectedPaths.some(path => request.nextUrl.pathname.startsWith(path))
 
   // Redirect to login if accessing protected route without auth
