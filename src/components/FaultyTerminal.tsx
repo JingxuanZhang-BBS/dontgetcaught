@@ -3,7 +3,6 @@
 import { useEffect, useRef, useMemo, useCallback } from 'react'
 import './FaultyTerminal.css'
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
 const { Renderer, Program, Mesh, Color, Triangle } = require('ogl')
 
 const vertexShader = `
@@ -266,9 +265,7 @@ export default function FaultyTerminal({
   style,
 }: FaultyTerminalProps) {
   const containerRef = useRef<HTMLDivElement>(null)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const programRef = useRef<any>(null)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rendererRef = useRef<any>(null)
   const mouseRef = useRef({ x: 0.5, y: 0.5 })
   const smoothMouseRef = useRef({ x: 0.5, y: 0.5 })

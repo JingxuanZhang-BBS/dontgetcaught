@@ -284,10 +284,88 @@ mark.ai-flagged{background:rgba(200,140,32,.18);border-bottom:1.5px solid rgba(2
 @keyframes ffBlink{0%,100%{opacity:1}50%{opacity:0}}
 .fun-fact-body.pulsing{animation:ffPulse 2.5s ease-in-out infinite}
 @keyframes ffPulse{0%,100%{opacity:1}50%{opacity:.15}}
+
+/* ━━ ONBOARDING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#onboarding-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);animation:obFadeIn .35s ease}
+@keyframes obFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes obFadeOut{from{opacity:1}to{opacity:0}}
+#onboarding-card{width:100%;max-width:460px;background:#1c1c1c;border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:44px 44px 34px;box-shadow:0 32px 96px rgba(0,0,0,0.6);overflow:hidden;position:relative}
+.ob-screens{position:relative;min-height:210px}
+.ob-screen{display:none}
+.ob-screen.active{display:block;animation:obSlideIn .28s ease}
+@keyframes obSlideIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+.ob-tag{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);margin-bottom:22px}
+.ob-h{font-size:26px;font-weight:600;color:var(--text);line-height:1.25;letter-spacing:-.025em;margin-bottom:16px}
+.ob-p{font-size:15px;color:var(--text2);line-height:1.75}
+.ob-label{font-size:14px;font-weight:600;color:var(--text);margin-bottom:18px;letter-spacing:-.01em}
+.ob-mode{margin-bottom:12px;padding:15px 18px;background:rgba(255,255,255,0.04);border-radius:10px;border:1px solid var(--border)}
+.ob-mode-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:5px}
+.ob-mode-desc{font-size:13px;color:var(--text2);line-height:1.65}
+.ob-tip{font-size:12px;color:var(--text3);margin-top:14px;line-height:1.6;padding-left:2px}
+.ob-credits{margin-top:22px;font-size:14px;color:var(--text2);line-height:1.8;padding:16px 20px;background:rgba(46,204,113,.06);border:1px solid rgba(46,204,113,.14);border-radius:10px}
+.ob-credits-num{font-size:28px;font-weight:700;color:var(--green);line-height:1;display:block;margin-bottom:4px}
+.ob-credits-ig{color:rgba(255,255,255,0.55);font-size:13px;margin-top:10px}
+.ob-credits-ig strong{color:var(--text);font-weight:500}
+.ob-footer{display:flex;align-items:center;justify-content:space-between;margin-top:36px}
+.ob-dots{display:flex;gap:7px;align-items:center}
+.ob-dot{width:6px;height:6px;border-radius:99px;background:rgba(255,255,255,0.15);transition:all .25s ease}
+.ob-dot.active{background:var(--text);width:20px}
+.ob-next{padding:11px 26px;border-radius:9px;border:none;background:var(--green);color:#fff;font-size:14px;font-family:var(--sans);font-weight:600;cursor:pointer;transition:opacity .15s;letter-spacing:.01em}
+.ob-next:hover{opacity:.82}
 </style>
 </head>
 <body>
 <div id="app">
+
+<!-- ━━ ONBOARDING MODAL ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div id="onboarding-overlay" style="display:none">
+  <div id="onboarding-card">
+    <div class="ob-screens">
+
+      <!-- Screen 1: Brand intro -->
+      <div class="ob-screen active" id="ob-s1">
+        <div class="ob-tag">◆ DontGetCaught.AI</div>
+        <h2 class="ob-h">The AI writing tool<br>that doesn't sound like AI.</h2>
+        <p class="ob-p">Tell us what to write.<br>We'll hand you something that passes.</p>
+      </div>
+
+      <!-- Screen 2: How to use -->
+      <div class="ob-screen" id="ob-s2">
+        <p class="ob-label">Two things you can do here</p>
+        <div class="ob-mode">
+          <div class="ob-mode-name">Generate</div>
+          <div class="ob-mode-desc">Type what you need — an essay, article, reflection, anything. Answer one quick question, pick your settings, and we'll write it for you.</div>
+        </div>
+        <div class="ob-mode">
+          <div class="ob-mode-name">Humanize</div>
+          <div class="ob-mode-desc">Already have AI-written text? Switch to Humanize mode, paste it in, and we'll rewrite it until it passes.</div>
+        </div>
+        <p class="ob-tip">Use the mode toggle at the top of the input box to switch between them.</p>
+      </div>
+
+      <!-- Screen 3: Beta -->
+      <div class="ob-screen" id="ob-s3">
+        <div class="ob-tag">Beta</div>
+        <h2 class="ob-h">You're one of our<br>first users.</h2>
+        <p class="ob-p">We're still improving. If something feels off or broken, let us know — your feedback shapes what we build next.</p>
+        <div class="ob-credits">
+          <span class="ob-credits-num">3</span>
+          free generations to get started.
+          <div class="ob-credits-ig">Need more? DM us on Instagram <strong>@dontgetcaught_ai</strong></div>
+        </div>
+      </div>
+
+    </div>
+    <div class="ob-footer">
+      <div class="ob-dots">
+        <div class="ob-dot active" id="ob-d0"></div>
+        <div class="ob-dot" id="ob-d1"></div>
+        <div class="ob-dot" id="ob-d2"></div>
+      </div>
+      <button class="ob-next" id="ob-next-btn" onclick="obNext()">Next →</button>
+    </div>
+  </div>
+</div>
 
   <!-- ━━ SIDEBAR ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
   <aside id="sidebar">
@@ -1321,13 +1399,17 @@ fileInput.onchange=async e=>{
 
 ;[homeInput,chatInput].forEach(inp=>{inp.addEventListener('input',()=>{inp.style.height='0';inp.style.height=Math.min(inp.scrollHeight,180)+'px'})})
 homeInput.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();handleSend();return}
   if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleSend();return}
   if(currentInputMode==='humanize'){
     const allowed=['Backspace','Delete','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Tab','Home','End','Escape']
     if(!allowed.includes(e.key)&&!e.ctrlKey&&!e.metaKey){e.preventDefault()}
   }
 })
-chatInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleSend()}})
+chatInput.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();handleSend();return}
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleSend()}
+})
 homeSend.onclick=()=>handleSend()
 chatSend.onclick=()=>handleSend()
 
@@ -1382,6 +1464,35 @@ function createFunFactBubble(facts){
 
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ONBOARDING
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let obStep = 0
+
+function obShow() {
+  if (localStorage.getItem('dgc_onboarded')) return
+  document.getElementById('onboarding-overlay').style.display = 'flex'
+}
+
+function obNext() {
+  const screens = document.querySelectorAll('.ob-screen')
+  const dots = document.querySelectorAll('.ob-dot')
+  if (obStep < 2) {
+    screens[obStep].classList.remove('active')
+    dots[obStep].classList.remove('active')
+    obStep++
+    screens[obStep].classList.add('active')
+    dots[obStep].classList.add('active')
+    if (obStep === 2) document.getElementById('ob-next-btn').textContent = 'Start Writing →'
+  } else {
+    localStorage.setItem('dgc_onboarded', '1')
+    const overlay = document.getElementById('onboarding-overlay')
+    overlay.style.animation = 'obFadeOut .25s ease forwards'
+    setTimeout(() => { overlay.style.display = 'none' }, 250)
+    homeInput.focus()
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // INIT
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 document.addEventListener('DOMContentLoaded', () => {
@@ -1391,6 +1502,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(animateSplitText, 250)
   homeInput.focus()
   loadHistory()
+  setTimeout(obShow, 800)
 
   // Pick up prompt from landing page
   const pending = sessionStorage.getItem('pending_prompt')

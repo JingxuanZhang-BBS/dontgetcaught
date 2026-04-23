@@ -2,7 +2,7 @@ import axios from 'axios'
 
 const ANTHROPIC = 'https://api.anthropic.com/v1/messages'
 const ANTHROPIC_VERSION = '2023-06-01'
-const MODEL = 'claude-sonnet-4-20250514'
+export const CLAUDE_MODEL = 'claude-sonnet-4-20250514'
 
 function headers() {
   return {
@@ -20,7 +20,7 @@ export async function claude(
   maxTokens = 4000
 ): Promise<string> {
   const body: Record<string, unknown> = {
-    model: MODEL,
+    model: CLAUDE_MODEL,
     max_tokens: maxTokens,
     system: [
       { type: 'text', text: systemText, cache_control: { type: 'ephemeral' } },

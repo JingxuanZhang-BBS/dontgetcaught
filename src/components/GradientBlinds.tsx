@@ -4,7 +4,6 @@
 import { useEffect, useRef } from 'react'
 import './GradientBlinds.css'
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { Renderer, Program, Mesh, Triangle } = require('ogl')
 
 const MAX_COLORS = 8

@@ -4,7 +4,6 @@
 import { useEffect, useRef } from 'react'
 import './Galaxy.css'
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { Renderer, Program, Mesh, Color, Triangle } = require('ogl')
 
 const vertexShader = `

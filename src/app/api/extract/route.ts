@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server'
 import mammoth from 'mammoth'
+import { CLAUDE_MODEL } from '@/lib/claude'
 
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages'
 const ANTHROPIC_VERSION = '2023-06-01'
-const MODEL = 'claude-sonnet-4-20250514'
 
 function anthropicHeaders(extra?: Record<string, string>) {
   return {
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
 
     } else if (mime.startsWith('image/')) {
       const extracted = await callAnthropic({
-        model: MODEL,
+        model: CLAUDE_MODEL,
         max_tokens: 4000,
         messages: [{
           role: 'user',

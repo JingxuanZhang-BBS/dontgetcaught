@@ -143,17 +143,17 @@ class RetroEffectImpl extends Effect {
       ['pixelSize', new THREE.Uniform(2.0)]
     ]);
     super('RetroEffect', ditherFragmentShader, { uniforms });
-    this.uniforms = uniforms;
+    (this as any).uniforms = uniforms;
   }
-  set colorNum(v) { this.uniforms.get('colorNum').value = v; }
-  get colorNum() { return this.uniforms.get('colorNum').value; }
-  set pixelSize(v) { this.uniforms.get('pixelSize').value = v; }
-  get pixelSize() { return this.uniforms.get('pixelSize').value; }
+  set colorNum(v) { this.uniforms.get('colorNum')!.value = v; }
+  get colorNum() { return this.uniforms.get('colorNum')!.value; }
+  set pixelSize(v) { this.uniforms.get('pixelSize')!.value = v; }
+  get pixelSize() { return this.uniforms.get('pixelSize')!.value; }
 }
 
 const WrappedRetro = wrapEffect(RetroEffectImpl);
 
-const RetroEffect = forwardRef((props, ref) => {
+const RetroEffect = forwardRef((props: any, ref) => {
   const { colorNum, pixelSize } = props;
   return <WrappedRetro ref={ref} colorNum={colorNum} pixelSize={pixelSize} />;
 });
