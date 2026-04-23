@@ -185,7 +185,7 @@ html,body{height:100%;background:var(--sb);color:var(--text);font-family:var(--s
 .tl-sub{font-size:11px;color:var(--text3);margin-top:2px}
 .log-wrap{border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
 .log-head{padding:8px 12px;border-bottom:1px solid var(--border);font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);background:var(--bg2)}
-.log-body{background:var(--bg3);padding:10px 12px;font-family:var(--mono);font-size:11.5px;line-height:2;max-height:170px;overflow-y:auto;color:var(--text2)}
+.log-body{background:var(--bg3);padding:10px 12px;font-family:var(--mono);font-size:11.5px;line-height:2;max-height:220px;overflow-y:auto;color:var(--text2)}
 .result-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
 .result-title{font-size:10.5px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:var(--text3)}
 .score-tag{font-size:11px;font-family:var(--mono);padding:3px 10px;border-radius:99px;font-weight:500;letter-spacing:.04em}
@@ -202,8 +202,8 @@ html,body{height:100%;background:var(--sb);color:var(--text);font-family:var(--s
 .humanize-notice strong{color:var(--text);display:block;margin-bottom:5px;font-size:13px}
 .humanize-notice ul{margin:0;padding-left:16px;color:var(--text3);font-size:12px}
 .humanize-notice ul li{margin-bottom:2px}
-mark.ai-flagged{background:rgba(200,140,32,.18);border-bottom:1.5px solid rgba(200,140,32,.5);border-radius:2px;padding:0 1px;cursor:help}
-.flagged-note{margin-top:10px;padding:9px 12px;background:rgba(200,140,32,.07);border:1px solid rgba(200,140,32,.22);border-radius:7px;font-size:12px;color:#c88c20;line-height:1.55}
+mark.ai-flagged{background:rgba(236,255,0,.15);border-bottom:2px solid rgba(236,255,0,.55);border-radius:2px;padding:0 1px;cursor:help;color:inherit}
+.flagged-note{margin-top:10px;padding:9px 12px;background:rgba(236,255,0,.05);border:1px solid rgba(236,255,0,.2);border-radius:7px;font-size:12px;color:rgba(210,225,0,.85);line-height:1.55}
 .undo-btn{margin-top:5px;font-size:11px;color:rgba(192,57,43,.4);background:none;border:none;cursor:pointer;font-family:var(--sans);transition:color .13s;padding:0}
 .undo-btn:hover{color:var(--red)}
 #chat-input-zone{flex-shrink:0;padding:10px 22px 22px;border-top:1px solid var(--border);background:var(--bg)}
@@ -286,32 +286,49 @@ mark.ai-flagged{background:rgba(200,140,32,.18);border-bottom:1.5px solid rgba(2
 @keyframes ffPulse{0%,100%{opacity:1}50%{opacity:.15}}
 
 /* ━━ ONBOARDING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-#onboarding-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);animation:obFadeIn .35s ease}
+#onboarding-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.72);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);animation:obFadeIn .35s ease}
 @keyframes obFadeIn{from{opacity:0}to{opacity:1}}
 @keyframes obFadeOut{from{opacity:1}to{opacity:0}}
-#onboarding-card{width:100%;max-width:460px;background:rgba(18,18,18,0.72);border:1px solid rgba(255,255,255,0.13);border-radius:18px;padding:44px 44px 34px;box-shadow:0 32px 96px rgba(0,0,0,0.55);position:relative;backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);transform-style:preserve-3d;transition:transform 0.12s ease,box-shadow 0.12s ease;will-change:transform}
-.ob-screens{position:relative;min-height:210px}
-.ob-screen{display:none}
+#onboarding-card{width:100%;max-width:460px;background:#111;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:40px 42px 32px;box-shadow:0 40px 100px rgba(0,0,0,0.6);position:relative;backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);transform-style:preserve-3d;transition:transform 0.12s ease,box-shadow 0.12s ease;will-change:transform}
+.ob-screens{position:relative;height:268px}
+.ob-screen{display:none;position:absolute;top:0;left:0;right:0}
 .ob-screen.active{display:block;animation:obSlideIn .28s ease}
 @keyframes obSlideIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
-.ob-tag{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);margin-bottom:22px}
-.ob-h{font-size:26px;font-weight:600;color:var(--text);line-height:1.25;letter-spacing:-.025em;margin-bottom:16px}
-.ob-p{font-size:15px;color:var(--text2);line-height:1.75}
-.ob-label{font-size:14px;font-weight:600;color:var(--text);margin-bottom:18px;letter-spacing:-.01em}
-.ob-mode{margin-bottom:12px;padding:15px 18px;background:rgba(255,255,255,0.04);border-radius:10px;border:1px solid var(--border)}
-.ob-mode-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:5px}
-.ob-mode-desc{font-size:13px;color:var(--text2);line-height:1.65}
-.ob-tip{font-size:12px;color:var(--text3);margin-top:14px;line-height:1.6;padding-left:2px}
-.ob-credits{margin-top:22px;font-size:14px;color:var(--text2);line-height:1.8;padding:16px 20px;background:rgba(46,204,113,.06);border:1px solid rgba(46,204,113,.14);border-radius:10px}
-.ob-credits-num{font-size:28px;font-weight:700;color:var(--green);line-height:1;display:block;margin-bottom:4px}
-.ob-credits-ig{color:rgba(255,255,255,0.55);font-size:13px;margin-top:10px}
-.ob-credits-ig strong{color:var(--text);font-weight:500}
-.ob-footer{display:flex;align-items:center;justify-content:space-between;margin-top:36px}
+/* S1 */
+.ob-s1-tag{font-size:10.5px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:18px}
+.ob-s1-h{font-size:30px;font-weight:700;color:var(--text);line-height:1.2;letter-spacing:-.03em;margin-bottom:24px}
+.ob-s1-accent{color:var(--green)}
+.ob-s1-rule{height:1px;background:rgba(255,255,255,0.07);margin-bottom:15px}
+.ob-s1-body{font-size:13.5px;color:rgba(255,255,255,0.45);line-height:1.68}
+/* S2 */
+.ob-s2-label{font-size:10.5px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:12px}
+.ob-mode-card{padding:12px 15px;border:1px solid rgba(255,255,255,0.08);border-radius:10px;background:rgba(255,255,255,0.03);margin-bottom:8px}
+.ob-mode-title{font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:4px}
+.ob-mode-body{font-size:12px;color:rgba(255,255,255,0.5);line-height:1.55}
+.ob-tip{font-size:11px;color:rgba(255,255,255,0.28);line-height:1.6;margin-top:11px}
+/* S3 */
+#ob-s3{text-align:center;padding-top:6px}
+.ob-g-stat{font-size:92px;font-weight:800;line-height:.9;letter-spacing:-.05em;background:linear-gradient(160deg,#4dffa0,#2ecc71 50%,#1fa355);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:block;margin-bottom:10px}
+.ob-g-sublabel{font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(46,204,113,0.65);margin-bottom:20px}
+.ob-g-sep{height:1px;background:rgba(255,255,255,0.07);width:32px;margin:0 auto 16px}
+.ob-g-body{font-size:12.5px;color:rgba(255,255,255,0.35);line-height:1.72}
+/* S4 */
+.ob-s4-tag{font-size:10.5px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--green);margin-bottom:12px}
+.ob-s4-h{font-size:26px;font-weight:700;color:var(--text);line-height:1.2;letter-spacing:-.025em;margin-bottom:10px}
+.ob-s4-p{font-size:12.5px;color:rgba(255,255,255,0.5);line-height:1.65;margin-bottom:18px}
+.ob-credits{display:flex;align-items:center;gap:14px;padding:14px 16px;background:rgba(46,204,113,.06);border:1px solid rgba(46,204,113,.14);border-radius:11px}
+.ob-credits-num{font-size:40px;font-weight:800;color:var(--green);line-height:1;flex-shrink:0;letter-spacing:-.03em}
+.ob-credits-body{flex:1}
+.ob-credits-main{font-size:13px;color:var(--text);font-weight:500;line-height:1.4;margin-bottom:4px}
+.ob-credits-ig{color:rgba(255,255,255,0.3);font-size:11.5px}
+.ob-credits-ig strong{color:var(--green);font-weight:500}
+/* Footer */
+.ob-footer{display:flex;align-items:center;justify-content:space-between;margin-top:28px}
 .ob-dots{display:flex;gap:7px;align-items:center}
-.ob-dot{width:6px;height:6px;border-radius:99px;background:rgba(255,255,255,0.15);transition:all .25s ease}
-.ob-dot.active{background:var(--text);width:20px}
-.ob-next{padding:11px 26px;border-radius:9px;border:none;background:var(--green);color:#fff;font-size:14px;font-family:var(--sans);font-weight:600;cursor:pointer;transition:opacity .15s;letter-spacing:.01em}
-.ob-next:hover{opacity:.82}
+.ob-dot{width:5px;height:5px;border-radius:99px;background:rgba(255,255,255,0.12);transition:all .25s ease}
+.ob-dot.active{background:rgba(255,255,255,0.7);width:18px}
+.ob-next{padding:10px 26px;border-radius:9px;border:none;background:var(--green);color:#fff;font-size:13.5px;font-family:var(--sans);font-weight:600;cursor:pointer;transition:opacity .15s;letter-spacing:.01em}
+.ob-next:hover{opacity:.83}
 </style>
 </head>
 <body>
@@ -322,36 +339,47 @@ mark.ai-flagged{background:rgba(200,140,32,.18);border-bottom:1.5px solid rgba(2
   <div id="onboarding-card">
     <div class="ob-screens">
 
-      <!-- Screen 1: Brand intro -->
+      <!-- Screen 1 -->
       <div class="ob-screen active" id="ob-s1">
-        <div class="ob-tag">◆ DontGetCaught.AI</div>
-        <h2 class="ob-h">The AI writing tool<br>that doesn't sound like AI.</h2>
-        <p class="ob-p">Tell us what to write.<br>We'll hand you something that passes.</p>
+        <div class="ob-s1-tag">◆ DontGetCaught.AI</div>
+        <h2 class="ob-s1-h">The first real AI humanizer.<br><span class="ob-s1-accent">Not a scam.</span> You won't get caught.</h2>
+        <div class="ob-s1-rule"></div>
+        <p class="ob-s1-body">We've built something that actually works. Not just another AI wrapper.</p>
       </div>
 
-      <!-- Screen 2: How to use -->
+      <!-- Screen 2 -->
       <div class="ob-screen" id="ob-s2">
-        <p class="ob-label">Two things you can do here</p>
-        <div class="ob-mode">
-          <div class="ob-mode-name">Generate</div>
-          <div class="ob-mode-desc">Type what you need — an essay, article, reflection, anything. Answer one quick question, pick your settings, and we'll write it for you.</div>
+        <div class="ob-s2-label">Two things you can do here</div>
+        <div class="ob-mode-card">
+          <div class="ob-mode-title">Generate</div>
+          <div class="ob-mode-body">Type what you need. We'll ask clarifying questions to refine your prompt, adjust our settings, and then we'll write it for you.</div>
         </div>
-        <div class="ob-mode">
-          <div class="ob-mode-name">Humanize</div>
-          <div class="ob-mode-desc">Already have AI-written text? Switch to Humanize mode, paste it in, and we'll rewrite it until it passes.</div>
+        <div class="ob-mode-card">
+          <div class="ob-mode-title">Humanize</div>
+          <div class="ob-mode-body">Paste it in, and we'll give you a human text without human errors.</div>
         </div>
         <p class="ob-tip">Use the mode toggle at the top of the input box to switch between them.</p>
       </div>
 
-      <!-- Screen 3: Beta -->
+      <!-- Screen 3 -->
       <div class="ob-screen" id="ob-s3">
-        <div class="ob-tag">Beta</div>
-        <h2 class="ob-h">You're one of our<br>first users.</h2>
-        <p class="ob-p">We're still improving. If something feels off or broken, let us know — your feedback shapes what we build next.</p>
+        <span class="ob-g-stat">85%</span>
+        <div class="ob-g-sublabel">Human Score Guarantee</div>
+        <div class="ob-g-sep"></div>
+        <p class="ob-g-body">We promise we will produce a text for you that shows up as at least 85% human on major, well-known AI text detectors. If it's any less than 85%, you get all your tokens back, and still get to keep the text.</p>
+      </div>
+
+      <!-- Screen 4 -->
+      <div class="ob-screen" id="ob-s4">
+        <div class="ob-s4-tag">Beta</div>
+        <h2 class="ob-s4-h">You're one of our<br>first users.</h2>
+        <p class="ob-s4-p">We're still improving. If something feels off or broken, let us know — your feedback shapes what we build next.</p>
         <div class="ob-credits">
-          <span class="ob-credits-num">3</span>
-          free generations to get started.
-          <div class="ob-credits-ig">Need more? DM us on Instagram <strong>@dontgetcaught_ai</strong></div>
+          <div class="ob-credits-num">3</div>
+          <div class="ob-credits-body">
+            <div class="ob-credits-main">free generations to get started.</div>
+            <div class="ob-credits-ig">Want more? DM us on Instagram <strong>@dontgetcaught_ai</strong></div>
+          </div>
         </div>
       </div>
 
@@ -361,6 +389,7 @@ mark.ai-flagged{background:rgba(200,140,32,.18);border-bottom:1.5px solid rgba(2
         <div class="ob-dot active" id="ob-d0"></div>
         <div class="ob-dot" id="ob-d1"></div>
         <div class="ob-dot" id="ob-d2"></div>
+        <div class="ob-dot" id="ob-d3"></div>
       </div>
       <button class="ob-next" id="ob-next-btn" onclick="obNext()">Next →</button>
     </div>
@@ -813,6 +842,16 @@ function setTheme(t){
   document.getElementById('theme-btn-dark').classList.toggle('active',t==='dark')
   document.getElementById('theme-btn-light').classList.toggle('active',t==='light')
 }
+async function refreshCredits(){
+  try {
+    const res = await fetch('/api/auth/check')
+    if (!res.ok) return
+    const d = await res.json()
+    const c = Math.min(d.credits ?? 3, 3)
+    document.getElementById('prof-bar').style.width = Math.round(c/3*100)+'%'
+    document.getElementById('prof-credits-text').textContent = c+' / 3 beta credits remaining'
+  } catch(e) {}
+}
 async function goProfile(){
   hideAllViews()
   document.getElementById('profile').style.display='flex'
@@ -824,7 +863,7 @@ async function goProfile(){
     const initials = (d.email||'?').slice(0,2).toUpperCase()
     document.getElementById('prof-avatar').textContent = initials
     document.getElementById('prof-email').textContent = d.email || ''
-    const c = d.credits ?? 3
+    const c = Math.min(d.credits ?? 3, 3)
     document.getElementById('prof-bar').style.width = Math.round(c/3*100)+'%'
     document.getElementById('prof-credits-text').textContent = c+' / 3 beta credits remaining'
     if (d.createdAt) {
@@ -984,7 +1023,7 @@ function addWarnMsg(text,opts){
 function addProgressMsg(customPhases){
   const id=newId(),el=mkRow(id,'ai')
   const phases=customPhases||[['Phase 1','Generating your draft'],['Phase 2','Optimizing content'],['Phase 3','Finishing touches'],['Phase 4','Final verification']]
-  el.innerHTML=`<div><div class="ai-label">DontGetCaught</div><div class="timeline">${phases.map(([t,s],i)=>`<div class="tl-row"><div class="tl-track"><div class="tl-dot" id="tldt-${id}-${i+1}"></div><div class="tl-line" id="tlln-${id}-${i+1}"></div></div><div class="tl-content"><div class="tl-title" id="tltl-${id}-${i+1}">${t}</div><div class="tl-sub">${s}</div></div></div>`).join('')}</div><div class="log-wrap"><div class="log-head">Activity log</div><div class="log-body" id="log-${id}"></div></div></div>`
+  el.innerHTML=`<div><div class="ai-label">DontGetCaught</div><div class="timeline">${phases.map(([t,s],i)=>`<div class="tl-row"><div class="tl-track"><div class="tl-dot" id="tldt-${id}-${i+1}"></div><div class="tl-line" id="tlln-${id}-${i+1}"></div></div><div class="tl-content"><div class="tl-title" id="tltl-${id}-${i+1}">${t}</div><div class="tl-sub">${s}</div></div></div>`).join('')}</div><div class="log-wrap" style="margin-top:12px"><div class="log-head">Activity log</div><div class="log-body" id="log-${id}"></div></div></div>`
   return id
 }
 function setPhase(pid,n,st){
@@ -1244,7 +1283,7 @@ async function generate(writingMode='research'){
     const msg=e instanceof Error?e.message:String(e)
     plog('Error: '+msg,'error');[1,2,3,4].forEach(n=>setPhase(pid,n,'error'))
     addAiMsg('Something went wrong: '+msg+'. Please try again.')
-  }finally{if(funFact){funFact.stop();removeMsg(funFact.msgId)};resetState();setLock(false)}
+  }finally{if(funFact){funFact.stop();removeMsg(funFact.msgId)};resetState();setLock(false);refreshCredits()}
 }
 
 async function runTransplant(text){
@@ -1261,7 +1300,7 @@ async function runTransplant(text){
 
   try{
     setPhase(pid,1,'active')
-    plog('Rewriting your content through our algorithm…','step')
+    plog('Rewriting your content…','step')
     const {draft}=await apiFetch('/transplant',{text,granularity:'paragraph',citations:false})
     workingText=draft
     plog('Rewrite complete.','success')
@@ -1307,7 +1346,7 @@ async function runTransplant(text){
     const msg=e instanceof Error?e.message:String(e)
     plog('Error: '+msg,'error');[1,2,3,4].forEach(n=>setPhase(pid,n,'error'))
     addAiMsg('Something went wrong: '+msg+'. Please try again.')
-  }finally{if(funFact){funFact.stop();removeMsg(funFact.msgId)};resetState();setLock(false)}
+  }finally{if(funFact){funFact.stop();removeMsg(funFact.msgId)};resetState();setLock(false);refreshCredits()}
 }
 
 function exportPdf(text){
@@ -1530,13 +1569,13 @@ function initObTilt() {
 function obNext() {
   const screens = document.querySelectorAll('.ob-screen')
   const dots = document.querySelectorAll('.ob-dot')
-  if (obStep < 2) {
+  if (obStep < 3) {
     screens[obStep].classList.remove('active')
     dots[obStep].classList.remove('active')
     obStep++
     screens[obStep].classList.add('active')
     dots[obStep].classList.add('active')
-    if (obStep === 2) document.getElementById('ob-next-btn').textContent = 'Start Writing →'
+    if (obStep === 3) document.getElementById('ob-next-btn').textContent = 'Start Writing →'
   } else {
     localStorage.setItem('dgc_onboarded', '1')
     const overlay = document.getElementById('onboarding-overlay')

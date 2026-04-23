@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { claude } from '@/lib/claude'
 import { createClient } from '@/lib/supabase/server'
+import { deductCredit, refundCredit } from '@/lib/credits-server'
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
@@ -9,6 +10,14 @@ export async function POST(request: NextRequest) {
 
   const { text, granularity, citations } = await request.json()
   if (!text) return Response.json({ error: 'Missing text' }, { status: 400 })
+
+  const refundToken = await deductCredit(user.id)
+  if (!refundToken) {
+    return NextResponse.json(
+      { error: 'INSUFFICIENT_CREDITS', message: "You've used all 3 beta credits. Contact us on Instagram @dontgetcaught_ai to request more access." },
+      { status: 402 }
+    )
+  }
 
   const citationRule = citations
     ? 'Add a short in-text citation (Source Name, Year) after each replaced block. Include a SOURCES section at the end.'
@@ -65,6 +74,7 @@ Output: the complete rewritten text followed by SOURCES. Nothing else.`
 
     return Response.json({ draft })
   } catch (err: unknown) {
+    await refundCredit(user.id)
     const msg = err instanceof Error ? err.message : 'Unknown error'
     return Response.json({ error: 'Transplant error: ' + msg }, { status: 500 })
   }
