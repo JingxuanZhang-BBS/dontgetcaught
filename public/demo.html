@@ -117,6 +117,7 @@ html,body{height:100%;background:var(--sb);color:var(--text);font-family:var(--s
 .home-sub{font-size:15px;color:var(--text2);text-align:center;margin-bottom:26px;max-width:400px}
 .home-input-wrap{width:100%;max-width:600px;background:var(--bg);border:1px solid var(--border-md);border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,.06);overflow:visible;margin-bottom:22px;transition:border-color .2s,box-shadow .2s}
 .home-input-wrap:focus-within{border-color:rgba(0,0,0,.22);box-shadow:0 4px 24px rgba(0,0,0,.1)}
+.home-input-wrap.drag-over,.chat-input-box.drag-over{border-color:rgba(255,255,255,0.4)!important;box-shadow:0 0 0 2px rgba(255,255,255,0.1)!important}
 #home-input{width:100%;border:none;outline:none;resize:none;font-size:15px;font-family:var(--sans);color:var(--text);padding:15px 18px 6px;min-height:52px;max-height:180px;overflow-y:auto;line-height:1.65;background:transparent;border-radius:0}
 #home-input::placeholder{color:var(--text3)}
 .home-input-footer{display:flex;align-items:center;justify-content:space-between;padding:7px 10px 9px}
@@ -372,7 +373,7 @@ mark.ai-flagged{background:rgba(200,140,32,.18);border-bottom:1.5px solid rgba(2
               <svg width="14" height="14" viewBox="0 0 15 15" fill="none"><path d="M7.5 1.5C5.01 1.5 3 3.51 3 6v5.5a4.5 4.5 0 009 0V5.5a3 3 0 10-6 0v6a1.5 1.5 0 003 0V6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
               Attach
             </button>
-            <span id="upload-name-home" style="display:none"></span>
+            <span id="upload-name-home" style="display:none"></span><button id="upload-clear-home" onclick="clearUpload()" style="display:none;background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.35);font-size:13px;padding:0 2px;margin-left:2px" title="Remove file">✕</button>
           </div>
           <button id="home-send">
             <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7l6-6 6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -485,7 +486,7 @@ mark.ai-flagged{background:rgba(200,140,32,.18);border-bottom:1.5px solid rgba(2
                 <button class="ci-btn" id="chat-attach-btn">
                   <svg width="14" height="14" viewBox="0 0 15 15" fill="none"><path d="M7.5 1.5C5.01 1.5 3 3.51 3 6v5.5a4.5 4.5 0 009 0V5.5a3 3 0 10-6 0v6a1.5 1.5 0 003 0V6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>
-                <span id="upload-name-chat" style="display:none"></span>
+                <span id="upload-name-chat" style="display:none"></span><button id="upload-clear-chat" onclick="clearUpload()" style="display:none;background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.35);font-size:13px;padding:0 2px;margin-left:2px" title="Remove file">✕</button>
               </div>
               <button id="chat-send">
                 <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7l6-6 6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -526,7 +527,7 @@ mark.ai-flagged{background:rgba(200,140,32,.18);border-bottom:1.5px solid rgba(2
   </aside>
 </div>
 
-<input type="file" id="file-input" accept=".txt,.docx" style="display:none">
+<input type="file" id="file-input" accept=".txt,.docx,.pdf" style="display:none">
 
 <script>
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -859,9 +860,10 @@ function removeMsg(id){const el=document.getElementById('msg-'+id);if(el)el.remo
 
 function addTyping(){const id=newId(),el=mkRow(id,'ai');el.innerHTML=`<div><div class="ai-label">DontGetCaught</div><div class="typing-dots"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;return id}
 function addAiMsg(text){const id=newId(),el=mkRow(id,'ai');el.innerHTML=`<div><div class="ai-label">DontGetCaught</div><div class="ai-text">${esc(text)}</div></div>`;return id}
-function addUserMsg(text,canUndo=false){
+function addUserMsg(text,canUndo=false,attachedFile=''){
   const id=newId(),el=mkRow(id,'user')
-  el.innerHTML=`<div class="bubble-user">${esc(text)}</div>${canUndo?`<button class="undo-btn" id="undo-${id}">↩ Undo</button>`:''}`
+  const fileTag=attachedFile?`<div style="display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:4px 9px;border-radius:6px;background:rgba(255,255,255,0.07);font-size:11px;color:rgba(255,255,255,0.45)"><svg width="11" height="11" viewBox="0 0 15 15" fill="none"><path d="M7.5 1.5C5.01 1.5 3 3.51 3 6v5.5a4.5 4.5 0 009 0V5.5a3 3 0 10-6 0v6a1.5 1.5 0 003 0V6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>${esc(attachedFile)}</div>`:''
+  el.innerHTML=`<div class="bubble-user">${esc(text)}${fileTag}</div>${canUndo?`<button class="undo-btn" id="undo-${id}">↩ Undo</button>`:''}`
   if(canUndo)setTimeout(()=>{const b=document.getElementById('undo-'+id);if(b)b.onclick=()=>doUndo(id)},0)
   return id
 }
@@ -914,11 +916,12 @@ function addResultMsg(text,score,flaggedSentences=[]){
   })
   const ps=bodyHtml.split(/\n\n+/).map(p=>`<p>${p}</p>`).join('')
   const flagNote=stillFlagged.length?`<div class="flagged-note">⚠ ${stillFlagged.length} highlighted passage${stillFlagged.length>1?'s':''} may still read as AI-generated. Revising them manually will further improve your score.</div>`:''
-  el.innerHTML=`<div><div class="ai-label">DontGetCaught</div><div class="result-meta"><div class="result-title">Finished piece</div><span class="score-tag ${cls}">${score}% human</span></div><div class="result-body">${ps}</div>${flagNote}<div class="result-actions"><button class="act-btn" id="cp-${id}">Copy text</button><button class="act-btn" id="dl-${id}">Download .docx</button><button class="act-btn" id="rw-${id}">Write another</button></div></div>`
+  el.innerHTML=`<div><div class="ai-label">DontGetCaught</div><div class="result-meta"><div class="result-title">Finished piece</div><span class="score-tag ${cls}">${score}% human</span></div><div class="result-body">${ps}</div>${flagNote}<div class="result-actions"><button class="act-btn" id="cp-${id}">Copy text</button><button class="act-btn" id="dl-${id}">Download .docx</button><button class="act-btn" id="pdf-${id}">Export PDF</button><button class="act-btn" id="rw-${id}">Write another</button></div></div>`
   setTimeout(()=>{
-    const c=document.getElementById('cp-'+id),d=document.getElementById('dl-'+id),r=document.getElementById('rw-'+id)
+    const c=document.getElementById('cp-'+id),d=document.getElementById('dl-'+id),p=document.getElementById('pdf-'+id),r=document.getElementById('rw-'+id)
     if(c)c.onclick=()=>{navigator.clipboard.writeText(workingText);c.textContent='Copied';c.classList.add('done');setTimeout(()=>{c.textContent='Copy text';c.classList.remove('done')},2000)}
     if(d)d.onclick=()=>exportDocx(workingText)
+    if(p)p.onclick=()=>exportPdf(workingText)
     if(r)r.onclick=goHome
   },0);return id
 }
@@ -957,7 +960,7 @@ async function handleSend(rawOverride){
   uploadNameHome.style.display='none';uploadNameChat.style.display='none';fileInput.value=''
   goChat(raw||uName)
   await delay(80)
-  const pmId=addUserMsg(raw||'📎 '+uName,true)
+  const pmId=addUserMsg(raw||'(document uploaded)',true,uName||'')
   history.push({userMsgId:pmId,rollback:()=>{resetState();setLock(false)}})
   setLock(true)
   if(currentInputMode==='humanize'){await runTransplant(raw);return}
@@ -1201,6 +1204,15 @@ async function runTransplant(text){
   }finally{if(funFact){funFact.stop();removeMsg(funFact.msgId)};resetState();setLock(false)}
 }
 
+function exportPdf(text){
+  const html=text.split(/\n\n+/).filter(Boolean).map(p=>`<p style="margin:0 0 1em;line-height:1.7">${p.trim().replace(/\n/g,'<br>')}</p>`).join('')
+  const win=window.open('','_blank')
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>DontGetCaught</title><style>body{font-family:'Times New Roman',serif;font-size:12pt;max-width:700px;margin:40px auto;padding:0 20px;color:#000}@media print{body{margin:0}}</style></head><body>${html}</body></html>`)
+  win.document.close()
+  win.focus()
+  setTimeout(()=>win.print(),400)
+}
+
 async function exportDocx(text){
   try{
     const r=await fetch('/api/export',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})})
@@ -1219,10 +1231,71 @@ function doUndo(userMsgId){
 
 document.getElementById('home-attach-btn').onclick=()=>fileInput.click()
 document.getElementById('chat-attach-btn').onclick=()=>fileInput.click()
+
+function clearUpload(){
+  uploadedText='';uploadedName=''
+  uploadNameHome.style.display='none';uploadNameChat.style.display='none'
+  document.getElementById('upload-clear-home').style.display='none'
+  document.getElementById('upload-clear-chat').style.display='none'
+  fileInput.value=''
+}
+
+// 拖拽上传
+async function handleDroppedFile(file){
+  if(!file)return
+  const allowed=['.txt','.docx','.pdf']
+  const ext='.'+file.name.split('.').pop().toLowerCase()
+  if(!allowed.includes(ext)){addAiMsg('Only .txt, .docx, and .pdf files are supported.');return}
+  const loadingName='Extracting '+file.name+'…'
+  uploadNameHome.style.display='inline';uploadNameHome.textContent=loadingName
+  uploadNameChat.style.display='inline';uploadNameChat.textContent=loadingName
+  try{
+    const fd=new FormData();fd.append('file',file)
+    const r=await fetch(API+'/api/extract',{method:'POST',body:fd})
+    const d=await r.json();if(!r.ok)throw new Error(d.error||'Extract failed')
+    uploadedText=d.text;uploadedName=file.name
+    uploadNameHome.textContent=file.name
+    uploadNameChat.textContent=file.name
+    document.getElementById('upload-clear-home').style.display='inline'
+    document.getElementById('upload-clear-chat').style.display='inline'
+  }catch(err){
+    uploadNameHome.style.display='none';uploadNameChat.style.display='none'
+    addAiMsg('Could not read that file: '+err.message)
+  }
+}
+
+// 阻止 textarea 自己处理 drop（否则浏览器会插入文件路径或导航）
+homeInput.addEventListener('dragover',e=>e.preventDefault())
+homeInput.addEventListener('drop',e=>{e.preventDefault();e.stopPropagation();const f=e.dataTransfer.files?.[0];if(f)handleDroppedFile(f)})
+chatInput.addEventListener('dragover',e=>e.preventDefault())
+chatInput.addEventListener('drop',e=>{e.preventDefault();e.stopPropagation();const f=e.dataTransfer.files?.[0];if(f)handleDroppedFile(f)})
+
+;['.home-input-wrap','#chat-input-box'].forEach(sel=>{
+  const el=document.querySelector(sel);if(!el)return
+  el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('drag-over')})
+  el.addEventListener('dragleave',e=>{if(!el.contains(e.relatedTarget))el.classList.remove('drag-over')})
+  el.addEventListener('drop',e=>{
+    e.preventDefault();el.classList.remove('drag-over')
+    const file=e.dataTransfer.files?.[0]
+    if(file)handleDroppedFile(file)
+  })
+})
 fileInput.onchange=async e=>{
   const f=e.target.files?.[0];if(!f)return
-  try{const d=await apiUpload(f);uploadedText=d.text;uploadedName=f.name;uploadNameHome.style.display='inline';uploadNameHome.textContent=f.name;uploadNameChat.style.display='inline';uploadNameChat.textContent=f.name}
-  catch(err){addAiMsg('Could not read that file: '+err.message)}
+  const loadingName='Extracting '+f.name+'…'
+  uploadNameHome.style.display='inline';uploadNameHome.textContent=loadingName
+  uploadNameChat.style.display='inline';uploadNameChat.textContent=loadingName
+  try{
+    const d=await apiUpload(f)
+    uploadedText=d.text;uploadedName=f.name
+    uploadNameHome.textContent=f.name
+    uploadNameChat.textContent=f.name
+    document.getElementById('upload-clear-home').style.display='inline'
+    document.getElementById('upload-clear-chat').style.display='inline'
+  }catch(err){
+    uploadNameHome.style.display='none';uploadNameChat.style.display='none'
+    addAiMsg('Could not read that file: '+err.message)
+  }
 }
 
 ;[homeInput,chatInput].forEach(inp=>{inp.addEventListener('input',()=>{inp.style.height='0';inp.style.height=Math.min(inp.scrollHeight,180)+'px'})})
