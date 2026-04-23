@@ -7,6 +7,7 @@ import { enforceEnglishDraft, looksLikeMetaRefusal } from '@/lib/enforce-english
 import { deductCredit, refundCredit } from '@/lib/credits-server'
 import { checkRateLimit } from '@/lib/rate-limit'
 
+
 function detectNonTextDeliverable(prompt: string): boolean {
   if (!prompt || typeof prompt !== 'string') return false
   const t = prompt.trim()
@@ -72,7 +73,7 @@ STRICT RULES:
 - NEVER refuse. NEVER say you don't see a document, never ask the user to paste or attach text, never apologize for lacking a file, never describe translation or editing workflows you cannot perform.
 - If the prompt contains a long course handout, read it and produce what the student actually needs (often a personal reflection, creative rationale, or analysis) using details from their instructions.
 - Match the text type and tone implied by the prompt. Use "I" for personal reflection when appropriate.
-- Respect word count, MLA, or format requirements stated in the prompt when present.
+- WORD COUNT IS MANDATORY: If the prompt states a word count (e.g. "200 words", "500-word essay"), hit it within ±20 words. Do not go over. Do not go under. Count your words before outputting and adjust if needed. This is a hard requirement.
 - ${citationRule}
 
 TEXT TYPE: ${typeConfig.name}
@@ -113,6 +114,7 @@ A document brief or assignment rubric has been provided. Your job:
 3. FORMULATE a proper research question following the format in the brief exactly (e.g. "How and to what extent does X affect Y, and what responses are most effective?").
 4. FOLLOW the required structure exactly — use every section heading in the brief, in the right order, with appropriate content in each.
 5. MEET all listed requirements — minimum sources, statistics, word count, section content, everything.
+6. WORD COUNT IS MANDATORY: Hit the stated word count within ±20 words. Count your words before outputting. Hard requirement.
 6. SOURCE everything from foreign language human-written content, translated literally into English.
 
 SOURCING:
@@ -170,7 +172,7 @@ CONNECTIVE TISSUE — keep it minimal (max 1-2 short sentences between blocks):
 TEXT TYPE: ${typeConfig.name}
 ${typeConfig.format}
 
-WORD COUNT — CRITICAL: Hit the word count in the prompt accurately. Do not exceed by more than 20 words. Do not fall short by more than 20 words.
+WORD COUNT — NON-NEGOTIABLE: Hit the word count in the prompt within ±20 words. Count your words before outputting. If you are over, cut. If you are under, expand. Do not output the piece until the count is within range.
 
 BEFORE OUTPUTTING, fix:
 - Any named individual the reader has not met — rewrite without the name

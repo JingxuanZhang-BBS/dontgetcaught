@@ -911,7 +911,7 @@ function addLog(pid,text,color){
   const d=document.createElement('div');d.style.color=color||'#787878';d.textContent=text
   box.appendChild(d);box.scrollTop=box.scrollHeight;scrollBottom()
 }
-function addResultMsg(text,score,flaggedSentences=[]){
+function addResultMsg(text,score,flaggedSentences=[],regenParams=null){
   const id=newId(),el=mkRow(id,'ai')
   const cls=score>=90?'score-green':score>=80?'score-yellow':'score-red'
   let bodyHtml=esc(text)
@@ -922,13 +922,24 @@ function addResultMsg(text,score,flaggedSentences=[]){
   })
   const ps=bodyHtml.split(/\n\n+/).map(p=>`<p>${p}</p>`).join('')
   const flagNote=stillFlagged.length?`<div class="flagged-note">⚠ ${stillFlagged.length} highlighted passage${stillFlagged.length>1?'s':''} may still read as AI-generated. Revising them manually will further improve your score.</div>`:''
-  el.innerHTML=`<div><div class="ai-label">DontGetCaught</div><div class="result-meta"><div class="result-title">Finished piece</div><span class="score-tag ${cls}">${score}% human</span></div><div class="result-body">${ps}</div>${flagNote}<div class="result-actions"><button class="act-btn" id="cp-${id}">Copy text</button><button class="act-btn" id="dl-${id}">Download .docx</button><button class="act-btn" id="pdf-${id}">Export PDF</button><button class="act-btn" id="rw-${id}">Write another</button></div></div>`
+  const wc=text.trim().split(/\s+/).filter(Boolean).length
+  const regenBtn=regenParams?`<button class="act-btn" id="regen-${id}">↻ Regenerate</button>`:''
+  el.innerHTML=`<div><div class="ai-label">DontGetCaught</div><div class="result-meta"><div class="result-title">Finished piece</div><span class="score-tag ${cls}">${score}% human</span></div><div class="result-body">${ps}</div>${flagNote}<div class="result-actions"><button class="act-btn" id="cp-${id}">Copy text</button><button class="act-btn" id="dl-${id}">Download .docx</button><button class="act-btn" id="pdf-${id}">Export PDF</button>${regenBtn}<button class="act-btn" id="rw-${id}">Write another</button></div><div style="font-size:11px;color:var(--text3);margin-top:8px">${wc.toLocaleString()} words</div></div>`
   setTimeout(()=>{
-    const c=document.getElementById('cp-'+id),d=document.getElementById('dl-'+id),p=document.getElementById('pdf-'+id),r=document.getElementById('rw-'+id)
+    const c=document.getElementById('cp-'+id),d=document.getElementById('dl-'+id),p=document.getElementById('pdf-'+id),r=document.getElementById('rw-'+id),regen=document.getElementById('regen-'+id)
     if(c)c.onclick=()=>{navigator.clipboard.writeText(workingText);c.textContent='Copied';c.classList.add('done');setTimeout(()=>{c.textContent='Copy text';c.classList.remove('done')},2000)}
     if(d)d.onclick=()=>exportDocx(workingText)
     if(p)p.onclick=()=>exportPdf(workingText)
     if(r)r.onclick=goHome
+    if(regen)regen.onclick=()=>{
+      resetState()
+      Object.assign(state,{
+        prompt:regenParams.prompt,clarifications:regenParams.clarifications,
+        textType:regenParams.textType,tone:regenParams.tone,
+        citations:regenParams.citations,wordCount:regenParams.wordCount
+      })
+      generate(regenParams.writingMode)
+    }
   },0);return id
 }
 
@@ -1116,7 +1127,11 @@ async function generate(writingMode='research'){
     plog(`✓ Final score: ${finalScore}% human.`,'success')
     setPhase(pid,4,'done')
     const remainingFlagged=(fs.sentences||[]).filter(s=>s.aiProb>=0.4).map(s=>s.text)
-    addResultMsg(workingText,finalScore,remainingFlagged)
+    addResultMsg(workingText,finalScore,remainingFlagged,{
+      prompt:state.prompt,clarifications:[...state.clarifications],
+      textType:state.textType,tone:state.tone,citations:state.citations,
+      wordCount:state.wordCount,writingMode
+    })
 
     // Save to history
     const wc=workingText.trim().split(/\s+/).length
