@@ -450,7 +450,7 @@ mark.ai-flagged{background:rgba(200,140,32,.18);border-bottom:1.5px solid rgba(2
         <hr class="prof-divider">
         <div class="prof-section-label">Credits</div>
         <div class="prof-credits-bar-wrap"><div class="prof-credits-bar" id="prof-bar" style="width:100%"></div></div>
-        <div class="prof-credits-text" id="prof-credits-text">– / 10 credits remaining</div>
+        <div class="prof-credits-text" id="prof-credits-text">– / 3 credits remaining</div>
         <hr class="prof-divider">
         <div class="prof-meta-label">Member since</div>
         <div class="prof-meta-val" id="prof-since">–</div>
@@ -739,9 +739,9 @@ async function goProfile(){
     const initials = (d.email||'?').slice(0,2).toUpperCase()
     document.getElementById('prof-avatar').textContent = initials
     document.getElementById('prof-email').textContent = d.email || ''
-    const c = d.credits ?? 10
-    document.getElementById('prof-bar').style.width = Math.round(c/10*100)+'%'
-    document.getElementById('prof-credits-text').textContent = c+' / 10 credits remaining'
+    const c = d.credits ?? 3
+    document.getElementById('prof-bar').style.width = Math.round(c/3*100)+'%'
+    document.getElementById('prof-credits-text').textContent = c+' / 3 beta credits remaining'
     if (d.createdAt) {
       const dt = new Date(d.createdAt)
       document.getElementById('prof-since').textContent = dt.toLocaleDateString('en-US',{month:'long',year:'numeric'})
@@ -821,6 +821,8 @@ function openHistoryTask(i){
     <div class="result-body">${bodyHtml}</div>
     <div class="result-actions">
       <button class="act-btn" id="copy-hist-${i}">Copy</button>
+      <button class="act-btn" id="dl-hist-${i}">Download .docx</button>
+      <button class="act-btn" id="pdf-hist-${i}">Export PDF</button>
     </div>
     <div style="font-size:11px;color:var(--text3);margin-top:8px">${timeAgo(t.created_at)}${t.word_count?' · '+t.word_count.toLocaleString()+' words':''}</div>
   </div>`
@@ -831,6 +833,10 @@ function openHistoryTask(i){
       btn.textContent='Copied!';btn.classList.add('done')
       setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('done')},2000)
     }
+    const dl=document.getElementById('dl-hist-'+i)
+    if(dl) dl.onclick=()=>exportDocx(t.draft)
+    const pdf=document.getElementById('pdf-hist-'+i)
+    if(pdf) pdf.onclick=()=>exportPdf(t.draft)
   },0)
   scrollBottom()
 }

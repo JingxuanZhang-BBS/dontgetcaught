@@ -392,7 +392,7 @@ export default function LandingPage() {
               style={{ background: 'rgba(74,222,128,0.07)', border: '1px solid rgba(74,222,128,0.2)' }}>
               <div className="w-2 h-2 rounded-full shrink-0 animate-pulse" style={{ background: '#4ade80' }} />
               <span className="text-[12px] leading-snug" style={{ color: 'rgba(255,255,255,0.55)' }}>
-                Beta — 3 free generations/month.<br />No card required.
+                Beta — 3 free generations. No card required.
               </span>
             </div>
           </div>

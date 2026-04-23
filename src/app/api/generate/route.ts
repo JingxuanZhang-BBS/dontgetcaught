@@ -47,7 +47,7 @@ export async function POST(request: Request) {
     const refundToken = await deductCredit(userId!)
     if (!refundToken) {
       return NextResponse.json(
-        { error: 'INSUFFICIENT_CREDITS', message: "You've used all your credits. Upgrade to keep generating." },
+        { error: 'INSUFFICIENT_CREDITS', message: "You've used all 3 beta credits. Contact us on Instagram @dontgetcaught_ai to request more access." },
         { status: 402 }
       )
     }
