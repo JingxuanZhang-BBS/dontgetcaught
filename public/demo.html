@@ -21,6 +21,7 @@
 </script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -564,10 +565,26 @@ mark.ai-flagged{background:rgba(236,255,0,.15);border-bottom:2px solid rgba(236,
         <hr class="prof-divider">
         <div class="prof-section-label">Credits</div>
         <div class="prof-credits-bar-wrap"><div class="prof-credits-bar" id="prof-bar" style="width:100%"></div></div>
-        <div class="prof-credits-text" id="prof-credits-text">– / 3 credits remaining</div>
+        <div class="prof-credits-text" id="prof-credits-text">– credits remaining</div>
+
+        <div class="prof-section-label" style="margin-top:4px">Redeem a code</div>
+        <div style="display:flex;gap:8px;margin-bottom:24px">
+          <input id="gift-code-input" type="text" placeholder="Enter gift code"
+            style="flex:1;padding:9px 12px;border-radius:8px;border:1px solid var(--border-md);background:var(--bg2);color:var(--text);font-size:13px;font-family:var(--sans);outline:none"
+            onkeydown="if(event.key==='Enter')redeemCode()" />
+          <button onclick="redeemCode()" id="redeem-btn"
+            style="padding:9px 16px;border-radius:8px;border:1px solid var(--border-md);background:transparent;color:var(--text2);font-size:13px;font-family:var(--sans);cursor:pointer;white-space:nowrap;transition:all .13s"
+            onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'">
+            Redeem
+          </button>
+        </div>
+        <div id="redeem-msg" style="display:none;font-size:12.5px;margin-top:-16px;margin-bottom:20px;padding:9px 12px;border-radius:8px"></div>
+
         <hr class="prof-divider">
         <div class="prof-meta-label">Member since</div>
         <div class="prof-meta-val" id="prof-since">–</div>
+        <div class="prof-meta-label" id="tos-label" style="display:none">Terms agreed</div>
+        <div class="prof-meta-val" id="prof-tos">–</div>
         <hr class="prof-divider">
         <button class="prof-signout" onclick="signOut()">Sign Out</button>
       </div>
@@ -847,10 +864,43 @@ async function refreshCredits(){
     const res = await fetch('/api/auth/check')
     if (!res.ok) return
     const d = await res.json()
-    const c = Math.min(d.credits ?? 3, 3)
-    document.getElementById('prof-bar').style.width = Math.round(c/3*100)+'%'
-    document.getElementById('prof-credits-text').textContent = c+' / 3 beta credits remaining'
+    const c = d.credits ?? 0
+    document.getElementById('prof-bar').style.width = Math.min(Math.round(c/3*100),100)+'%'
+    document.getElementById('prof-credits-text').textContent = c+' credit'+(c===1?'':'s')+' remaining'
   } catch(e) {}
+}
+async function redeemCode(){
+  const input = document.getElementById('gift-code-input')
+  const msg = document.getElementById('redeem-msg')
+  const btn = document.getElementById('redeem-btn')
+  const code = input.value.trim()
+  if (!code) return
+  btn.disabled = true
+  btn.textContent = '...'
+  msg.style.display = 'none'
+  try {
+    const r = await fetch('/api/redeem', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})})
+    const d = await r.json()
+    if (!r.ok) {
+      msg.style.display = 'block'
+      msg.style.background = 'rgba(192,57,43,0.08)'
+      msg.style.border = '1px solid rgba(192,57,43,0.2)'
+      msg.style.color = 'var(--red)'
+      msg.textContent = d.error || 'Redemption failed'
+    } else {
+      msg.style.display = 'block'
+      msg.style.background = 'rgba(30,158,85,0.08)'
+      msg.style.border = '1px solid rgba(30,158,85,0.2)'
+      msg.style.color = 'var(--green)'
+      msg.textContent = '+'+d.creditsAdded+' credit'+(d.creditsAdded===1?'':'s')+' added!'
+      input.value = ''
+      await refreshCredits()
+    }
+  } catch(e) {
+    msg.style.display='block';msg.style.background='rgba(192,57,43,0.08)';msg.style.border='1px solid rgba(192,57,43,0.2)';msg.style.color='var(--red)';msg.textContent='Network error'
+  } finally {
+    btn.disabled=false;btn.textContent='Redeem'
+  }
 }
 async function goProfile(){
   hideAllViews()
@@ -863,12 +913,18 @@ async function goProfile(){
     const initials = (d.email||'?').slice(0,2).toUpperCase()
     document.getElementById('prof-avatar').textContent = initials
     document.getElementById('prof-email').textContent = d.email || ''
-    const c = Math.min(d.credits ?? 3, 3)
-    document.getElementById('prof-bar').style.width = Math.round(c/3*100)+'%'
-    document.getElementById('prof-credits-text').textContent = c+' / 3 beta credits remaining'
+    const c = d.credits ?? 0
+    document.getElementById('prof-bar').style.width = Math.min(Math.round(c/3*100),100)+'%'
+    document.getElementById('prof-credits-text').textContent = c+' credit'+(c===1?'':'s')+' remaining'
     if (d.createdAt) {
       const dt = new Date(d.createdAt)
       document.getElementById('prof-since').textContent = dt.toLocaleDateString('en-US',{month:'long',year:'numeric'})
+    }
+    if (d.tosAcceptedAt) {
+      const tosEl = document.getElementById('tos-label')
+      const tosVal = document.getElementById('prof-tos')
+      if (tosEl) tosEl.style.display = 'block'
+      if (tosVal) tosVal.textContent = new Date(d.tosAcceptedAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})
     }
   } catch(e) { console.error(e) }
 }
@@ -1235,13 +1291,13 @@ async function generate(writingMode='research'){
       if(!flagged.length){plog('No sentences above threshold.','warn');break}
       if(round===3){plog('Max rounds. Proceeding to polish.','warn');break}
       plog('Refining flagged passages…','step')
-      const {humanized}=await apiFetch('/humanize',{draft:workingText,flaggedSentences:flagged.map(s=>s.text),textType:state.textType,citations:state.citations})
+      const {humanized}=await apiFetch('/humanize',{draft:workingText,flaggedSentences:flagged.map(s=>s.text),textType:state.textType,citations:state.citations,wordCount:state.wordCount,prompt:state.prompt})
       workingText=humanized;plog('Refined. Checking again…','info')
     }
     setPhase(pid,2,'done')
     setPhase(pid,3,'active')
     plog('Phase 3 — polishing…','step')
-    const {polished}=await apiFetch('/polish',{text:workingText,textType:state.textType,citations:state.citations})
+    const {polished}=await apiFetch('/polish',{text:workingText,textType:state.textType,citations:state.citations,wordCount:state.wordCount,prompt:state.prompt})
     workingText=polished;plog('Polish complete.','success')
     setPhase(pid,3,'done')
     setPhase(pid,4,'active')
@@ -1350,12 +1406,25 @@ async function runTransplant(text){
 }
 
 function exportPdf(text){
-  const html=text.split(/\n\n+/).filter(Boolean).map(p=>`<p style="margin:0 0 1em;line-height:1.7">${p.trim().replace(/\n/g,'<br>')}</p>`).join('')
-  const win=window.open('','_blank')
-  win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>DontGetCaught</title><style>body{font-family:'Times New Roman',serif;font-size:12pt;max-width:700px;margin:40px auto;padding:0 20px;color:#000}@media print{body{margin:0}}</style></head><body>${html}</body></html>`)
-  win.document.close()
-  win.focus()
-  setTimeout(()=>win.print(),400)
+  const {jsPDF}=window.jspdf
+  const doc=new jsPDF({unit:'mm',format:'a4'})
+  doc.setFont('times','normal')
+  doc.setFontSize(12)
+  const margin=25,lineH=6.5
+  const usableW=doc.internal.pageSize.getWidth()-margin*2
+  const pageH=doc.internal.pageSize.getHeight()
+  let y=margin
+  const paragraphs=text.split(/\n\n+/).filter(Boolean)
+  for(const para of paragraphs){
+    const lines=doc.splitTextToSize(para.trim(),usableW)
+    for(const line of lines){
+      if(y+lineH>pageH-margin){doc.addPage();y=margin}
+      doc.text(line,margin,y)
+      y+=lineH
+    }
+    y+=lineH*0.6
+  }
+  doc.save('dontgetcaught.pdf')
 }
 
 async function exportDocx(text){

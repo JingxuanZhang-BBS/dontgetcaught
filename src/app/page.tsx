@@ -69,7 +69,7 @@ const LOGO_ITEMS = [
 // ── How It Works step data ────────────────────────────────────────────────
 const STEPS = [
   {
-    num: '01', title: 'Draft', tag: 'Generation',
+    num: '01', title: 'Draft', tag: 'Generation', img: '/1.png',
     icon: (
       <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
@@ -78,7 +78,7 @@ const STEPS = [
     body: 'Your prompt is analyzed for type, tone, and intent. A first draft is generated under precise constraints designed to minimize detectable AI patterns from the start.',
   },
   {
-    num: '02', title: 'Scan', tag: 'Detection',
+    num: '02', title: 'Scan', tag: 'Detection', img: '/2.png',
     icon: (
       <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
         <circle cx="11" cy="11" r="8"/><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35"/>
@@ -88,7 +88,7 @@ const STEPS = [
     body: 'The draft runs through GPTZero sentence by sentence. Each segment receives an AI-probability score; anything above threshold is flagged for targeted rewriting.',
   },
   {
-    num: '03', title: 'Humanize', tag: 'Rewriting',
+    num: '03', title: 'Humanize', tag: 'Rewriting', img: '/3.png',
     icon: (
       <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
@@ -99,7 +99,7 @@ const STEPS = [
     body: 'Flagged segments are individually rewritten to shift detection patterns while preserving meaning, argument, and flow. This loop runs up to three rounds until the score clears 85%.',
   },
   {
-    num: '04', title: 'Polish', tag: 'Quality check',
+    num: '04', title: 'Polish', tag: 'Quality check', img: '/4.png',
     icon: (
       <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -160,19 +160,19 @@ export default function LandingPage() {
   }, [])
 
   useEffect(() => {
-    const t1 = setTimeout(() => setIntroPhase('pause'), 5500)
+    const t1 = setTimeout(() => setIntroPhase('pause'), 4200)
     return () => clearTimeout(t1)
   }, [])
 
   useEffect(() => {
     if (introPhase !== 'pause') return
-    const t = setTimeout(() => setIntroPhase('typing2'), 1200)
+    const t = setTimeout(() => setIntroPhase('typing2'), 2000)
     return () => clearTimeout(t)
   }, [introPhase])
 
   useEffect(() => {
     if (introPhase !== 'typing2') return
-    const t = setTimeout(() => setIntroPhase('done'), 5500)
+    const t = setTimeout(() => setIntroPhase('done'), 3500)
     return () => clearTimeout(t)
   }, [introPhase])
 
@@ -237,7 +237,7 @@ export default function LandingPage() {
               <TextType
                 text={["Tired of your AI-written essays always getting flagged?"]}
                 className="text-3xl md:text-[42px] font-medium tracking-[-0.02em] leading-snug text-white/90"
-                typingSpeed={80} showCursor cursorCharacter="_" cursorBlinkDuration={0.6} loop={false}
+                typingSpeed={50} showCursor cursorCharacter="_" cursorBlinkDuration={0.6} loop={false}
               />
             </div>
           )}
@@ -245,7 +245,7 @@ export default function LandingPage() {
             <TextType
               text={["We generate writing that sounds like you — not a machine."]}
               className="text-2xl md:text-[36px] font-normal tracking-[-0.01em] leading-snug text-white/80"
-              typingSpeed={70} showCursor cursorCharacter="_" cursorBlinkDuration={0.6} loop={false}
+              typingSpeed={50} showCursor cursorCharacter="_" cursorBlinkDuration={0.6} loop={false}
             />
           )}
         </div>
@@ -424,26 +424,16 @@ export default function LandingPage() {
                 key={step.num}
                 className="w-full h-full flex flex-col relative overflow-hidden"
               >
-                {/* ── Image placeholder (top ~42%) ── */}
+                {/* ── Step image (top ~42%) ── */}
                 <div
-                  className="shrink-0 relative flex items-center justify-center"
+                  className="shrink-0 relative overflow-hidden"
                   style={{
-                    height: '42%',
-                    background: 'rgba(255,255,255,0.03)',
+                    height: '55%',
                     borderBottom: '1px solid rgba(255,255,255,0.07)',
                   }}
                 >
-                  {/* Placeholder icon + label */}
-                  <div className="flex flex-col items-center gap-2 select-none">
-                    <svg width="28" height="28" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1.4" viewBox="0 0 24 24">
-                      <rect x="3" y="3" width="18" height="18" rx="3"/>
-                      <circle cx="8.5" cy="8.5" r="1.5"/>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 15l-5-5L5 21"/>
-                    </svg>
-                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.15)', fontFamily: 'monospace', letterSpacing: '0.08em' }}>
-                      IMAGE PLACEHOLDER
-                    </span>
-                  </div>
+                  <img src={step.img} alt={step.title}
+                    className="w-full h-full object-cover object-top" />
                   {/* Tag badge — top right */}
                   <div
                     className="absolute top-4 right-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full"
@@ -499,16 +489,16 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[
-              { alias: '?', label: 'Frontend Engineer', detail: 'Freshman · Beijing', initials: '?' },
-              { alias: '?', label: 'Backend Engineer',  detail: 'Freshman · Portugal', initials: '?' },
+              { label: 'Frontend Engineer', detail: 'Freshman · Beijing', img: '/frontend.png' },
+              { label: 'Backend Engineer',  detail: 'Freshman · Portugal', img: '/backend.png' },
             ].map((f, i) => (
               <div key={i} className="rounded-2xl p-6 flex flex-col gap-5"
                 style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full flex items-center justify-center text-[18px] font-bold shrink-0"
-                    style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.3)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                    ?
-                  </div>
+                  <img src={f.img} alt={f.label}
+                    className="w-12 h-12 rounded-full shrink-0 object-cover"
+                    style={{ border: '1px solid rgba(255,255,255,0.1)' }} />
+
                   <div>
                     <p className="text-[14px] font-semibold" style={{ color: '#fff' }}>{f.label}</p>
                     <p className="text-[12px]" style={{ color: 'rgba(255,255,255,0.35)' }}>{f.detail} · DontGetCaught.AI</p>

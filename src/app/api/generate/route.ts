@@ -6,6 +6,13 @@ import { createClient } from '@/lib/supabase/server'
 import { enforceEnglishDraft, looksLikeMetaRefusal } from '@/lib/enforce-english'
 import { deductCredit, refundCredit } from '@/lib/credits-server'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { askClaudeIsHarmful, HARMFUL_PROMPT_MESSAGE } from '@/lib/harm-check'
+import {
+  resolveWordCountTarget,
+  resolveWordCountIncludesSources,
+  wordCountBandLine,
+  reviseWordCountBand,
+} from '@/lib/word-count'
 
 
 function detectNonTextDeliverable(prompt: string): boolean {
@@ -28,9 +35,13 @@ export async function POST(request: Request) {
     const rateLimited = await checkRateLimit(userId, 'generate')
     if (rateLimited) return rateLimited
 
-    const { prompt, citations, textType, category, writingMode } = await request.json()
+    const { prompt, citations, textType, category, writingMode, wordCount: wordCountBody, wordCountIncludesSources: wcIncludesBody } = await request.json()
     if (!prompt) {
       return NextResponse.json({ error: 'Missing prompt' }, { status: 400 })
+    }
+
+    if (await askClaudeIsHarmful(prompt)) {
+      return NextResponse.json({ error: 'HARMFUL_PROMPT', message: HARMFUL_PROMPT_MESSAGE }, { status: 400 })
     }
 
     if (detectNonTextDeliverable(prompt)) {
@@ -53,6 +64,12 @@ export async function POST(request: Request) {
       )
     }
 
+    const wordCountTarget = resolveWordCountTarget(prompt, wordCountBody)
+    const includeSourcesInCount = resolveWordCountIncludesSources(prompt, wcIncludesBody === true)
+    const wcInstruction = wordCountTarget
+      ? wordCountBandLine(wordCountTarget, includeSourcesInCount)
+      : 'If the prompt states a word count, get as close as you can — aim within ±50 words.'
+
     const typeConfig = TEXT_TYPES[textType] || TEXT_TYPES.oped
     const citationRule = citations
       ? 'Add a short in-text citation in parentheses after each passage e.g. (Source Name, Year). Do NOT mention the language it was translated from. Always include a full SOURCES section at the end.'
@@ -73,7 +90,7 @@ STRICT RULES:
 - NEVER refuse. NEVER say you don't see a document, never ask the user to paste or attach text, never apologize for lacking a file, never describe translation or editing workflows you cannot perform.
 - If the prompt contains a long course handout, read it and produce what the student actually needs (often a personal reflection, creative rationale, or analysis) using details from their instructions.
 - Match the text type and tone implied by the prompt. Use "I" for personal reflection when appropriate.
-- WORD COUNT IS MANDATORY: If the prompt states a word count (e.g. "200 words", "500-word essay"), hit it within ±20 words. Do not go over. Do not go under. Count your words before outputting and adjust if needed. This is a hard requirement.
+- ${wcInstruction}
 - ${citationRule}
 
 TEXT TYPE: ${typeConfig.name}
@@ -88,6 +105,9 @@ ${typeConfig.format}`
             { error: "The model refused to write. Try rephrasing your request as a clear writing task (e.g. 'Write a 700-word reflection about…')." },
             { status: 500 }
           )
+        }
+        if (wordCountTarget) {
+          draft = await reviseWordCountBand(draft, wordCountTarget, includeSourcesInCount)
         }
         return NextResponse.json({ draft, writingMode: 'best_effort', refundToken })
       } catch (err: unknown) {
@@ -114,8 +134,8 @@ A document brief or assignment rubric has been provided. Your job:
 3. FORMULATE a proper research question following the format in the brief exactly (e.g. "How and to what extent does X affect Y, and what responses are most effective?").
 4. FOLLOW the required structure exactly — use every section heading in the brief, in the right order, with appropriate content in each.
 5. MEET all listed requirements — minimum sources, statistics, word count, section content, everything.
-6. WORD COUNT IS MANDATORY: Hit the stated word count within ±20 words. Count your words before outputting. Hard requirement.
-6. SOURCE everything from foreign language human-written content, translated literally into English.
+6. ${wcInstruction}
+7. SOURCE everything from foreign language human-written content, translated literally into English.
 
 SOURCING:
 - Choose 3-4 languages with rich content on the specific topic and chosen location
@@ -172,7 +192,7 @@ CONNECTIVE TISSUE — keep it minimal (max 1-2 short sentences between blocks):
 TEXT TYPE: ${typeConfig.name}
 ${typeConfig.format}
 
-WORD COUNT — NON-NEGOTIABLE: Hit the word count in the prompt within ±20 words. Count your words before outputting. If you are over, cut. If you are under, expand. Do not output the piece until the count is within range.
+${wcInstruction}
 
 BEFORE OUTPUTTING, fix:
 - Any named individual the reader has not met — rewrite without the name
@@ -216,6 +236,10 @@ Output the complete corrected text. No commentary.`
       draft = artifactCleaned.replace(/^#{1,6}\s+/gm, '').replace(/\*\*/g, '').trim()
     } catch {
       // best-effort
+    }
+
+    if (wordCountTarget) {
+      draft = await reviseWordCountBand(draft, wordCountTarget, includeSourcesInCount)
     }
 
     return NextResponse.json({ draft, writingMode: 'research', refundToken })

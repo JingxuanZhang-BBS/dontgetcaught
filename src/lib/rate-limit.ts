@@ -36,7 +36,10 @@ export async function checkRateLimit(
 
   if (error) {
     console.error('rate limit check error:', error)
-    return null // fail open — don't block on DB error
+    return NextResponse.json(
+      { error: 'RATE_LIMITED', message: 'Service temporarily unavailable. Please try again shortly.' },
+      { status: 429 }
+    )
   }
 
   if (data === false) {

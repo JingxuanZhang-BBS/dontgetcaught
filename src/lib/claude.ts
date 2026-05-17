@@ -48,12 +48,15 @@ export async function claude(
     } catch (err) {
       if (
         axios.isAxiosError(err) &&
-        (err.response?.status === 429 || err.response?.status === 529) &&
+        (err.response?.status === 429 || err.response?.status === 502 || err.response?.status === 529) &&
         attempt < MAX_RETRIES
       ) {
         const wait = (attempt + 1) * 5000 // 5s, 10s, 15s
         await new Promise(r => setTimeout(r, wait))
         continue
+      }
+      if (axios.isAxiosError(err) && err.response) {
+        console.error('Anthropic API error', err.response.status, JSON.stringify(err.response.data))
       }
       throw err
     }

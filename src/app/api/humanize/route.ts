@@ -5,6 +5,13 @@ import { claude, TEXT_TYPES } from '@/lib/claude'
 import { createClient } from '@/lib/supabase/server'
 import { enforceEnglishDraft } from '@/lib/enforce-english'
 import { checkRateLimit } from '@/lib/rate-limit'
+import {
+  resolveWordCountTarget,
+  resolveWordCountIncludesSources,
+  reviseWordCountBand,
+  countWordsForLengthTarget,
+  WORD_COUNT_TOLERANCE,
+} from '@/lib/word-count'
 
 export async function POST(request: Request) {
   try {
@@ -15,10 +22,30 @@ export async function POST(request: Request) {
     const rateLimited = await checkRateLimit(user.id, 'humanize')
     if (rateLimited) return rateLimited
 
-    const { draft, flaggedSentences, textType, citations, writingMode } = await request.json()
+    const {
+      draft,
+      flaggedSentences,
+      textType,
+      citations,
+      writingMode,
+      wordCount: wordCountBody,
+      prompt: lengthPrompt,
+      wordCountIncludesSources: wcIncludesBody,
+    } = await request.json()
+
     if (!draft || !flaggedSentences?.length) {
       return NextResponse.json({ error: 'Missing data' }, { status: 400 })
     }
+
+    const wordCountTarget = resolveWordCountTarget(null, wordCountBody)
+    const includeSourcesInCount = resolveWordCountIncludesSources(lengthPrompt ?? '', wcIncludesBody === true)
+    const measuredWords = countWordsForLengthTarget(draft, includeSourcesInCount)
+
+    const lengthNote = wordCountTarget
+      ? (includeSourcesInCount
+        ? `\n\nLENGTH (mandatory): After edits, total words (main body + entire SOURCES block) must stay between ${Math.max(50, wordCountTarget - WORD_COUNT_TOLERANCE)} and ${wordCountTarget + WORD_COUNT_TOLERANCE} inclusive. About ${measuredWords} words now by that rule. In-text citations always count. Do not delete SOURCES lines to shorten — adjust the body.`
+        : `\n\nLENGTH (mandatory): After edits, count ONLY the main body (before SOURCES); do NOT count the SOURCES section. In-text citations in the body DO count. Body must stay between ${Math.max(50, wordCountTarget - WORD_COUNT_TOLERANCE)} and ${wordCountTarget + WORD_COUNT_TOLERANCE} words inclusive. Body is about ${measuredWords} words now.`)
+      : ''
 
     const bestEffort = writingMode === 'best_effort'
     const typeConfig = TEXT_TYPES[textType] || TEXT_TYPES.oped
@@ -52,7 +79,7 @@ RULES FOR ALL REPLACEMENTS:
 - ${citationNote}
 
 After replacing all flagged sentences, return the COMPLETE rewritten draft with replacements inserted in the correct positions.
-No preamble. Just the full piece.`
+No preamble. Just the full piece.${lengthNote}`
 
     const systemBestEffort = `You revise a personal or analytical draft to read less AI-like. You receive the full draft and sentences that scored as AI-like.
 
@@ -60,7 +87,7 @@ For each flagged sentence: rewrite it in a more natural, human voice — varied 
 
 ${citationNote}
 
-Return the COMPLETE draft with those sentences revised. No preamble.`
+Return the COMPLETE draft with those sentences revised. No preamble.${lengthNote}`
 
     const system = bestEffort ? systemBestEffort : systemResearch
 
@@ -78,6 +105,10 @@ Return the COMPLETE draft with those sentences revised. No preamble.`
 
     if (!bestEffort) {
       humanized = await enforceEnglishDraft(humanized)
+    }
+
+    if (wordCountTarget) {
+      humanized = await reviseWordCountBand(humanized, wordCountTarget, includeSourcesInCount)
     }
 
     return NextResponse.json({ humanized })

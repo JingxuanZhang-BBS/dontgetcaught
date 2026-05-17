@@ -1,7 +1,12 @@
 import { NextRequest } from 'next/server'
 import { claude } from '@/lib/claude'
+import { createClient } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+
   const { prompt } = await request.json()
   if (!prompt) return Response.json({ error: 'Missing prompt' }, { status: 400 })
 

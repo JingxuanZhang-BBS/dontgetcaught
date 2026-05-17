@@ -4,6 +4,16 @@
 
 ---
 
+## 2026-04-23 18:xx
+- /api/clarify 和 /api/analyze 加入身份验证拦截
+- /api/transplant 加入 credit 扣除（standalone Humanize tab 入口）
+- credit 扣除逻辑：RPC 失败时 fallback 到直接 table 操作
+- credits 显示修复：上限 3，生成完自动刷新
+- progress 面板改回竖向堆叠布局（timeline 在上，activity log 在下）
+- fun-facts 系统提示移除内部技术细节
+
+---
+
 ## 2026-04-07 前后端合并：demo.html 接替旧 dashboard
 
 - **dashboard/page.tsx**：旧黑色聊天界面完全移除，改为重定向到 `/demo.html`
