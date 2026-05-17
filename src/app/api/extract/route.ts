@@ -62,10 +62,23 @@ export async function POST(request: Request) {
       text = extracted
 
     } else if (mime === 'application/pdf') {
-      const { PDFParse } = await import('pdf-parse')
-      const parsed = new PDFParse({ data: buffer })
-      const result = await parsed.getText()
-      text = (result as any).text ?? String(result)
+      text = await callAnthropic(
+        {
+          model: CLAUDE_MODEL,
+          max_tokens: 4000,
+          messages: [{
+            role: 'user',
+            content: [
+              {
+                type: 'document',
+                source: { type: 'base64', media_type: 'application/pdf', data: buffer.toString('base64') },
+              },
+              { type: 'text', text: 'Extract all the text from this PDF exactly as written. Output only the extracted text, nothing else.' },
+            ],
+          }],
+        },
+        { 'anthropic-beta': 'pdfs-2024-09-25' }
+      )
 
     } else {
       text = buffer.toString('utf-8')

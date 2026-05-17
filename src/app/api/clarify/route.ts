@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { claude } from '@/lib/claude'
 import { createClient } from '@/lib/supabase/server'
+import { askClaudeIsHarmful, HARMFUL_PROMPT_MESSAGE } from '@/lib/harm-check'
 
 export async function POST(request: Request) {
   try {
@@ -11,6 +12,10 @@ export async function POST(request: Request) {
     const { prompt, clarificationsSoFar } = await request.json()
     if (!prompt) {
       return NextResponse.json({ error: 'Missing prompt' }, { status: 400 })
+    }
+
+    if (await askClaudeIsHarmful(prompt)) {
+      return NextResponse.json({ error: 'HARMFUL_PROMPT', message: HARMFUL_PROMPT_MESSAGE }, { status: 400 })
     }
 
     const prevAnswered =

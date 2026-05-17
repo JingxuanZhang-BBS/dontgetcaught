@@ -4,6 +4,14 @@
 
 ---
 
+## 2026-05-17 09:00
+- beta analytics tracking: demo.html generate() and runTransplant() now send initial_score, humanize_rounds, pipeline_duration_ms, citations, word_count_target to /api/history
+- /api/history POST saves permanent analytics row to generation_analytics via service role
+- Added supabase/migrations/012_analytics.sql: generation_analytics table + beta_dashboard view
+- Partner backend updates merged: analyze, clarify, extract API routes updated
+
+---
+
 ## 2026-04-23 18:xx
 - /api/clarify 和 /api/analyze 加入身份验证拦截
 - /api/transplant 加入 credit 扣除（standalone Humanize tab 入口）

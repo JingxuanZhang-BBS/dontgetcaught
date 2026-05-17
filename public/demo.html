@@ -1255,13 +1255,14 @@ async function analyzeAndGo(){
 
 async function generate(writingMode='research'){
   generationStarted=true
+  const _pipelineStart=Date.now()
   let full=state.prompt
   if(state.clarifications.length)full+='\n\nClarifications:\n'+state.clarifications.map(c=>c.question+' → '+c.answer).join('\n')
   full+='\n\nText type: '+TYPE_NAMES[state.textType]+'\nTone: '+state.tone+'\nWord count: '+state.wordCount+' words'
   const C={step:'#5b8fbe',info:'#909090',warn:'#c88c20',success:'#1e9e55',error:'#b0322a'}
   const pid=addProgressMsg()
   const plog=(t,type='info')=>addLog(pid,t,C[type]||'#909090')
-  workingText='';let finalScore=0
+  workingText='';let finalScore=0;let _initialScore=null;let _humanizeRounds=0
 
   // Fun facts — separate bubble, fires in parallel, doesn't block generation
   let funFact=null
@@ -1285,6 +1286,7 @@ async function generate(writingMode='research'){
       plog(`── Round ${round} quality check…`,'step')
       const scan=await apiFetch('/scan',{text:workingText})
       const hp=Math.round((1-scan.overallAiProb)*100);finalScore=hp
+      if(round===1)_initialScore=hp
       const flagged=scan.sentences.filter(s=>s.aiProb*100>=60)
       plog(`Quality: ${hp}% — ${flagged.length ? flagged.length+' passages need work' : 'looking great'}`,hp>=TARGET?'success':'warn')
       if(hp>=TARGET){plog(`✓ Reached ${hp}% — moving to polish.`,'success');break}
@@ -1292,7 +1294,7 @@ async function generate(writingMode='research'){
       if(round===3){plog('Max rounds. Proceeding to polish.','warn');break}
       plog('Refining flagged passages…','step')
       const {humanized}=await apiFetch('/humanize',{draft:workingText,flaggedSentences:flagged.map(s=>s.text),textType:state.textType,citations:state.citations,wordCount:state.wordCount,prompt:state.prompt})
-      workingText=humanized;plog('Refined. Checking again…','info')
+      workingText=humanized;_humanizeRounds++;plog('Refined. Checking again…','info')
     }
     setPhase(pid,2,'done')
     setPhase(pid,3,'active')
@@ -1316,7 +1318,10 @@ async function generate(writingMode='research'){
     // Save to history
     const wc=workingText.trim().split(/\s+/).length
     fetch('/api/history',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-      prompt:full,draft:workingText,score:finalScore,word_count:wc,text_type:state.textType,writing_mode:writingMode
+      prompt:full,draft:workingText,score:finalScore,word_count:wc,text_type:state.textType,writing_mode:writingMode,
+      initial_score:_initialScore,humanize_rounds:_humanizeRounds,
+      pipeline_duration_ms:Date.now()-_pipelineStart,
+      citations:state.citations,word_count_target:state.wordCount
     })}).then(async r=>{
       const d=await r.json()
       if(!r.ok) plog('History save failed: '+JSON.stringify(d),'error')
@@ -1344,6 +1349,7 @@ async function generate(writingMode='research'){
 
 async function runTransplant(text){
   generationStarted=true
+  const _tStart=Date.now();let _tInitialScore=null;let _tHumanizeRounds=0
   const C={step:'#5b8fbe',info:'#909090',warn:'#c88c20',success:'#1e9e55',error:'#b0322a'}
   const phases=[['Phase 1','Processing your text'],['Phase 2','Optimizing content'],['Phase 3','Finishing touches'],['Phase 4','Final verification']]
   const pid=addProgressMsg(phases)
@@ -1366,6 +1372,7 @@ async function runTransplant(text){
       plog(`── Round ${round} quality check…`,'step')
       const scan=await apiFetch('/scan',{text:workingText})
       const hp=Math.round((1-scan.overallAiProb)*100);finalScore=hp
+      if(round===1)_tInitialScore=hp
       const flagged=scan.sentences.filter(s=>s.aiProb*100>=60)
       plog(`Quality: ${hp}% — ${flagged.length ? flagged.length+' passages need work' : 'looking great'}`,hp>=TARGET?'success':'warn')
       if(hp>=TARGET){plog(`✓ Reached ${hp}% — moving to polish.`,'success');break}
@@ -1373,7 +1380,7 @@ async function runTransplant(text){
       if(round===3){plog('Max rounds. Proceeding to polish.','warn');break}
       plog('Refining flagged passages…','step')
       const {humanized}=await apiFetch('/humanize',{draft:workingText,flaggedSentences:flagged.map(s=>s.text),textType:'essay',citations:false})
-      workingText=humanized;plog('Refined. Checking again…','info')
+      workingText=humanized;_tHumanizeRounds++;plog('Refined. Checking again…','info')
     }
     setPhase(pid,2,'done')
     setPhase(pid,3,'active')
@@ -1392,7 +1399,10 @@ async function runTransplant(text){
 
     const wcT=workingText.trim().split(/\s+/).length
     fetch('/api/history',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-      prompt:'[Humanized] '+text.slice(0,200),draft:workingText,score:finalScore,word_count:wcT,text_type:state.textType,writing_mode:'humanize'
+      prompt:'[Humanized] '+text.slice(0,200),draft:workingText,score:finalScore,word_count:wcT,text_type:state.textType,writing_mode:'humanize',
+      initial_score:_tInitialScore,humanize_rounds:_tHumanizeRounds,
+      pipeline_duration_ms:Date.now()-_tStart,
+      citations:false,word_count_target:null
     })}).then(async r=>{
       const d=await r.json()
       if(!r.ok) plog('History save failed: '+JSON.stringify(d),'error')
