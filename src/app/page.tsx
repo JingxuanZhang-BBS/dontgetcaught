@@ -294,7 +294,7 @@ export default function LandingPage() {
           </div>
 
           <p className="text-lg md:text-xl text-white/60 text-center max-w-2xl leading-relaxed font-normal mb-14">
-            AI-powered writing that reads like yours — undetectable, natural, and tailored to your voice.
+            The world's first real AI humanizer.
           </p>
         </div>
 
