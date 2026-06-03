@@ -185,11 +185,15 @@ export default function LandingPage() {
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault()
-    const supabase = createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    if (session) {
-      window.location.href = '/demo.html'
-    } else {
+    try {
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        window.location.href = '/demo.html'
+      } else {
+        router.push('/login')
+      }
+    } catch {
       router.push('/login')
     }
   }
