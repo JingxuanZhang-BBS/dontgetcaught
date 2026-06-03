@@ -62,7 +62,13 @@ ONLY fix these specific things:
 - ${citationNote}
 ${lengthPolish}
 
-DO NOT touch anything else. Do not rephrase. Do not restructure. Do not improve flow. Do not smooth translations.
+CRITICAL — DO NOT do any of the following even if they look like errors:
+- Do not normalize sentence length. Short sentences, fragments, and long run-ons must stay exactly as they are.
+- Do not replace informal or conversational words with formal synonyms.
+- Do not fix comma splices that read naturally.
+- Do not add transitions or connective phrases between paragraphs.
+- Do not make the writing sound more polished, academic, or professional.
+
 The goal is to change as few words as possible while fixing only the above issues.
 Output the full piece. No preamble.`
 

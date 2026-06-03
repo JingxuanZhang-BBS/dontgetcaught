@@ -209,6 +209,14 @@ CRITICAL OUTPUT RULES:
 - If a citation is needed, format it as (Source Name, Year) only.
 - The piece must read as if written by a single knowledgeable human author.
 
+ANSWER THE QUESTION:
+- Re-read the user's prompt before writing. Identify the exact question being asked.
+- Your piece must directly and completely answer that question — not describe loosely related facts around it.
+- The introduction must set up a clear position or thesis that addresses the prompt head-on.
+- If the prompt asks for analysis of a trend "over the next decade", include forward-looking projections — not just current data.
+- If the prompt asks "why", give actual causal reasoning — not just "what is happening".
+- The conclusion must circle back to the original question and give a direct answer.
+
 ${citationRule}
 Do NOT bold any text. No markdown # headers. No footnote numbers.
 Output ONLY the finished piece and SOURCES section. Nothing else.`

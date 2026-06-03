@@ -1282,12 +1282,12 @@ async function generate(writingMode='research'){
     plog('Pass 3 — content cleanup done.','success')
     setPhase(pid,1,'done')
     setPhase(pid,2,'active')
-    for(let round=1;round<=3;round++){
+    for(let round=1;round<=5;round++){
       plog(`── Round ${round} quality check…`,'step')
       const scan=await apiFetch('/scan',{text:workingText})
       const hp=Math.round((1-scan.overallAiProb)*100);finalScore=hp
       if(round===1)_initialScore=hp
-      const flagged=scan.sentences.filter(s=>s.aiProb*100>=60)
+      const flagged=scan.sentences.filter(s=>s.aiProb*100>=40)
       plog(`Quality: ${hp}% — ${flagged.length ? flagged.length+' passages need work' : 'looking great'}`,hp>=TARGET?'success':'warn')
       if(hp>=TARGET){plog(`✓ Reached ${hp}% — moving to polish.`,'success');break}
       if(!flagged.length){plog('No sentences above threshold.','warn');break}
@@ -1368,12 +1368,12 @@ async function runTransplant(text){
     plog('Rewrite complete.','success')
     setPhase(pid,1,'done')
     setPhase(pid,2,'active')
-    for(let round=1;round<=3;round++){
+    for(let round=1;round<=5;round++){
       plog(`── Round ${round} quality check…`,'step')
       const scan=await apiFetch('/scan',{text:workingText})
       const hp=Math.round((1-scan.overallAiProb)*100);finalScore=hp
       if(round===1)_tInitialScore=hp
-      const flagged=scan.sentences.filter(s=>s.aiProb*100>=60)
+      const flagged=scan.sentences.filter(s=>s.aiProb*100>=40)
       plog(`Quality: ${hp}% — ${flagged.length ? flagged.length+' passages need work' : 'looking great'}`,hp>=TARGET?'success':'warn')
       if(hp>=TARGET){plog(`✓ Reached ${hp}% — moving to polish.`,'success');break}
       if(!flagged.length){plog('No sentences above threshold.','warn');break}
