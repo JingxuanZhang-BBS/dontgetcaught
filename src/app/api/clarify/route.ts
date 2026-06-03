@@ -25,9 +25,6 @@ export async function POST(request: Request) {
             .join('\n')
         : 'None'
 
-    // Use web search only if prompt suggests a recent/current event
-    const needsWebSearch = /\b(recent|latest|current|new|today|2024|2025|2026|now|ongoing|just|this year|this week)\b/i.test(prompt)
-
     const system = `You are a sharp, intelligent writing assistant. Your job is to read the user's prompt and any previous answers, think carefully about what they actually mean, and decide if one more clarifying question is needed.
 
 You have TWO reasons to ask a question:
@@ -75,7 +72,7 @@ or
             .join('\n')
         : '')
 
-    const raw = await claude(system, userMsg, needsWebSearch)
+    const raw = await claude(system, userMsg, true)
     const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim())
     return NextResponse.json(parsed)
   } catch {
