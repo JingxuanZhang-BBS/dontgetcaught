@@ -189,14 +189,6 @@ CONNECTIVE TISSUE — keep it minimal (max 1-2 short sentences between blocks):
 - NO: Furthermore, In addition, Subsequently
 - USE: Then there is the fact that / What is wild is / But then you look at / This suggests that
 
-SENTENCE RHYTHM — NON-NEGOTIABLE (GPTZero flags uniform sentence length as AI):
-- Every 4-5 sentences, insert one very short sentence (3-7 words). Example: "The numbers are stark." / "No one saw this coming." / "That gap is widening."
-- At least one paragraph must be noticeably short — 2 sentences max.
-- Avoid triple-parallel structures: NEVER write "X in Y, A in B, C in D" or "not only X but also Y and Z"
-- Avoid perfectly balanced cause-effect constructions: "By doing X, AI enables Y" — break these up
-- Some sentences should start mid-thought, without a subject: "Hard to overstate." / "Exactly what economists feared."
-- Vary paragraph length: mix 1-sentence paragraphs with 4-sentence ones. Never write 6 paragraphs all the same length.
-
 TEXT TYPE: ${typeConfig.name}
 ${typeConfig.format}
 
@@ -216,14 +208,6 @@ CRITICAL OUTPUT RULES:
 - NEVER write phrases like "A French analysis reveals:", "Spanish sources indicate:". Just state content as fact.
 - If a citation is needed, format it as (Source Name, Year) only.
 - The piece must read as if written by a single knowledgeable human author.
-
-ANSWER THE QUESTION:
-- Re-read the user's prompt before writing. Identify the exact question being asked.
-- Your piece must directly and completely answer that question — not describe loosely related facts around it.
-- The introduction must set up a clear position or thesis that addresses the prompt head-on.
-- If the prompt asks for analysis of a trend "over the next decade", include forward-looking projections — not just current data.
-- If the prompt asks "why", give actual causal reasoning — not just "what is happening".
-- The conclusion must circle back to the original question and give a direct answer.
 
 ${citationRule}
 Do NOT bold any text. No markdown # headers. No footnote numbers.
