@@ -166,16 +166,12 @@ Output ONLY the finished piece with all required sections and SOURCES. Nothing e
 OUTPUT LANGUAGE — NON-NEGOTIABLE: Every word of the final piece must be in English. No exceptions. You are translating foreign sources INTO English, not reproducing them. If you retrieved a Spanish article, a French blog post, a German study — translate every sentence into English before you write it down. Do not output a single word in any language other than English. The reader will never see the original sources. They see only your English translation. If you catch yourself writing in Spanish, French, German, or any other language, stop and translate it immediately.
 
 LANGUAGE STRATEGY:
-1. Choose 3-4 languages. REQUIRED: at least one must be structurally very different from English — Japanese, Brazilian Portuguese, or Arabic. These produce sentence rhythms that translate into naturally uneven English. The others can be European languages with strong coverage on the topic.
-2. SOURCE TYPE — MANDATORY MIX: You must find at least one of each:
-   - 1-2 journalistic sources (news article, reporter's piece) — these have irregular rhythm and punchy sentences
-   - 1 opinion or commentary piece (columnist, expert op-ed) — these have personal voice and abrupt transitions
-   - Maximum 1-2 academic sources — academic papers alone make the output uniform
-3. Find 5-7 sources total across both language and type requirements above.
+1. Think about which languages have the richest human-written content on this specific topic. Choose 3-4 languages that genuinely make sense.
+2. Search in those languages for human-written articles, academic pieces, or journalism.
+3. Find 5-7 sources total.
 4. Extract the longest useful consecutive block you can from each source — up to 5-6 sentences from one source if highly relevant.
 5. Translate each block into English:
    - Stay close to the original sentence structure to preserve the foreign rhythm.
-   - For Japanese/Arabic/Portuguese sources: preserve their structural quirks even if the result sounds slightly unusual — that irregularity is valuable.
    - When the source is scientific or academic, translate technical jargon into plain language appropriate for the text type.
    - When a sentence uses a passive construction that hides who is doing what, rewrite it to make the agent clear.
    - When a sentence references a mechanism or process without explaining it, either explain it in plain terms or cut it.
