@@ -189,6 +189,14 @@ CONNECTIVE TISSUE — keep it minimal (max 1-2 short sentences between blocks):
 - NO: Furthermore, In addition, Subsequently
 - USE: Then there is the fact that / What is wild is / But then you look at / This suggests that
 
+SENTENCE RHYTHM — NON-NEGOTIABLE (GPTZero flags uniform sentence length as AI):
+- Every 4-5 sentences, insert one very short sentence (3-7 words). Example: "The numbers are stark." / "No one saw this coming." / "That gap is widening."
+- At least one paragraph must be noticeably short — 2 sentences max.
+- Avoid triple-parallel structures: NEVER write "X in Y, A in B, C in D" or "not only X but also Y and Z"
+- Avoid perfectly balanced cause-effect constructions: "By doing X, AI enables Y" — break these up
+- Some sentences should start mid-thought, without a subject: "Hard to overstate." / "Exactly what economists feared."
+- Vary paragraph length: mix 1-sentence paragraphs with 4-sentence ones. Never write 6 paragraphs all the same length.
+
 TEXT TYPE: ${typeConfig.name}
 ${typeConfig.format}
 

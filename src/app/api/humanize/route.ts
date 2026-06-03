@@ -75,10 +75,16 @@ RULES FOR ALL REPLACEMENTS:
 - Do NOT bold anything
 - Do NOT use m-dashes
 - Avoid symmetrical list structures ("X with Y, A with B")
-- Vary sentence length dramatically in replacements
+- Vary sentence length dramatically in replacements — mix 4-word sentences with longer ones
 - ${citationNote}
 
-After replacing all flagged sentences, return the COMPLETE rewritten draft with replacements inserted in the correct positions.
+STRUCTURAL FIXES (apply to the whole draft, not just flagged sentences):
+- If you notice 3 or more consecutive paragraphs of similar length, break one of them into a very short paragraph (1-2 sentences) or merge two into a longer one
+- If you see 4+ sentences in a row of similar length, insert a short punchy sentence (under 8 words) between them
+- Remove any "Furthermore", "In addition", "Moreover", "Additionally" — replace with a short abrupt transition or nothing
+- If a paragraph starts with "However" or "Looking toward" or "By [verb]-ing", rewrite the opening
+
+After replacing all flagged sentences and applying structural fixes, return the COMPLETE rewritten draft.
 No preamble. Just the full piece.${lengthNote}`
 
     const systemBestEffort = `You revise a personal or analytical draft to read less AI-like. You receive the full draft and sentences that scored as AI-like.
