@@ -1030,6 +1030,9 @@ function timeAgo(iso){
   return 'Just now'
 }
 
+function stripSources(text){
+  return text.replace(/\n+\s*(SOURCES|Sources|References|Bibliography)\b[\s\S]*/,'').trim()
+}
 async function apiFetch(ep,body){
   const r=await fetch(API+'/api'+ep,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
   const d=await r.json();if(!r.ok)throw new Error(d.error||ep+' failed');return d
@@ -1102,7 +1105,7 @@ function addResultMsg(text,score,flaggedSentences=[],regenParams=null){
   })
   const ps=bodyHtml.split(/\n\n+/).map(p=>`<p>${p}</p>`).join('')
   const flagNote=stillFlagged.length?`<div class="flagged-note">⚠ ${stillFlagged.length} highlighted passage${stillFlagged.length>1?'s':''} may still read as AI-generated. Revising them manually will further improve your score.</div>`:''
-  const wc=text.trim().split(/\s+/).filter(Boolean).length
+  const wc=stripSources(text).trim().split(/\s+/).filter(Boolean).length
   const regenBtn=regenParams?`<button class="act-btn" id="regen-${id}">↻ Regenerate</button>`:''
   el.innerHTML=`<div><div class="ai-label">DontGetCaught</div><div class="result-meta"><div class="result-title">Finished piece</div><span class="score-tag ${cls}">${score}% human</span></div><div class="result-body">${ps}</div>${flagNote}<div class="result-actions"><button class="act-btn" id="cp-${id}">Copy text</button><button class="act-btn" id="dl-${id}">Download .docx</button><button class="act-btn" id="pdf-${id}">Export PDF</button>${regenBtn}<button class="act-btn" id="rw-${id}">Write another</button></div><div style="font-size:11px;color:var(--text3);margin-top:8px">${wc.toLocaleString()} words</div></div>`
   setTimeout(()=>{
@@ -1284,7 +1287,7 @@ async function generate(writingMode='research'){
     setPhase(pid,2,'active')
     for(let round=1;round<=5;round++){
       plog(`── Round ${round} quality check…`,'step')
-      const scan=await apiFetch('/scan',{text:workingText})
+      const scan=await apiFetch('/scan',{text:stripSources(workingText)})
       const hp=Math.round((1-scan.overallAiProb)*100);finalScore=hp
       if(round===1)_initialScore=hp
       const flagged=scan.sentences.filter(s=>s.aiProb*100>=40)
@@ -1304,7 +1307,7 @@ async function generate(writingMode='research'){
     setPhase(pid,3,'done')
     setPhase(pid,4,'active')
     plog('Phase 4 — final verification…','step')
-    const fs=await apiFetch('/scan',{text:workingText})
+    const fs=await apiFetch('/scan',{text:stripSources(workingText)})
     finalScore=Math.round((1-fs.overallAiProb)*100)
     plog(`✓ Final score: ${finalScore}% human.`,'success')
     setPhase(pid,4,'done')
@@ -1316,7 +1319,7 @@ async function generate(writingMode='research'){
     })
 
     // Save to history
-    const wc=workingText.trim().split(/\s+/).length
+    const wc=stripSources(workingText).trim().split(/\s+/).length
     fetch('/api/history',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
       prompt:full,draft:workingText,score:finalScore,word_count:wc,text_type:state.textType,writing_mode:writingMode,
       initial_score:_initialScore,humanize_rounds:_humanizeRounds,
@@ -1370,7 +1373,7 @@ async function runTransplant(text){
     setPhase(pid,2,'active')
     for(let round=1;round<=5;round++){
       plog(`── Round ${round} quality check…`,'step')
-      const scan=await apiFetch('/scan',{text:workingText})
+      const scan=await apiFetch('/scan',{text:stripSources(workingText)})
       const hp=Math.round((1-scan.overallAiProb)*100);finalScore=hp
       if(round===1)_tInitialScore=hp
       const flagged=scan.sentences.filter(s=>s.aiProb*100>=40)
@@ -1390,14 +1393,14 @@ async function runTransplant(text){
     setPhase(pid,3,'done')
     setPhase(pid,4,'active')
     plog('Phase 4 — final verification…','step')
-    const fs=await apiFetch('/scan',{text:workingText})
+    const fs=await apiFetch('/scan',{text:stripSources(workingText)})
     finalScore=Math.round((1-fs.overallAiProb)*100)
     plog(`✓ Final score: ${finalScore}% human.`,'success')
     setPhase(pid,4,'done')
     const remainingFlaggedT=(fs.sentences||[]).filter(s=>s.aiProb>=0.4).map(s=>s.text)
     addResultMsg(workingText,finalScore,remainingFlaggedT)
 
-    const wcT=workingText.trim().split(/\s+/).length
+    const wcT=stripSources(workingText).trim().split(/\s+/).length
     fetch('/api/history',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
       prompt:'[Humanized] '+text.slice(0,200),draft:workingText,score:finalScore,word_count:wcT,text_type:state.textType,writing_mode:'humanize',
       initial_score:_tInitialScore,humanize_rounds:_tHumanizeRounds,
