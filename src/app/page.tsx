@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState, useRef, useEffect } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import dynamic from 'next/dynamic'
 import { DM_Sans } from 'next/font/google'
 import BorderGlow from '@/components/BorderGlow'
@@ -182,15 +183,14 @@ export default function LandingPage() {
     e.target.style.height = Math.min(e.target.scrollHeight, 200) + 'px'
   }
 
-  const handleSubmit = (e?: React.FormEvent) => {
+  const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault()
-    const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
-    if (isDevMode) {
-      if (prompt.trim()) sessionStorage.setItem('pending_prompt', prompt.trim())
+    const supabase = createClient()
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session) {
       window.location.href = '/demo.html'
     } else {
-      if (prompt.trim()) sessionStorage.setItem('pending_prompt', prompt.trim())
-      router.push('/signup')
+      router.push('/login')
     }
   }
 
@@ -308,8 +308,9 @@ export default function LandingPage() {
             <form onSubmit={handleSubmit} style={{ backdropFilter: 'blur(24px)' }}>
               <textarea
                 ref={textareaRef} value={prompt} onChange={handleChange} onKeyDown={handleKeyDown}
+                onClick={() => handleSubmit()} readOnly
                 placeholder={placeholder} rows={2}
-                className="w-full bg-transparent text-white/90 text-[15px] placeholder-white/25 outline-none resize-none leading-relaxed px-6 pt-6 pb-3"
+                className="w-full bg-transparent text-white/90 text-[15px] placeholder-white/25 outline-none resize-none leading-relaxed px-6 pt-6 pb-3 cursor-pointer"
                 style={{ minHeight: '80px', maxHeight: '200px' }}
               />
               <div className="flex items-center justify-between px-5 pb-5 pt-1">
