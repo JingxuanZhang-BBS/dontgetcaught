@@ -3,7 +3,7 @@ export const maxDuration = 300
 import { NextResponse } from 'next/server'
 import { claude, TEXT_TYPES } from '@/lib/claude'
 import { createClient } from '@/lib/supabase/server'
-import { enforceEnglishDraft, looksLikeMetaRefusal } from '@/lib/enforce-english'
+import { looksLikeMetaRefusal } from '@/lib/enforce-english'
 import { deductCredit, refundCredit } from '@/lib/credits-server'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { askClaudeIsHarmful, HARMFUL_PROMPT_MESSAGE } from '@/lib/harm-check'
@@ -216,8 +216,6 @@ Output ONLY the finished piece and SOURCES section. Nothing else.`
 
     let draft = await claude(system, prompt, true)
     draft = draft.replace(/^#{1,6}\s+/gm, '').replace(/\*\*/g, '').replace(/\[\d+\]/g, '').trim()
-
-    draft = await enforceEnglishDraft(draft)
 
     const artifactCleanupSystem = `You are a copy editor fixing translation artifacts in a text assembled from foreign language sources. Find and fix only sentences that are broken or unnatural due to bad translation. Do not touch sentences that read naturally.
 
