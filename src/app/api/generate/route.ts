@@ -11,7 +11,6 @@ import {
   resolveWordCountTarget,
   resolveWordCountIncludesSources,
   wordCountBandLine,
-  reviseWordCountBand,
 } from '@/lib/word-count'
 
 
@@ -216,29 +215,6 @@ Output ONLY the finished piece and SOURCES section. Nothing else.`
 
     let draft = await claude(system, prompt, true)
     draft = draft.replace(/^#{1,6}\s+/gm, '').replace(/\*\*/g, '').replace(/\[\d+\]/g, '').trim()
-
-    const artifactCleanupSystem = `You are a copy editor fixing translation artifacts in a text assembled from foreign language sources. Find and fix only sentences that are broken or unnatural due to bad translation. Do not touch sentences that read naturally.
-
-Fix ONLY these problems:
-1. Foreign word order that makes no sense in English — rewrite that sentence in natural English with the same meaning
-2. Completely meaningless or garbled fragments — delete them
-3. Literal translations of idioms that produce nonsense in English — replace with the natural English equivalent
-4. Wrong word choices from translation errors — fix the word only
-5. Bureaucratic copy-paste from UN resolutions or legal documents that reads like no human wrote it — simplify to plain English
-
-Do NOT rewrite sentences that already read naturally. Do NOT change facts, statistics, or claims. Do NOT add content.
-Output the complete corrected text. No commentary.`
-
-    try {
-      const artifactCleaned = await claude(artifactCleanupSystem, draft)
-      draft = artifactCleaned.replace(/^#{1,6}\s+/gm, '').replace(/\*\*/g, '').trim()
-    } catch {
-      // best-effort
-    }
-
-    if (wordCountTarget) {
-      draft = await reviseWordCountBand(draft, wordCountTarget, includeSourcesInCount)
-    }
 
     return NextResponse.json({ draft, writingMode: 'research', refundToken })
   } catch (err: unknown) {
