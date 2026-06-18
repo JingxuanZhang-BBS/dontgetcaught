@@ -3,7 +3,6 @@ export const maxDuration = 300
 import { NextResponse } from 'next/server'
 import { claude, TEXT_TYPES } from '@/lib/claude'
 import { createClient } from '@/lib/supabase/server'
-import { enforceEnglishDraft } from '@/lib/enforce-english'
 import { checkRateLimit } from '@/lib/rate-limit'
 import {
   resolveWordCountTarget,
@@ -102,10 +101,6 @@ Return the COMPLETE draft with those sentences revised. No preamble.${lengthNote
       !bestEffort
     )
     humanized = humanized.replace(/\*\*/g, '').replace(/\[\d+\]/g, '').trim()
-
-    if (!bestEffort) {
-      humanized = await enforceEnglishDraft(humanized)
-    }
 
     if (wordCountTarget) {
       humanized = await reviseWordCountBand(humanized, wordCountTarget, includeSourcesInCount)
