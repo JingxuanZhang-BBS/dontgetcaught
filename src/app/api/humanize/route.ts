@@ -99,7 +99,7 @@ Return the COMPLETE draft with those sentences revised. No preamble.${lengthNote
     let humanized = await claude(
       system,
       `Text type: ${typeConfig.name}\n\nFlagged sentences to replace:\n${flaggedList}\n\nFull draft:\n${draft}`,
-      false
+      !bestEffort
     )
     humanized = humanized.replace(/\*\*/g, '').replace(/\[\d+\]/g, '').trim()
 
