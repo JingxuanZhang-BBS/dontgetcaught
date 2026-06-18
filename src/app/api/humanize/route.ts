@@ -1,4 +1,4 @@
-export const maxDuration = 120
+export const maxDuration = 300
 
 import { NextResponse } from 'next/server'
 import { claude, TEXT_TYPES } from '@/lib/claude'
