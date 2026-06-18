@@ -2,7 +2,7 @@ import axios from 'axios'
 
 const ANTHROPIC = 'https://api.anthropic.com/v1/messages'
 const ANTHROPIC_VERSION = '2023-06-01'
-export const CLAUDE_MODEL = 'claude-sonnet-4-20250514'
+export const CLAUDE_MODEL = 'claude-sonnet-4-6'
 
 function headers() {
   return {
