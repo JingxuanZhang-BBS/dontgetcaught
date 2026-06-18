@@ -11,6 +11,7 @@ import {
   resolveWordCountTarget,
   resolveWordCountIncludesSources,
   wordCountBandLine,
+  reviseWordCountBand,
 } from '@/lib/word-count'
 
 
