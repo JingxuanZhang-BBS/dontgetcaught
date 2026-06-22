@@ -3,7 +3,6 @@ export const maxDuration = 120
 import { NextResponse } from 'next/server'
 import { claude, TEXT_TYPES } from '@/lib/claude'
 import { createClient } from '@/lib/supabase/server'
-import { enforceEnglishDraft } from '@/lib/enforce-english'
 import {
   resolveWordCountTarget,
   resolveWordCountIncludesSources,
@@ -68,10 +67,6 @@ Output the full piece. No preamble.`
 
     let polished = await claude(system, 'Polish this ' + typeConfig.name + ':\n\n' + text)
     polished = polished.replace(/\*\*/g, '').replace(/\[\d+\]/g, '').trim()
-
-    if (!bestEffort) {
-      polished = await enforceEnglishDraft(polished)
-    }
 
     if (wordCountTarget) {
       polished = await reviseWordCountBand(polished, wordCountTarget, includeSourcesInCount)
