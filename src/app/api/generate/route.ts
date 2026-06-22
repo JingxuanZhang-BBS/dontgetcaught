@@ -1,6 +1,5 @@
 export const maxDuration = 300
 
-import { NextResponse } from 'next/server'
 import { claude, TEXT_TYPES } from '@/lib/claude'
 import { createClient } from '@/lib/supabase/server'
 import { enforceEnglishDraft, looksLikeMetaRefusal } from '@/lib/enforce-english'
@@ -25,65 +24,66 @@ function detectNonTextDeliverable(prompt: string): boolean {
 
 
 export async function POST(request: Request) {
-  let userId: string | null = null
-  try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    userId = user.id
+  const encoder = new TextEncoder()
+  let pingInterval: ReturnType<typeof setInterval> | undefined
 
-    const rateLimited = await checkRateLimit(userId, 'generate')
-    if (rateLimited) return rateLimited
+  const stream = new ReadableStream({
+    async start(controller) {
+      const send = (data: object) => {
+        try { controller.enqueue(encoder.encode(JSON.stringify(data) + '\n')) } catch {}
+      }
 
-    const { prompt, citations, textType, category, writingMode, wordCount: wordCountBody, wordCountIncludesSources: wcIncludesBody } = await request.json()
-    if (!prompt) {
-      return NextResponse.json({ error: 'Missing prompt' }, { status: 400 })
-    }
+      pingInterval = setInterval(() => send({ type: 'ping' }), 25000)
 
-    if (await askClaudeIsHarmful(prompt)) {
-      return NextResponse.json({ error: 'HARMFUL_PROMPT', message: HARMFUL_PROMPT_MESSAGE }, { status: 400 })
-    }
+      let userId: string | null = null
+      try {
+        const supabase = await createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) { send({ type: 'error', status: 401, error: 'Unauthorized' }); return }
+        userId = user.id
 
-    if (detectNonTextDeliverable(prompt)) {
-      return NextResponse.json(
-        {
-          error: 'NON_TEXT',
-          message:
-            "DontGetCaught only outputs written text — we can't create drawings, paintings, filmed dances, or other non-text art. If you need the written part of an assignment (for example a reflection or essay about your creative work), ask specifically for that written piece and we'll help.",
-        },
-        { status: 400 }
-      )
-    }
+        const rateLimited = await checkRateLimit(userId, 'generate')
+        if (rateLimited) { send({ type: 'error', status: 429, error: 'Rate limited' }); return }
 
-    // ── CREDIT CHECK ───────────────────────────────────────────────────────────
-    const refundToken = await deductCredit(userId!)
-    if (!refundToken) {
-      return NextResponse.json(
-        { error: 'INSUFFICIENT_CREDITS', message: "You've used all 3 beta credits. Contact us on Instagram @dontgetcaught_ai to request more access." },
-        { status: 402 }
-      )
-    }
+        const { prompt, citations, textType, category, writingMode, wordCount: wordCountBody, wordCountIncludesSources: wcIncludesBody } = await request.json()
+        if (!prompt) { send({ type: 'error', status: 400, error: 'Missing prompt' }); return }
 
-    const wordCountTarget = resolveWordCountTarget(prompt, wordCountBody)
-    const includeSourcesInCount = resolveWordCountIncludesSources(prompt, wcIncludesBody === true)
-    const wcInstruction = wordCountTarget
-      ? wordCountBandLine(wordCountTarget, includeSourcesInCount)
-      : 'If the prompt states a word count, get as close as you can — aim within ±50 words.'
+        if (await askClaudeIsHarmful(prompt)) {
+          send({ type: 'error', status: 400, error: 'HARMFUL_PROMPT', message: HARMFUL_PROMPT_MESSAGE })
+          return
+        }
 
-    const typeConfig = TEXT_TYPES[textType] || TEXT_TYPES.oped
-    const citationRule = citations
-      ? 'Add a short in-text citation in parentheses after each passage e.g. (Source Name, Year). Do NOT mention the language it was translated from. Always include a full SOURCES section at the end.'
-      : 'Do NOT include any in-text citations in the body. Always include a full SOURCES section at the end listing every URL used.'
+        if (detectNonTextDeliverable(prompt)) {
+          send({ type: 'error', status: 400, error: 'NON_TEXT', message: "DontGetCaught only outputs written text — we can't create drawings, paintings, filmed dances, or other non-text art. If you need the written part of an assignment (for example a reflection or essay about your creative work), ask specifically for that written piece and we'll help." })
+          return
+        }
 
-    let resolvedMode = writingMode
-    if (!resolvedMode) {
-      resolvedMode = !category || category === 'research_based' ? 'research' : 'best_effort'
-    }
-    const useResearchPipeline = resolvedMode === 'research'
+        const refundToken = await deductCredit(userId!)
+        if (!refundToken) {
+          send({ type: 'error', status: 402, error: 'INSUFFICIENT_CREDITS', message: "You've used all 3 beta credits. Contact us on Instagram @dontgetcaught_ai to request more access." })
+          return
+        }
 
-    // ── BEST EFFORT MODE ───────────────────────────────────────────────────
-    if (!useResearchPipeline) {
-      const bestEffortSystem = `You are dontgetcaught in direct writing mode. The user's request does not fit our usual workflow (finding foreign news and translating it). You must write the full piece yourself in strong, natural English.
+        const wordCountTarget = resolveWordCountTarget(prompt, wordCountBody)
+        const includeSourcesInCount = resolveWordCountIncludesSources(prompt, wcIncludesBody === true)
+        const wcInstruction = wordCountTarget
+          ? wordCountBandLine(wordCountTarget, includeSourcesInCount)
+          : 'If the prompt states a word count, get as close as you can — aim within ±50 words.'
+
+        const typeConfig = TEXT_TYPES[textType] || TEXT_TYPES.oped
+        const citationRule = citations
+          ? 'Add a short in-text citation in parentheses after each passage e.g. (Source Name, Year). Do NOT mention the language it was translated from. Always include a full SOURCES section at the end.'
+          : 'Do NOT include any in-text citations in the body. Always include a full SOURCES section at the end listing every URL used.'
+
+        let resolvedMode = writingMode
+        if (!resolvedMode) {
+          resolvedMode = !category || category === 'research_based' ? 'research' : 'best_effort'
+        }
+        const useResearchPipeline = resolvedMode === 'research'
+
+        // ── BEST EFFORT MODE ─────────────────────────────────────────────────
+        if (!useResearchPipeline) {
+          const bestEffortSystem = `You are dontgetcaught in direct writing mode. The user's request does not fit our usual workflow (finding foreign news and translating it). You must write the full piece yourself in strong, natural English.
 
 STRICT RULES:
 - Output ONLY the completed written work (essay, reflection, memoir, literary analysis, etc.). No title line like "Here is your essay." No preamble or postscript.
@@ -96,35 +96,35 @@ STRICT RULES:
 TEXT TYPE: ${typeConfig.name}
 ${typeConfig.format}`
 
-      try {
-        let draft = await claude(bestEffortSystem, prompt, false, 16384)
-        draft = draft.replace(/^#{1,6}\s+/gm, '').replace(/\*\*/g, '').replace(/\[\d+\]/g, '').trim()
-        if (looksLikeMetaRefusal(draft)) {
-          await refundCredit(userId!)
-          return NextResponse.json(
-            { error: "The model refused to write. Try rephrasing your request as a clear writing task (e.g. 'Write a 700-word reflection about…')." },
-            { status: 500 }
-          )
+          try {
+            let draft = await claude(bestEffortSystem, prompt, false, 16384)
+            draft = draft.replace(/^#{1,6}\s+/gm, '').replace(/\*\*/g, '').replace(/\[\d+\]/g, '').trim()
+            if (looksLikeMetaRefusal(draft)) {
+              await refundCredit(userId!)
+              send({ type: 'error', status: 500, error: "The model refused to write. Try rephrasing your request as a clear writing task (e.g. 'Write a 700-word reflection about…')." })
+              return
+            }
+            if (wordCountTarget) {
+              draft = await reviseWordCountBand(draft, wordCountTarget, includeSourcesInCount)
+            }
+            send({ type: 'result', draft, writingMode: 'best_effort', refundToken })
+            return
+          } catch (err: unknown) {
+            await refundCredit(userId!)
+            send({ type: 'error', error: 'Generate error: ' + String(err) })
+            return
+          }
         }
-        if (wordCountTarget) {
-          draft = await reviseWordCountBand(draft, wordCountTarget, includeSourcesInCount)
-        }
-        return NextResponse.json({ draft, writingMode: 'best_effort', refundToken })
-      } catch (err: unknown) {
-        await refundCredit(userId!)
-        return NextResponse.json({ error: 'Generate error: ' + String(err) }, { status: 500 })
-      }
-    }
 
-    // ── RESEARCH PIPELINE MODE ─────────────────────────────────────────────
-    const isDocumentBrief =
-      prompt.length > 500 &&
-      /rubric|criterion|assignment|task|report structure|research question|marks|assessment|bibliography|learning objective|ATL|MYP|IB/i.test(prompt)
+        // ── RESEARCH PIPELINE MODE ───────────────────────────────────────────
+        const isDocumentBrief =
+          prompt.length > 500 &&
+          /rubric|criterion|assignment|task|report structure|research question|marks|assessment|bibliography|learning objective|ATL|MYP|IB/i.test(prompt)
 
-    let system: string
+        let system: string
 
-    if (isDocumentBrief) {
-      system = `You are a Research Curator who writes structured pieces by sourcing real human-written content in foreign languages and translating it literally into English.
+        if (isDocumentBrief) {
+          system = `You are a Research Curator who writes structured pieces by sourcing real human-written content in foreign languages and translating it literally into English.
 
 OUTPUT LANGUAGE — NON-NEGOTIABLE: Every word of the final piece must be in English. No exceptions. You are translating foreign sources INTO English, not reproducing them. If you retrieved a Spanish article, a French blog post, a German study — translate every sentence into English before you write it down. Do not output a single word in any language other than English. If you catch yourself writing in Spanish, French, German, or any other language, stop and translate it immediately.
 
@@ -160,8 +160,8 @@ CRITICAL OUTPUT RULES:
 ${citationRule}
 Do NOT bold any text. No markdown # headers. No footnote numbers.
 Output ONLY the finished piece with all required sections and SOURCES. Nothing else.`
-    } else {
-      system = `You are a Research Curator writing a ${typeConfig.name}. Find human-written source material in foreign languages, translate it literally into English, and assemble the piece from those translations.
+        } else {
+          system = `You are a Research Curator writing a ${typeConfig.name}. Find human-written source material in foreign languages, translate it literally into English, and assemble the piece from those translations.
 
 OUTPUT LANGUAGE — NON-NEGOTIABLE: Every word of the final piece must be in English. No exceptions. You are translating foreign sources INTO English, not reproducing them. If you retrieved a Spanish article, a French blog post, a German study — translate every sentence into English before you write it down. Do not output a single word in any language other than English. The reader will never see the original sources. They see only your English translation. If you catch yourself writing in Spanish, French, German, or any other language, stop and translate it immediately.
 
@@ -212,14 +212,14 @@ CRITICAL OUTPUT RULES:
 ${citationRule}
 Do NOT bold any text. No markdown # headers. No footnote numbers.
 Output ONLY the finished piece and SOURCES section. Nothing else.`
-    }
+        }
 
-    let draft = await claude(system, prompt, true)
-    draft = draft.replace(/^#{1,6}\s+/gm, '').replace(/\*\*/g, '').replace(/\[\d+\]/g, '').trim()
+        let draft = await claude(system, prompt, true)
+        draft = draft.replace(/^#{1,6}\s+/gm, '').replace(/\*\*/g, '').replace(/\[\d+\]/g, '').trim()
 
-    draft = await enforceEnglishDraft(draft)
+        draft = await enforceEnglishDraft(draft)
 
-    const artifactCleanupSystem = `You are a copy editor fixing translation artifacts in a text assembled from foreign language sources. Find and fix only sentences that are broken or unnatural due to bad translation. Do not touch sentences that read naturally.
+        const artifactCleanupSystem = `You are a copy editor fixing translation artifacts in a text assembled from foreign language sources. Find and fix only sentences that are broken or unnatural due to bad translation. Do not touch sentences that read naturally.
 
 Fix ONLY these problems:
 1. Foreign word order that makes no sense in English — rewrite that sentence in natural English with the same meaning
@@ -231,23 +231,35 @@ Fix ONLY these problems:
 Do NOT rewrite sentences that already read naturally. Do NOT change facts, statistics, or claims. Do NOT add content.
 Output the complete corrected text. No commentary.`
 
-    try {
-      const artifactCleaned = await claude(artifactCleanupSystem, draft)
-      draft = artifactCleaned.replace(/^#{1,6}\s+/gm, '').replace(/\*\*/g, '').trim()
-    } catch {
-      // best-effort
-    }
+        try {
+          const artifactCleaned = await claude(artifactCleanupSystem, draft)
+          draft = artifactCleaned.replace(/^#{1,6}\s+/gm, '').replace(/\*\*/g, '').trim()
+        } catch {
+          // best-effort
+        }
 
-    if (wordCountTarget) {
-      draft = await reviseWordCountBand(draft, wordCountTarget, includeSourcesInCount)
-    }
+        if (wordCountTarget) {
+          draft = await reviseWordCountBand(draft, wordCountTarget, includeSourcesInCount)
+        }
 
-    return NextResponse.json({ draft, writingMode: 'research', refundToken })
-  } catch (err: unknown) {
-    await refundCredit(userId!).catch(() => {})
-    return NextResponse.json(
-      { error: 'Generate error: ' + String(err) },
-      { status: 500 }
-    )
-  }
+        send({ type: 'result', draft, writingMode: 'research', refundToken })
+      } catch (err: unknown) {
+        await refundCredit(userId!).catch(() => {})
+        send({ type: 'error', error: 'Generate error: ' + String(err) })
+      } finally {
+        clearInterval(pingInterval)
+        try { controller.close() } catch {}
+      }
+    },
+    cancel() {
+      clearInterval(pingInterval)
+    }
+  })
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'application/x-ndjson',
+      'Cache-Control': 'no-cache',
+    }
+  })
 }

@@ -1037,6 +1037,24 @@ async function apiFetch(ep,body){
   const r=await fetch(API+'/api'+ep,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
   const d=await r.json();if(!r.ok)throw new Error(d.error||ep+' failed');return d
 }
+async function streamFetch(ep,body){
+  const r=await fetch(API+'/api'+ep,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+  if(!r.ok){const d=await r.json();throw new Error(d.error||ep+' failed')}
+  const reader=r.body.getReader();const decoder=new TextDecoder();let buf=''
+  while(true){
+    const{done,value}=await reader.read();if(done)break
+    buf+=decoder.decode(value,{stream:true})
+    const lines=buf.split('\n');buf=lines.pop()??''
+    for(const line of lines){
+      if(!line.trim())continue
+      let msg;try{msg=JSON.parse(line)}catch{continue}
+      if(msg.type==='ping')continue
+      if(msg.type==='error')throw new Error(msg.message||msg.error||ep+' failed')
+      if(msg.type==='result')return msg
+    }
+  }
+  throw new Error(ep+': stream ended without result')
+}
 async function apiUpload(file){
   const fd=new FormData();fd.append('file',file)
   const r=await fetch(API+'/api/extract',{method:'POST',body:fd})
@@ -1276,7 +1294,7 @@ async function generate(writingMode='research'){
     setPhase(pid,1,'active')
     plog('Phase 1 — generating your draft…','step')
     let slowTimer=setTimeout(()=>plog('Still working — this topic requires deeper research. Hang tight…','warn'),60000)
-    const {draft,refundToken}=await apiFetch('/generate',{prompt:full,citations:state.citations,textType:state.textType,writingMode,category:state.analysisCategory||'research_based'})
+    const {draft,refundToken}=await streamFetch('/generate',{prompt:full,citations:state.citations,textType:state.textType,writingMode,category:state.analysisCategory||'research_based'})
     clearTimeout(slowTimer)
     workingText=draft
     pendingRefundToken=refundToken||null
@@ -1296,7 +1314,7 @@ async function generate(writingMode='research'){
       if(!flagged.length){plog('No sentences above threshold.','warn');break}
       if(round===3){plog('Max rounds. Proceeding to polish.','warn');break}
       plog('Refining flagged passages…','step')
-      const {humanized}=await apiFetch('/humanize',{draft:workingText,flaggedSentences:flagged.map(s=>s.text),textType:state.textType,citations:state.citations,wordCount:state.wordCount,prompt:state.prompt})
+      const {humanized}=await streamFetch('/humanize',{draft:workingText,flaggedSentences:flagged.map(s=>s.text),textType:state.textType,citations:state.citations,wordCount:state.wordCount,prompt:state.prompt})
       workingText=humanized;_humanizeRounds++;plog('Refined. Checking again…','info')
     }
     setPhase(pid,2,'done')
@@ -1382,7 +1400,7 @@ async function runTransplant(text){
       if(!flagged.length){plog('No sentences above threshold.','warn');break}
       if(round===3){plog('Max rounds. Proceeding to polish.','warn');break}
       plog('Refining flagged passages…','step')
-      const {humanized}=await apiFetch('/humanize',{draft:workingText,flaggedSentences:flagged.map(s=>s.text),textType:'essay',citations:false})
+      const {humanized}=await streamFetch('/humanize',{draft:workingText,flaggedSentences:flagged.map(s=>s.text),textType:'essay',citations:false})
       workingText=humanized;_tHumanizeRounds++;plog('Refined. Checking again…','info')
     }
     setPhase(pid,2,'done')
