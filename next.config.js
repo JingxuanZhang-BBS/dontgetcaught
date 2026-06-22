@@ -6,6 +6,15 @@ const nextConfig = {
     },
   },
   serverExternalPackages: ['pdf-parse'],
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        destination: 'https://dontgetcaught-production.up.railway.app/:path*',
+        permanent: false,
+      },
+    ]
+  },
 }
 
 module.exports = nextConfig
