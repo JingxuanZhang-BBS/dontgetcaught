@@ -7,6 +7,7 @@ const nextConfig = {
   },
   serverExternalPackages: ['pdf-parse'],
   async redirects() {
+    if (!process.env.VERCEL) return []
     return [
       {
         source: '/:path*',
