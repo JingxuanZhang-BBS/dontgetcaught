@@ -48,3 +48,7 @@ Thumbs.db
 # Logs
 *.log
 dev-*.log
+
+# Local media/test assets (not part of the app)
+/DGC测试素材/
+/视频matchcut素材/
