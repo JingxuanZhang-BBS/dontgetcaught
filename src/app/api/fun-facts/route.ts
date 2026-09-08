@@ -1,11 +1,25 @@
 import { NextRequest } from 'next/server'
 import { claude } from '@/lib/claude'
 import { createClient } from '@/lib/supabase/server'
+import { checkRateLimit } from '@/lib/rate-limit'
+
+const FALLBACK_FACTS = [
+  'The average person reads 200–250 words per minute.',
+  'Oxford University is older than the Aztec Empire.',
+  'Cleopatra lived closer in time to the Moon landing than to the construction of the Great Pyramid.',
+  'Most AI detectors look for low perplexity — predictable word choices.',
+  'Human writing tends to have more variation in sentence length than AI writing.',
+  'The word "deadline" originally referred to a line in a prison — crossing it meant guards could shoot.',
+]
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+
+  // Loading-screen decoration — never fail the caller, just serve canned facts.
+  const rateLimited = await checkRateLimit(user.id, 'fun-facts')
+  if (rateLimited) return Response.json({ facts: FALLBACK_FACTS })
 
   const { prompt } = await request.json()
   if (!prompt) return Response.json({ error: 'Missing prompt' }, { status: 400 })
@@ -27,17 +41,10 @@ No preamble. No explanation. Just the array.`
   try {
     const raw = await claude(system, 'Topic: ' + prompt)
     const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim())
-    return Response.json({ facts: parsed })
+    // The model can return an object or a short list — only trust a real array.
+    const facts = Array.isArray(parsed) ? parsed.filter(f => typeof f === 'string') : []
+    return Response.json({ facts: facts.length ? facts : FALLBACK_FACTS })
   } catch {
-    return Response.json({
-      facts: [
-        'The average person reads 200–250 words per minute.',
-        'Oxford University is older than the Aztec Empire.',
-        'Cleopatra lived closer in time to the Moon landing than to the construction of the Great Pyramid.',
-        'Most AI detectors look for low perplexity — predictable word choices.',
-        'Human writing tends to have more variation in sentence length than AI writing.',
-        'The word "deadline" originally referred to a line in a prison — crossing it meant guards could shoot.',
-      ],
-    })
+    return Response.json({ facts: FALLBACK_FACTS })
   }
 }

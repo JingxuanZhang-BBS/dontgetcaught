@@ -4,10 +4,26 @@ const ANTHROPIC = 'https://api.anthropic.com/v1/messages'
 const ANTHROPIC_VERSION = '2023-06-01'
 export const CLAUDE_MODEL = 'claude-sonnet-4-6'
 
+/**
+ * Anthropic key lookup. Accepts either name: ANTHROPIC_KEY (used since the first
+ * deploy) or ANTHROPIC_API_KEY (what .env.example, README and CLAUDE.md document).
+ * A deploy configured from the docs used to fail every call with a bare 401.
+ */
+export function anthropicApiKey(): string {
+  return process.env.ANTHROPIC_KEY || process.env.ANTHROPIC_API_KEY || ''
+}
+
+export class MissingApiKeyError extends Error {
+  constructor() {
+    super('Anthropic API key is not configured on the server. Set ANTHROPIC_API_KEY.')
+    this.name = 'MissingApiKeyError'
+  }
+}
+
 function headers() {
   return {
     'Content-Type': 'application/json',
-    'x-api-key': process.env.ANTHROPIC_KEY || '',
+    'x-api-key': anthropicApiKey(),
     'anthropic-version': ANTHROPIC_VERSION,
     'anthropic-beta': 'prompt-caching-2024-07-31',
   }
@@ -19,6 +35,8 @@ export async function claude(
   useWebSearch = false,
   maxTokens = 4000
 ): Promise<string> {
+  if (!anthropicApiKey()) throw new MissingApiKeyError()
+
   const body: Record<string, unknown> = {
     model: CLAUDE_MODEL,
     max_tokens: maxTokens,

@@ -27,6 +27,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Redemption failed' }, { status: 500 })
   }
 
+  // A null/!object payload used to throw a TypeError here and surface as a raw 500.
+  if (!data || typeof data !== 'object') {
+    console.error('redeem_gift_code returned unexpected payload:', data)
+    return NextResponse.json({ error: 'Redemption failed' }, { status: 500 })
+  }
+
   if (!data.success) {
     const msg =
       data.error === 'invalid_code'     ? 'Invalid code. Check and try again.' :

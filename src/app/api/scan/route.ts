@@ -23,7 +23,7 @@ export async function POST(request: Request) {
       {
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': process.env.GPTZERO_KEY || '',
+          'x-api-key': process.env.GPTZERO_KEY || process.env.GPTZERO_API_KEY || '',
         },
       }
     )
@@ -52,6 +52,6 @@ export async function POST(request: Request) {
       status === 429 ? 'Scan limit reached. Please try again shortly.' :
       status === 401 ? 'Scan service authentication failed. Contact support.' :
       'Scan service unavailable. Please try again.'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return NextResponse.json({ error: message }, { status: status === 429 ? 429 : 502 })
   }
 }

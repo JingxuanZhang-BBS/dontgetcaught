@@ -168,10 +168,18 @@ export default function SignupPage() {
                   style={{ background: '#161616', colorScheme: 'dark' }} />
               </div>
 
-              {/* TOS checkbox */}
-              <label className="flex items-start gap-3 cursor-pointer select-none pt-1">
+              {/* TOS checkbox — the whole row toggles, not just the 16px box */}
+              <div
+                role="checkbox"
+                aria-checked={tosChecked}
+                tabIndex={0}
+                onClick={() => setTosChecked(v => !v)}
+                onKeyDown={e => {
+                  if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); setTosChecked(v => !v) }
+                }}
+                className="flex items-start gap-3 cursor-pointer select-none pt-1"
+              >
                 <div
-                  onClick={() => setTosChecked(v => !v)}
                   className="mt-0.5 w-4 h-4 rounded shrink-0 flex items-center justify-center transition"
                   style={{
                     background: tosChecked ? '#fff' : 'transparent',
@@ -186,12 +194,13 @@ export default function SignupPage() {
                 </div>
                 <span className="text-xs text-white/40 leading-relaxed">
                   I have read and agree to the{' '}
-                  <button type="button" onClick={() => setShowTos(true)}
+                  <button type="button"
+                    onClick={e => { e.stopPropagation(); setShowTos(true) }}
                     className="text-white/70 underline underline-offset-2 hover:text-white transition">
                     Terms of Service & Privacy Policy
                   </button>
                 </span>
-              </label>
+              </div>
 
               <button type="submit" disabled={loading || !tosChecked}
                 className="w-full py-3 rounded-xl text-sm font-semibold text-black bg-white hover:bg-white/90 transition disabled:opacity-40 disabled:cursor-not-allowed mt-2">

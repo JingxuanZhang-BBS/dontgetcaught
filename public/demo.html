@@ -951,7 +951,7 @@ function renderSidebarHistory(){
     return
   }
   el.innerHTML=HIST_TASKS.map((t,i)=>{
-    const title=t.prompt.slice(0,60)+(t.prompt.length>60?'…':'')
+    const title=esc(t.prompt.slice(0,60))+(t.prompt.length>60?'…':'')
     const words=t.word_count?t.word_count.toLocaleString()+' words':''
     const ago=timeAgo(t.created_at)
     return `<div class="sb-recent-item" onclick="openHistoryTask(${i})">
@@ -970,15 +970,15 @@ function renderHistoryList(){
   }
   list.innerHTML = HIST_TASKS.map((t,i) => {
     const sc = (t.score||0)>=90?'score-green':(t.score||0)>=80?'score-yellow':'score-red'
-    const snippet=t.draft.slice(0,200).replace(/\n/g,' ')+'…'
+    const snippet=esc(t.draft.slice(0,200).replace(/\n/g,' '))+'…'
     const ago=timeAgo(t.created_at)
     const words=t.word_count?t.word_count.toLocaleString()+' words':''
     return `<div class="hist-card" onclick="openHistoryTask(${i})">
       <div class="hist-card-top">
-        <div class="hist-card-title">${t.prompt.slice(0,80)+(t.prompt.length>80?'…':'')}</div>
+        <div class="hist-card-title">${esc(t.prompt.slice(0,80))+(t.prompt.length>80?'…':'')}</div>
         ${t.score?`<span class="score-tag ${sc}">${t.score}% human</span>`:''}
       </div>
-      <div class="hist-card-meta">${ago}${words?' · '+words:''}${t.text_type?' · '+t.text_type:''}</div>
+      <div class="hist-card-meta">${ago}${words?' · '+words:''}${t.text_type?' · '+esc(t.text_type):''}</div>
       <div class="hist-card-snippet">${snippet}</div>
     </div>`
   }).join('')
@@ -992,10 +992,10 @@ function openHistoryTask(i){
   const id = newId()
   const el = mkRow(id,'ai')
   const sc = (t.score||0)>=90?'score-green':(t.score||0)>=80?'score-yellow':'score-red'
-  const bodyHtml = t.draft.split(/\n\n+/).filter(Boolean).map(p=>`<p>${p.trim()}</p>`).join('')
+  const bodyHtml = t.draft.split(/\n\n+/).filter(Boolean).map(p=>`<p>${esc(p.trim())}</p>`).join('')
   el.innerHTML=`<div>
     <div class="result-meta">
-      <span class="result-title">${t.text_type||'Draft'}</span>
+      <span class="result-title">${esc(t.text_type||'Draft')}</span>
       ${t.score?`<span class="score-tag ${sc}">${t.score}% human</span>`:''}
     </div>
     <div class="result-body">${bodyHtml}</div>
@@ -1033,13 +1033,30 @@ function timeAgo(iso){
 function stripSources(text){
   return text.replace(/\n+\s*(SOURCES|Sources|References|Bibliography)\b[\s\S]*/,'').trim()
 }
+// A gateway/proxy error (Railway, Vercel, a crashed worker) returns HTML, not JSON.
+// Parsing it blindly threw "Unexpected token '<'" and that string was shown to the user.
+async function readJson(r){
+  const raw=await r.text()
+  try{return JSON.parse(raw)}catch{return null}
+}
+function httpMessage(r,ep){
+  if(r.status===401)return 'Your session expired. Please sign in again.'
+  if(r.status===402)return "You're out of credits."
+  if(r.status===429)return 'Too many requests. Please wait a minute and try again.'
+  if(r.status===413)return 'That file is too large.'
+  if(r.status>=500)return 'The server had a problem. Please try again in a moment.'
+  return ep+' failed ('+r.status+')'
+}
 async function apiFetch(ep,body){
   const r=await fetch(API+'/api'+ep,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
-  const d=await r.json();if(!r.ok)throw new Error(d.error||ep+' failed');return d
+  const d=await readJson(r)
+  if(!r.ok)throw new Error((d&&(d.message||d.error))||httpMessage(r,ep))
+  if(!d)throw new Error('Unexpected response from '+ep+'. Please try again.')
+  return d
 }
 async function streamFetch(ep,body){
   const r=await fetch(API+'/api'+ep,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
-  if(!r.ok){const d=await r.json();throw new Error(d.error||ep+' failed')}
+  if(!r.ok){const d=await readJson(r);throw new Error((d&&(d.message||d.error))||httpMessage(r,ep))}
   const reader=r.body.getReader();const decoder=new TextDecoder();let buf=''
   while(true){
     const{done,value}=await reader.read();if(done)break
@@ -1058,7 +1075,10 @@ async function streamFetch(ep,body){
 async function apiUpload(file){
   const fd=new FormData();fd.append('file',file)
   const r=await fetch(API+'/api/extract',{method:'POST',body:fd})
-  const d=await r.json();if(!r.ok)throw new Error(d.error);return d
+  const d=await readJson(r)
+  if(!r.ok)throw new Error((d&&(d.message||d.error))||httpMessage(r,'/extract'))
+  if(!d)throw new Error('Unexpected response while reading that file. Please try again.')
+  return d
 }
 
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
@@ -1128,9 +1148,11 @@ function addResultMsg(text,score,flaggedSentences=[],regenParams=null){
   el.innerHTML=`<div><div class="ai-label">DontGetCaught</div><div class="result-meta"><div class="result-title">Finished piece</div><span class="score-tag ${cls}">${score}% human</span></div><div class="result-body">${ps}</div>${flagNote}<div class="result-actions"><button class="act-btn" id="cp-${id}">Copy text</button><button class="act-btn" id="dl-${id}">Download .docx</button><button class="act-btn" id="pdf-${id}">Export PDF</button>${regenBtn}<button class="act-btn" id="rw-${id}">Write another</button></div><div style="font-size:11px;color:var(--text3);margin-top:8px">${wc.toLocaleString()} words</div></div>`
   setTimeout(()=>{
     const c=document.getElementById('cp-'+id),d=document.getElementById('dl-'+id),p=document.getElementById('pdf-'+id),r=document.getElementById('rw-'+id),regen=document.getElementById('regen-'+id)
-    if(c)c.onclick=()=>{navigator.clipboard.writeText(workingText);c.textContent='Copied';c.classList.add('done');setTimeout(()=>{c.textContent='Copy text';c.classList.remove('done')},2000)}
-    if(d)d.onclick=()=>exportDocx(workingText)
-    if(p)p.onclick=()=>exportPdf(workingText)
+    // Bind this card's own text, not the shared workingText global — after a second
+    // generation the older card's buttons used to hand over the newer document.
+    if(c)c.onclick=()=>{navigator.clipboard.writeText(text);c.textContent='Copied';c.classList.add('done');setTimeout(()=>{c.textContent='Copy text';c.classList.remove('done')},2000)}
+    if(d)d.onclick=()=>exportDocx(text)
+    if(p)p.onclick=()=>exportPdf(text)
     if(r)r.onclick=goHome
     if(regen)regen.onclick=()=>{
       resetState()
@@ -1344,10 +1366,11 @@ async function generate(writingMode='research'){
       pipeline_duration_ms:Date.now()-_pipelineStart,
       citations:state.citations,word_count_target:state.wordCount
     })}).then(async r=>{
-      const d=await r.json()
-      if(!r.ok) plog('History save failed: '+JSON.stringify(d),'error')
+      // History is a convenience, not part of the deliverable — log it, don't
+      // dump a raw JSON error into the user's activity log.
+      if(!r.ok){console.error('history save failed',r.status,await readJson(r))}
       else loadHistory()
-    }).catch(e=>plog('History save error: '+e.message,'error'))
+    }).catch(e=>console.error('history save error',e))
 
     if(!warningGiven&&finalScore<TARGET){
       if(pendingRefundToken){
@@ -1384,8 +1407,9 @@ async function runTransplant(text){
   try{
     setPhase(pid,1,'active')
     plog('Rewriting your content…','step')
-    const {draft}=await apiFetch('/transplant',{text,granularity:'paragraph',citations:false})
+    const {draft,refundToken}=await apiFetch('/transplant',{text,granularity:'paragraph',citations:false})
     workingText=draft
+    pendingRefundToken=refundToken||null
     plog('Rewrite complete.','success')
     setPhase(pid,1,'done')
     setPhase(pid,2,'active')
@@ -1425,10 +1449,20 @@ async function runTransplant(text){
       pipeline_duration_ms:Date.now()-_tStart,
       citations:false,word_count_target:null
     })}).then(async r=>{
-      const d=await r.json()
-      if(!r.ok) plog('History save failed: '+JSON.stringify(d),'error')
+      if(!r.ok){console.error('history save failed',r.status,await readJson(r))}
       else loadHistory()
-    }).catch(e=>plog('History save error: '+e.message,'error'))
+    }).catch(e=>console.error('history save error',e))
+
+    if(finalScore<TARGET){
+      if(pendingRefundToken){
+        const tok=pendingRefundToken;pendingRefundToken=null
+        apiFetch('/refund',{refundToken:tok})
+          .then(()=>addAiMsg('Your credit has been refunded — this result fell below our 85% threshold.'))
+          .catch(()=>addAiMsg('This result fell below our 85% threshold. Please contact support for a refund.'))
+      } else {
+        addAiMsg('This result fell below our 85% threshold.')
+      }
+    }
   }catch(e){
     const msg=e instanceof Error?e.message:String(e)
     plog('Error: '+msg,'error');[1,2,3,4].forEach(n=>setPhase(pid,n,'error'))
@@ -1495,9 +1529,7 @@ async function handleDroppedFile(file){
   uploadNameHome.style.display='inline';uploadNameHome.textContent=loadingName
   uploadNameChat.style.display='inline';uploadNameChat.textContent=loadingName
   try{
-    const fd=new FormData();fd.append('file',file)
-    const r=await fetch(API+'/api/extract',{method:'POST',body:fd})
-    const d=await r.json();if(!r.ok)throw new Error(d.error||'Extract failed')
+    const d=await apiUpload(file)
     uploadedText=d.text;uploadedName=file.name
     uploadNameHome.textContent=file.name
     uploadNameChat.textContent=file.name

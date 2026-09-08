@@ -1,15 +1,27 @@
+export const maxDuration = 300
+
 import { NextRequest, NextResponse } from 'next/server'
 import { claude } from '@/lib/claude'
 import { createClient } from '@/lib/supabase/server'
 import { deductCredit, refundCredit } from '@/lib/credits-server'
+import { checkRateLimit } from '@/lib/rate-limit'
+import { mapWithConcurrency } from '@/lib/concurrency'
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { text, granularity, citations } = await request.json()
-  if (!text) return Response.json({ error: 'Missing text' }, { status: 400 })
+  const rateLimited = await checkRateLimit(user.id, 'transplant')
+  if (rateLimited) return rateLimited
+
+  let text: string, granularity: string | undefined, citations: boolean | undefined
+  try {
+    ({ text, granularity, citations } = await request.json())
+  } catch {
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+  }
+  if (!text) return NextResponse.json({ error: 'Missing text' }, { status: 400 })
 
   const refundToken = await deductCredit(user.id)
   if (!refundToken) {
@@ -57,25 +69,28 @@ Output: the complete rewritten text followed by SOURCES. Nothing else.`
     // Language enforcement pass
     const paraLangSystem = `Go through the text below sentence by sentence. For each sentence: if it is in English, copy it exactly as written. If it is in any other language, translate that sentence into English. Output must be 100% English. Output only the result, no explanation.`
     const paragraphs = draft.split(/\n\n+/)
-    const fixed = await Promise.all(
-      paragraphs.map(async p => {
-        if (p.trim().length < 15) return p
-        try {
-          return (await claude(paraLangSystem, p))
-            .replace(/^#{1,6}\s+/gm, '')
-            .replace(/\*\*/g, '')
-            .trim()
-        } catch {
-          return p
-        }
-      })
-    )
+    // Bounded fan-out — an unbounded Promise.all over every paragraph is what
+    // exhausts memory on long pastes.
+    const fixed = await mapWithConcurrency(paragraphs, 4, async p => {
+      if (p.trim().length < 15) return p
+      try {
+        return (await claude(paraLangSystem, p))
+          .replace(/^#{1,6}\s+/gm, '')
+          .replace(/\*\*/g, '')
+          .trim()
+      } catch {
+        return p
+      }
+    })
     draft = fixed.join('\n\n')
 
-    return Response.json({ draft })
+    // Hand back the refund token so a below-threshold result can be refunded,
+    // the same way /api/generate does.
+    return NextResponse.json({ draft, refundToken })
   } catch (err: unknown) {
     await refundCredit(user.id)
+    console.error('transplant failed:', err)
     const msg = err instanceof Error ? err.message : 'Unknown error'
-    return Response.json({ error: 'Transplant error: ' + msg }, { status: 500 })
+    return NextResponse.json({ error: 'Transplant error: ' + msg }, { status: 500 })
   }
 }

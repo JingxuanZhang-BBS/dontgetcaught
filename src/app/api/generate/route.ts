@@ -36,6 +36,10 @@ export async function POST(request: Request) {
       pingInterval = setInterval(() => send({ type: 'ping' }), 25000)
 
       let userId: string | null = null
+      // Only true once a credit has actually left the balance. The catch-all below
+      // used to refund unconditionally, so any failure BEFORE the deduction (bad
+      // JSON body, harm-check throw) handed the caller a free credit.
+      let creditDeducted = false
       try {
         const supabase = await createClient()
         const { data: { user } } = await supabase.auth.getUser()
@@ -63,6 +67,7 @@ export async function POST(request: Request) {
           send({ type: 'error', status: 402, error: 'INSUFFICIENT_CREDITS', message: "You've used all 3 beta credits. Contact us on Instagram @dontgetcaught_ai to request more access." })
           return
         }
+        creditDeducted = true
 
         const wordCountTarget = resolveWordCountTarget(prompt, wordCountBody)
         const includeSourcesInCount = resolveWordCountIncludesSources(prompt, wcIncludesBody === true)
@@ -101,6 +106,7 @@ ${typeConfig.format}`
             draft = draft.replace(/^#{1,6}\s+/gm, '').replace(/\*\*/g, '').replace(/\[\d+\]/g, '').trim()
             if (looksLikeMetaRefusal(draft)) {
               await refundCredit(userId!)
+              creditDeducted = false
               send({ type: 'error', status: 500, error: "The model refused to write. Try rephrasing your request as a clear writing task (e.g. 'Write a 700-word reflection about…')." })
               return
             }
@@ -111,6 +117,8 @@ ${typeConfig.format}`
             return
           } catch (err: unknown) {
             await refundCredit(userId!)
+            creditDeducted = false
+            console.error('generate (best_effort) failed:', err)
             send({ type: 'error', error: 'Generate error: ' + String(err) })
             return
           }
@@ -244,7 +252,11 @@ Output the complete corrected text. No commentary.`
 
         send({ type: 'result', draft, writingMode: 'research', refundToken })
       } catch (err: unknown) {
-        await refundCredit(userId!).catch(() => {})
+        console.error('generate failed:', err)
+        if (userId && creditDeducted) {
+          await refundCredit(userId).catch(() => {})
+          creditDeducted = false
+        }
         send({ type: 'error', error: 'Generate error: ' + String(err) })
       } finally {
         clearInterval(pingInterval)
